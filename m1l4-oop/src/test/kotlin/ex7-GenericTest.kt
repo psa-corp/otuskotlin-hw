@@ -4,7 +4,7 @@ import kotlin.test.assertEquals
 class GenericTest {
     @Test
     fun invariant() {
-        // val obj: ISome<Number> = IntSome(1) // Не работает!!!
+        val obj: ISome<IntSome> = IntSome(1)
         assertEquals(3, (IntSome(1) + IntSome(2)).value)
     }
 

@@ -7,7 +7,7 @@ data object ChildA : Base
 
 class ChildB : Base {
     override fun equals(other: Any?): Boolean {
-        return this === other
+        return this === other // по ссылке не по полям
     }
 
     override fun hashCode(): Int {
@@ -18,7 +18,7 @@ class ChildB : Base {
 object ChildC : Base
 
 // Uncomment this to get compilation error
-//class ChildC : Base
+//class ChildC : Base // объект же создан
 
 class SealedTest {
     @Test

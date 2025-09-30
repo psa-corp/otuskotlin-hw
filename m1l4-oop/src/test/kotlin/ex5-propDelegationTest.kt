@@ -3,8 +3,9 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 import kotlin.test.Test
 import kotlin.test.assertEquals
-
-
+/**
+    Виден внутри модуля
+**/
 internal class PropDelegationTest {
 
     @Test

@@ -44,7 +44,10 @@ class CashTest {
         println(c.format(Locale.FRANCE))
 
         assertEquals(c.amount, BigDecimal.TEN)
-
+        /**
+            Аннотация @Suppress("RedundantCompanionReference")в Kotlin используется для подавления предупреждения,
+            выдаваемого IDE при companion object обнаружении избыточной ссылки на a.
+         **/
         @Suppress("RedundantCompanionReference")
         assertEquals(Cash.Companion.NONE, Cash.NONE)
     }
