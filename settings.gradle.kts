@@ -6,3 +6,4 @@ plugins {
 rootProject.name = "otuskotlin"
 
 includeBuild("lessons")
+includeBuild("projects")
