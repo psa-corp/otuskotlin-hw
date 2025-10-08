@@ -5,4 +5,4 @@ plugins {
 
 rootProject.name = "otuskotlin"
 
-includeBuild("practice")
+includeBuild("lessons")
