@@ -1,17 +1,16 @@
 plugins {
-    kotlin("jvm") apply false
+    alias(libs.plugins.kotlin.jvm) apply false
 }
 
-group = "com.impsa.otuskotlin.marketplace"
+group = "com.impsa.otuskotlin.practice"
 version = "0.0.1"
 
-allprojects {
+
+subprojects {
     repositories {
         mavenCentral()
     }
-}
-
-subprojects {
     group = rootProject.group
     version = rootProject.version
+
 }
