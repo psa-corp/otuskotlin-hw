@@ -1,4 +1,4 @@
-package com.impsa.otuskotlin.plugins
+package net.otuskotlin.plugins
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project

@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package ru.otus.otuskotlin.m2l1
+package net.otuskotlin.m2l1
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

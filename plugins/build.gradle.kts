@@ -6,7 +6,7 @@ gradlePlugin {
     plugins {
         register("plugin-jvm") {
             id = "plugin-jvm"
-            implementationClass = "com.impsa.otuskotlin.plugins.PluginJvm"
+            implementationClass = "net.otuskotlin.plugins.PluginJvm"
         }
     }
 }
@@ -22,5 +22,5 @@ dependencies {
     implementation(libs.lvalidator)
 }
 
-group = "com.impsa.otuskotlin.plugins"
+group = "net.otuskotlin.plugins"
 version = "0.0.1"

@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
 }
 
-group = "com.impsa.otuskotlin.lessons"
+group = "net.otuskotlin.lessons"
 version = "0.0.1"
 
 

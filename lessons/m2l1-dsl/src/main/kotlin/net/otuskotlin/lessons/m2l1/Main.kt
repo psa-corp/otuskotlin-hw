@@ -1,10 +1,10 @@
-package ru.otus.otuskotlin.m2l1
+package net.otuskotlin.lessons.m2l1
 
-import ru.otus.otuskotlin.m2l1.dsl.Action.*
-import ru.otus.otuskotlin.m2l1.dsl.buildUser
-import ru.otus.otuskotlin.m2l1.dsl.fri
-import ru.otus.otuskotlin.m2l1.dsl.tue
-import ru.otus.otuskotlin.m2l1.dsl.wed
+import net.otuskotlin.lessons.m2l1.dsl.Action.*
+import net.otuskotlin.lessons.m2l1.dsl.buildUser
+import net.otuskotlin.lessons.m2l1.dsl.fri
+import net.otuskotlin.lessons.m2l1.dsl.tue
+import net.otuskotlin.lessons.m2l1.dsl.wed
 
 fun main() {
 

@@ -1,4 +1,4 @@
-package ru.otus.otuskotlin.m2l1.demo
+package net.otuskotlin.lessons.m2l1.demo
 
 fun calculate(operation: (Int, Int) -> Int, a: Int, b: Int): Int {
     return operation(a, b)

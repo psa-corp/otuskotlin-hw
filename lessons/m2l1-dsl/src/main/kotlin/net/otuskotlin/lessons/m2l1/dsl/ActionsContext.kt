@@ -1,4 +1,4 @@
-package ru.otus.otuskotlin.m2l1.dsl
+package net.otuskotlin.lessons.m2l1.dsl
 
 @UserDsl
 class ActionsContext {

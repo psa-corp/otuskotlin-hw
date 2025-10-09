@@ -1,4 +1,4 @@
-package com.impsa.otuskotlin.projects
+package net.otuskotlin.projects
 
 fun main() {
     println("Hello World!")

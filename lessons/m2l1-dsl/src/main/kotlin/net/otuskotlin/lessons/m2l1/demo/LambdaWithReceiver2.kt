@@ -1,4 +1,4 @@
-package ru.otus.otuskotlin.m2l1.demo
+package net.otuskotlin.lessons.m2l1.demo
 
 class Greeter {
     var greeting: String = "Привет"

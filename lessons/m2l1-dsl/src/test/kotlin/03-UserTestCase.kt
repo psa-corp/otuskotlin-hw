@@ -1,10 +1,10 @@
-package ru.otus.otuskotlin.m2l1
+package net.otuskotlin.lessons.m2l1
 
-import ru.otus.otuskotlin.m2l1.dsl.Action
-import ru.otus.otuskotlin.m2l1.dsl.buildUser
-import ru.otus.otuskotlin.m2l1.dsl.fri
-import ru.otus.otuskotlin.m2l1.dsl.mon
-import ru.otus.otuskotlin.m2l1.dsl.tomorrow
+import net.otuskotlin.lessons.m2l1.dsl.Action
+import net.otuskotlin.lessons.m2l1.dsl.buildUser
+import net.otuskotlin.lessons.m2l1.dsl.fri
+import net.otuskotlin.lessons.m2l1.dsl.mon
+import net.otuskotlin.lessons.m2l1.dsl.tomorrow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
