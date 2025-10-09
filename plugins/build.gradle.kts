@@ -8,6 +8,10 @@ gradlePlugin {
             id = "plugin-jvm"
             implementationClass = "net.otuskotlin.plugins.PluginJvm"
         }
+        register("plugin-kmp") {
+            id = "plugin-kmp"
+            implementationClass = "net.otuskotlin.plugins.PluginMultiplatform"
+        }
     }
 }
 
