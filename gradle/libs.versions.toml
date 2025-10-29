@@ -1,0 +1,15 @@
+[versions]
+kotlin = "2.2.10"
+kotlinx-datetime = "0.6.1"
+binary-compatibility-validator = "0.13.2"
+jvm-compiler = "17"
+jvm-language = "21"
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+
+[libraries]
+lkotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+lvalidator = { module =  "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "binary-compatibility-validator"}
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
