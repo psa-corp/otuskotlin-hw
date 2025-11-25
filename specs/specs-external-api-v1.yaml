@@ -1,0 +1,333 @@
+openapi: 3.0.4
+info:
+  title: "Ingredient Scan API"
+  description: API для анализа состава продуктов
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/v1
+    description: Development server
+
+tags:
+  - name: analysis
+    description: Анализ состава продуктов
+  - name: composition
+    description: Управление составами продуктов
+  - name: download
+    description: Скачивание файлов
+
+paths:
+  /analysis/get/{id}:
+    post:
+      tags: [analysis]
+      summary: Получение анализа состава по ID
+      operationId: analysisGet
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID анализа
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Analysis'
+        '404':
+          description: Анализ не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Превышен лимит запросов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /analysis/regenerate/{id}:
+    post:
+      tags: [analysis]
+      summary: Перегенерация анализа состава
+      operationId: analysisRegenerate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID анализа
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Analysis'
+        '404':
+          description: Анализ не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Превышен лимит перегенераций
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /composition/create/manual:
+    post:
+      tags: [composition]
+      summary: Создание состава вручную
+      operationId: compositionCreateByManual
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanManualDto'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "composition_123"
+        '400':
+          description: Неверные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Превышен дневной лимит
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /composition/create/photos:
+    post:
+      tags: [composition]
+      summary: Создание состава по фото
+      operationId: compositionCreateByPhotos
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photos:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Фотографии состава
+                scan:
+                  $ref: '#/components/schemas/ScanPhotosDto'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "composition_123"
+        '400':
+          description: Неверные данные или размер файла
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Превышен дневной лимит
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /composition/get/{id}:
+    post:
+      tags: [composition]
+      summary: Получение состава по ID
+      operationId: compositionGet
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID состава
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Composition'
+        '404':
+          description: Состав не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /download/file/{fileName}:
+    post:
+      tags: [download]
+      summary: Скачивание файла
+      operationId: downloadFile
+      parameters:
+        - name: fileName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Имя файла
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Файл не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Analysis:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "analysis_123"
+        compositionId:
+          type: string
+          example: "composition_123"
+        createDate:
+          type: string
+          format: date-time
+        description:
+          type: string
+        rating:
+          type: number
+          format: double
+          minimum: 1.0
+          maximum: 5.0
+        color:
+          type: string
+          enum: [dark_red, red, orange, yellow, light_yellow, light_green, green, dark_green]
+        problematicComponent:
+          type: array
+          items:
+            $ref: '#/components/schemas/Component'
+        safeComponent:
+          type: array
+          items:
+            $ref: '#/components/schemas/Component'
+
+    Composition:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "composition_123"
+        createDate:
+          type: string
+          format: date-time
+        text:
+          type: string
+          minLength: 10
+          maxLength: 5000
+        analysisId:
+          type: string
+        useCount:
+          type: integer
+          format: int64
+
+    ScanManualDto:
+      type: object
+      required:
+        - data
+      properties:
+        id:
+          type: string
+        type:
+          $ref: '#/components/schemas/ScanType'
+        data:
+          type: string
+          minLength: 10
+          maxLength: 5000
+          description: Текст состава
+
+    ScanPhotosDto:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          $ref: '#/components/schemas/ScanType'
+
+    Component:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        createDate:
+          type: string
+          format: date-time
+        scientificName:
+          type: string
+        description:
+          type: string
+        sources:
+          type: string
+        riskLevel:
+          $ref: '#/components/schemas/RiskLevel'
+        healthRisks:
+          type: string
+
+    ScanType:
+      type: string
+      enum: [MANUAL, PHOTO]
+
+    RiskLevel:
+      type: string
+      enum: [MINIMAL, LOW, MEDIUM, HIGH, CRITICAL]
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          example: "Текст состава должен содержать минимум 10 символов"
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+        timestamp:
+          type: string
+          format: date-time
