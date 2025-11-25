@@ -33,7 +33,7 @@ tasks.withType<Test> {
 
 jib {
 	from {
-		image = "eclipse-temurin:21-jre-alpine"
+		image = "eclipse-temurin:${libs.versions.jreImage.get()}"
 	}
 	to {
 		image = "darthchain/ingredient-scan-scan"
