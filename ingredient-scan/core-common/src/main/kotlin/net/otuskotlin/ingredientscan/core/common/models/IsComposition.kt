@@ -1,6 +1,7 @@
 package net.otuskotlin.ingredientscan.core.common.models
 
 import kotlinx.datetime.Instant
+import net.otuskotlin.ingredientscan.core.common.NONE
 
 data class IsComposition(
     var id: IsCompositionId = IsCompositionId.NONE,
