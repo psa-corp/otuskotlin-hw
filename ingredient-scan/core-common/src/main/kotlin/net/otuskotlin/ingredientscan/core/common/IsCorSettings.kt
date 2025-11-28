@@ -1,6 +1,6 @@
 package net.otuskotlin.ingredientscan.core.common
 
-import net.otuskotlin.ingredientscan.libs.logging.common.IsLoggerProvider
+import net.otuskotlin.ingredientscan.core.common.logging.IsLoggerProvider
 
 data class IsCorSettings(
     val loggerProvider: IsLoggerProvider = IsLoggerProvider(),

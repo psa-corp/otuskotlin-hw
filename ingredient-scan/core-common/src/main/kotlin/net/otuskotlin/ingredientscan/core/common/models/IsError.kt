@@ -1,6 +1,6 @@
 package net.otuskotlin.ingredientscan.core.common.models
 
-import net.otuskotlin.ingredientscan.libs.logging.common.IsLogLevel
+import net.otuskotlin.ingredientscan.core.common.logging.IsLogLevel
 
 data class IsError(
     val code: String = "",
