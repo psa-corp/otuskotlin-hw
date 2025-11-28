@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.logging.common
+package net.otuskotlin.ingredientscan.libs.logging.common
 
 enum class IsLogLevel(
     private val levelInt: Int,

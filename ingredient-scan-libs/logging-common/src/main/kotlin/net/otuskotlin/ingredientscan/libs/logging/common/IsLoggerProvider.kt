@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.logging.common
+package net.otuskotlin.ingredientscan.libs.logging.common
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction

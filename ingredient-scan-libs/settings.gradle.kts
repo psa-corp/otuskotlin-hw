@@ -23,7 +23,8 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-rootProject.name = "ingredient_scan_libs"
+// 1. Используем kebab-case для имени корневого проекта
+rootProject.name = "ingredient-scan-libs"
 
-include("is_lib_logging_common")
-
+// 2. Включаем переименованную папку
+include("logging-common")

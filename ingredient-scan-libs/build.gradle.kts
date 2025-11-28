@@ -2,7 +2,8 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
 }
 
-group = "net.otuskotlin.ingredient_scan_libs"
+// Это база для всех артефактов этой сборки
+group = "net.otuskotlin.ingredientscan.libs" // Можно использовать дефис или слитное написание
 version = "0.0.1"
 
 allprojects {
