@@ -7,7 +7,7 @@ plugins {
 	alias(libs.plugins.jib)
 }
 
-group = "net.otuskotlin.ingredient-scan"
+group = "net.otuskotlin.ingredientscan.scaner"
 version = "0.0.1"
 description = "Spring ingredient-scan-scan "
 

@@ -1,0 +1,21 @@
+package net.otuskotlin.ingredientscan.app.common.models
+
+import kotlinx.datetime.Instant
+
+data class IsScan(
+    var id: IsScanId = IsScanId.NONE,
+    var type: IsScanType = IsScanType.NONE,
+    var time: Instant = Instant.NONE,
+    var data: String = "",
+    var text: String = "",
+    var ocr: Long = 0,
+    var compositionId: IsCompositionId = IsCompositionId.NONE,
+    var userId: IsUserId = IsUserId.NONE,
+    var category: String = "",
+) {
+    fun isEmpty() = this == NONE
+
+    companion object {
+        val NONE = IsScan()
+    }
+}
