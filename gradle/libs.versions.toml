@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.2.10"
-kotlinx-datetime = "0.6.1"
+kotlinx-datetime = "0.6.2"
 binary-compatibility-validator = "0.13.2"
 jvm-compiler = "17"
 jvm-language = "21"
@@ -9,6 +9,11 @@ spring-dependency-management = "1.1.7"
 jib = "3.4.5"
 jreImage = "21-latest"
 
+kotlinx-serialization = "1.8.1"
+openapi-generator = "7.15.0"
+jackson = "2.20.1"
+
+
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -16,7 +21,10 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
+openapi-generator = { id = "org.openapi.generator", version.ref = "openapi-generator" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
+#crowdproj-generator = { id = "com.crowdproj.generator", version = "0.3.0" }
 
 [libraries]
 lkotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -25,3 +33,9 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }
+
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+
+jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jackson-datatype = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
