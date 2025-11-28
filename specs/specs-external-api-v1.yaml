@@ -33,8 +33,9 @@ paths:
           description: Успешный ответ
           content:
             application/json:
+              # Updated to use the new wrapped response DTO
               schema:
-                $ref: '#/components/schemas/Analysis'
+                $ref: '#/components/schemas/AnalysisGetResponse'
         '404':
           description: Анализ не найден
           content:
@@ -65,8 +66,9 @@ paths:
           description: Успешный ответ
           content:
             application/json:
+              # Updated to use the new wrapped response DTO
               schema:
-                $ref: '#/components/schemas/Analysis'
+                $ref: '#/components/schemas/AnalysisRegenerateResponse'
         '404':
           description: Анализ не найден
           content:
@@ -89,16 +91,17 @@ paths:
         required: true
         content:
           application/json:
+            # Updated to use the new wrapped request DTO
             schema:
-              $ref: '#/components/schemas/ScanManualDto'
+              $ref: '#/components/schemas/CompositionCreateByManualRequest'
       responses:
         '200':
           description: Успешный ответ
           content:
-            text/plain:
+            application/json:
+              # Updated to use the new wrapped response DTO
               schema:
-                type: string
-                example: "composition_123"
+                $ref: '#/components/schemas/CompositionCreateByManualResponse'
         '400':
           description: Неверные данные запроса
           content:
@@ -131,15 +134,16 @@ paths:
                     format: binary
                   description: Фотографии состава
                 scan:
-                  $ref: '#/components/schemas/ScanPhotosDto'
+                  # Updated to use the new wrapped request DTO
+                  $ref: '#/components/schemas/CompositionCreateByPhotosRequest'
       responses:
         '200':
           description: Успешный ответ
           content:
-            text/plain:
+            application/json:
+              # Updated to use the new wrapped response DTO
               schema:
-                type: string
-                example: "composition_123"
+                $ref: '#/components/schemas/CompositionCreateByPhotosResponse'
         '400':
           description: Неверные данные или размер файла
           content:
@@ -170,8 +174,9 @@ paths:
           description: Успешный ответ
           content:
             application/json:
+              # Updated to use the new wrapped response DTO
               schema:
-                $ref: '#/components/schemas/Composition'
+                $ref: '#/components/schemas/CompositionGetResponse'
         '404':
           description: Состав не найден
           content:
@@ -208,6 +213,81 @@ paths:
 
 components:
   schemas:
+    # --- Base Schemas from specs ---
+    ResponseResult:
+      type: string
+      enum:
+        - success
+        - error
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        group:
+          type: string
+        field:
+          type: string
+        message:
+          type: string
+
+    RequestDebug:
+      type: object
+      properties:
+        debug:
+          type: object
+          properties:
+            mode:
+              type: string
+              enum: [prod, test, stub]
+
+    # --- Generic Interfaces for all requests/responses (IRequest/IResponse) ---
+
+    IRequest:
+      type: object
+      description: Базовый интерфейс для всех запросов
+      properties:
+        requestType:
+          type: string
+          description: Поле-дескриминатор для вычисления типа запроса
+          example: analysisGet
+      discriminator:
+        propertyName: requestType
+        mapping:
+          analysisGet: '#/components/schemas/AnalysisGetRequest'
+          analysisRegenerate: '#/components/schemas/AnalysisRegenerateRequest'
+          compositionCreateByManual: '#/components/schemas/CompositionCreateByManualRequest'
+          compositionCreateByPhotos: '#/components/schemas/CompositionCreateByPhotosRequest'
+          compositionGet: '#/components/schemas/CompositionGetRequest'
+          downloadFile: '#/components/schemas/DownloadFileRequest' # Added for completeness
+
+    IResponse:
+      type: object
+      description: Базовый интерфейс для всех ответов
+      properties:
+        responseType:
+          type: string
+          description: Поле-дескриминатор для вычисления типа запроса
+          example: analysisGet
+        result:
+          $ref: '#/components/schemas/ResponseResult'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      discriminator:
+        propertyName: responseType
+        mapping:
+          analysisGet: '#/components/schemas/AnalysisGetResponse'
+          analysisRegenerate: '#/components/schemas/AnalysisRegenerateResponse'
+          compositionCreateByManual: '#/components/schemas/CompositionCreateByManualResponse'
+          compositionCreateByPhotos: '#/components/schemas/CompositionCreateByPhotosResponse'
+          compositionGet: '#/components/schemas/CompositionGetResponse'
+          error: '#/components/schemas/ErrorResponse'
+
+    # --- Original DTOs (used as objects within the new requests/responses) ---
+
     Analysis:
       type: object
       properties:
@@ -310,24 +390,112 @@ components:
       type: string
       enum: [MINIMAL, LOW, MEDIUM, HIGH, CRITICAL]
 
+    # --- New API-Specific Request/Response Schemas (Wrappers for IRequest/IResponse) ---
+
+    AnalysisGetRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/RequestDebug'
+        # Request data (ID is in path, so no body needed)
+
+    AnalysisGetResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - type: object
+          properties:
+            analysis:
+              $ref: '#/components/schemas/Analysis'
+
+    AnalysisRegenerateRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/RequestDebug'
+        # Request data (ID is in path, so no body needed)
+
+    AnalysisRegenerateResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - type: object
+          properties:
+            analysis:
+              $ref: '#/components/schemas/Analysis'
+
+    CompositionCreateByManualRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/RequestDebug'
+        - type: object
+          properties:
+            scan:
+              $ref: '#/components/schemas/ScanManualDto'
+
+    CompositionCreateByManualResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - type: object
+          properties:
+            compositionId:
+              type: string
+              example: "composition_123"
+              description: ID созданного состава
+
+    CompositionCreateByPhotosRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/RequestDebug'
+        - $ref: '#/components/schemas/ScanPhotosDto'
+        # The 'photos' array is handled by the multipart/form-data content type directly in the path definition
+
+    CompositionCreateByPhotosResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - type: object
+          properties:
+            compositionId:
+              type: string
+              example: "composition_123"
+              description: ID созданного состава
+
+    CompositionGetRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/RequestDebug'
+        # Request data (ID is in path, so no body needed)
+
+    CompositionGetResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - type: object
+          properties:
+            composition:
+              $ref: '#/components/schemas/Composition'
+
+    DownloadFileRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/RequestDebug'
+        # Request data (fileName is in path, so no body needed)
+
     ErrorResponse:
-      type: object
-      properties:
-        code:
-          type: string
-          example: "VALIDATION_ERROR"
-        message:
-          type: string
-          example: "Текст состава должен содержать минимум 10 символов"
-        details:
-          type: array
-          items:
-            type: object
-            properties:
-              field:
-                type: string
-              message:
-                type: string
-        timestamp:
-          type: string
-          format: date-time
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - type: object
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              example: "Текст состава должен содержать минимум 10 символов"
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+            timestamp:
+              type: string
+              format: date-time
