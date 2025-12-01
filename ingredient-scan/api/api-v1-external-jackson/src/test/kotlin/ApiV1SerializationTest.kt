@@ -112,7 +112,7 @@ class ApiV1SerializationTest {
         debug = DEBUG_MODE,
         scan = ScanManualDto(
             type = ScanType.MANUAL,
-            data = "Тестовый состав для ручного ввода"
+            text = "томаты измельченные 72%, концентрат томатный 14%, лук, масло подсолнечное рафинированное, базилик 2%, сахар, соль, регулятор кислотности."
         )
     )
 
@@ -122,7 +122,7 @@ class ApiV1SerializationTest {
         val obj = apiV1ExternalMapper.readValue(json, IRequest::class.java)
 
         assertIs<CompositionCreateByManualRequest>(obj)
-        assertEquals(createManualRequest.scan?.data, obj.scan?.data)
+        assertEquals(createManualRequest.scan?.text, obj.scan?.text)
     }
 
     // ErrorResponse
