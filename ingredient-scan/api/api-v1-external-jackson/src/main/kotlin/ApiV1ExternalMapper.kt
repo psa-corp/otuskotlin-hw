@@ -2,6 +2,7 @@ package net.otuskotlin.ingredientscan.api.v1.external
 
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import net.otuskotlin.ingredientscan.api.v1.external.models.IRequest
@@ -11,6 +12,7 @@ val apiV1ExternalMapper = JsonMapper.builder().run {
     addModule(KotlinModule.Builder().build())
     // !!!!! Включаем поддержку полиморфизма через базовый тип (IRequest/IResponse)
     enable(MapperFeature.USE_BASE_TYPE_AS_DEFAULT_IMPL)
+    addModule(JavaTimeModule())
     build()
 }
 

@@ -1,12 +1,12 @@
 package net.otuskotlin.ingredientscan.core.common.models
 
-import kotlinx.datetime.Instant
-import net.otuskotlin.ingredientscan.core.common.NONE
+import net.otuskotlin.ingredientscan.core.common.LOCAL_DATE_TIME_NONE
+import java.time.LocalDateTime
 
 data class IsScan(
     var id: IsScanId = IsScanId.NONE,
     var type: IsScanType = IsScanType.NONE,
-    var time: Instant = Instant.NONE,
+    var time: LocalDateTime = LOCAL_DATE_TIME_NONE,
     var files: MutableList<String> = mutableListOf(),
     var text: String = "",
     var ocr: Long = 0,

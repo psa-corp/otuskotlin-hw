@@ -1,8 +1,8 @@
 package net.otuskotlin.ingredientscan.core.common
 
-import kotlinx.datetime.Instant
 import net.otuskotlin.ingredientscan.core.common.models.*
 import net.otuskotlin.ingredientscan.core.common.stubs.IsStubs
+import java.time.LocalDateTime
 
 data class IsContext(
     var command: IsCommand = IsCommand.NONE,
@@ -13,7 +13,7 @@ data class IsContext(
     var stubCase: IsStubs = IsStubs.NONE,
 
     var requestId: IsRequestId = IsRequestId.NONE,
-    var timeStart: Instant = Instant.NONE,
+    var timeStart: LocalDateTime = LOCAL_DATE_TIME_NONE,
 
     // Request data
     var analysisRequest: IsAnalysis = IsAnalysis(),

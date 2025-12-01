@@ -5,7 +5,6 @@ import net.otuskotlin.ingredientscan.core.common.IsContext
 import net.otuskotlin.ingredientscan.core.common.models.*
 import net.otuskotlin.ingredientscan.mappers.v1.toTransportAnalysisGet // Ваша исправленная функция
 import org.junit.Test
-import kotlinx.datetime.Instant
 import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisGetRequest
 import net.otuskotlin.ingredientscan.api.v1.external.models.RequestDebug
 import net.otuskotlin.ingredientscan.core.common.stubs.IsStubs
@@ -15,12 +14,13 @@ import kotlin.test.assertEquals
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.DebugMode
 import net.otuskotlin.ingredientscan.api.v1.external.models.RequestDebugStub
+import java.time.LocalDateTime
 
-// Простая заглушка для тестирования (в реальном проекте вынесена в IsAnalysisStub)
+// Простая заглушка для тестирования (в реальном проекте вынесена в IsAnalysisStub) (Запланирована)
 val STUB_ANALYSIS: IsAnalysis = IsAnalysis(
     id = IsAnalysisId("analysis-test-123"),
     compositionId = IsCompositionId("comp-test-456"),
-    createDate = Instant.fromEpochMilliseconds(1672531200000L),
+    createDate = LocalDateTime.now(),
     description = "Test analysis description",
     rating = 4.5,
     color = IsColor.GREEN,
@@ -90,7 +90,6 @@ class AnalysisMapperTest {
         // Проверка маппинга объекта Analysis
         val analysis = response.analysis
         assertEquals(STUB_ANALYSIS.toTransportAnalysis(), analysis)
-        // Или более детальные проверки по полям, если toTransportAnalysis() не доступна в этом модуле
         assertEquals(STUB_ANALYSIS.id.asString(), analysis?.id)
         assertEquals(STUB_ANALYSIS.description, analysis?.description)
         assertEquals(STUB_ANALYSIS.rating, analysis?.rating)

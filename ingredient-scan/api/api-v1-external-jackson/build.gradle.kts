@@ -37,7 +37,7 @@ openApiGenerate {
      */
     configOptions.set(
         mapOf(
-            "dateLibrary" to "string",
+            "dateLibrary" to "java8",
             "enumPropertyNaming" to "UPPERCASE",
             "serializationLibrary" to "jackson",
             "collectionType" to "list"
@@ -47,7 +47,7 @@ openApiGenerate {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation(libs.kotlinx.datetime)
+//    implementation(libs.kotlinx.datetime)
     implementation(libs.jackson.kotlin)
     implementation(libs.jackson.datatype)
     testImplementation(kotlin("test-junit"))

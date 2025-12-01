@@ -4,6 +4,7 @@ import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.core.common.IsContext
 import net.otuskotlin.ingredientscan.core.common.models.*
 import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownIsCommand
+import java.time.ZoneOffset
 
 fun IsContext.toTransport(): IResponse = when (val cmd = command) {
     IsCommand.ANALYSIS_GET -> toTransportAnalysisGet()
@@ -13,7 +14,7 @@ fun IsContext.toTransport(): IResponse = when (val cmd = command) {
     IsCommand.COMPOSITION_GET -> toTransportCompositionGet()
     IsCommand.DOWNLOAD_FILE -> toTransportDownloadFile() // Обычно файлы отдаются стримом, но если есть JSON ответ при ошибке
     IsCommand.NONE -> throw UnknownIsCommand(cmd)
-    // Обработка остальных команд, если они появятся
+
     else -> throw UnknownIsCommand(cmd)
 }
 
@@ -73,7 +74,7 @@ fun IsContext.toTransportDownloadFile(): IResponse {
 fun IsAnalysis.toTransport(): Analysis? = if (this.isEmpty()) null else Analysis(
     id = id.takeIf { it != IsAnalysisId.NONE }?.asString(),
     compositionId = compositionId.takeIf { it != IsCompositionId.NONE }?.asString(),
-    createDate = createDate.toString(), // Instant to String
+    createDate = createDate.atOffset(ZoneOffset.UTC),
     description = description.takeIf { it.isNotBlank() },
     rating = rating.takeIf { it > 0 }?.toDouble(), // Предполагаем rating > 0
     color = color.toTransport(),
@@ -83,7 +84,7 @@ fun IsAnalysis.toTransport(): Analysis? = if (this.isEmpty()) null else Analysis
 
 fun IsComposition.toTransport(): Composition? = if (this.id == IsCompositionId.NONE) null else Composition(
     id = id.asString(),
-    createDate = createDate.toString(),
+    createDate = createDate.atOffset(ZoneOffset.UTC),
     text = text.takeIf { it.isNotBlank() },
     // analysisId и useCount нужно добавить в IsComposition или брать из других мест, если они там есть
 )
@@ -91,7 +92,7 @@ fun IsComposition.toTransport(): Composition? = if (this.id == IsCompositionId.N
 fun IsComponent.toTransport(): Component = Component(
     id = id.asString(),
     name = name.takeIf { it.isNotBlank() },
-    createDate = createDate.toString(),
+    createDate = createDate.atOffset(ZoneOffset.UTC),
     scientificName = scientificName.takeIf { it.isNotBlank() },
     description = description.takeIf { it.isNotBlank() },
     sources = sources.takeIf { it.isNotBlank() },

@@ -7,17 +7,8 @@ version = rootProject.version
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation(libs.kotlinx.datetime)
+//    implementation(libs.kotlinx.datetime)
     implementation(projects.api.apiV1ExternalJackson)
     implementation(projects.coreCommon)
     testImplementation(kotlin("test-junit"))
-}
-
-tasks {
-     compileTestKotlin {
-        dependsOn(rootProject.tasks.named("openApiGenerate"))
-    }
-    compileKotlin {
-        dependsOn(rootProject.tasks.named("openApiGenerate"))
-    }
 }

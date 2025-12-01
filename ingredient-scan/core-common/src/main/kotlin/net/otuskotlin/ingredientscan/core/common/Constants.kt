@@ -1,7 +1,5 @@
 package net.otuskotlin.ingredientscan.core.common
 
-import kotlinx.datetime.Instant
+import java.time.LocalDateTime
 
-private val INSTANT_NONE = Instant.fromEpochMilliseconds(Long.MIN_VALUE)
-val Instant.Companion.NONE
-    get() = INSTANT_NONE
+val LOCAL_DATE_TIME_NONE: LocalDateTime = LocalDateTime.of(1970, 1, 1, 0, 0, 0)

@@ -1,6 +1,6 @@
 package net.otuskotlin.ingredientscan.core.common.logging
 
-import kotlinx.datetime.Clock
+import java.time.Instant
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
@@ -98,7 +98,7 @@ interface IsLogWrapper: AutoCloseable {
                     .takeIf { it.isNotBlank() }
                     ?.let { " ($it)" }
                 val args = listOfNotNull(
-                    "${Clock.System.now()} [${level.name}]$markerString: $msg",
+                    "${Instant.now()} [${level.name}]$markerString: $msg",
                     e?.let { "${it.message ?: "Unknown reason"}:\n${it.stackTraceToString()}" },
                     data?.toString(),
                     objs?.toString(),

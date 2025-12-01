@@ -1,12 +1,12 @@
 package net.otuskotlin.ingredientscan.core.common.models
 
-import kotlinx.datetime.Instant
-import net.otuskotlin.ingredientscan.core.common.NONE
+import net.otuskotlin.ingredientscan.core.common.LOCAL_DATE_TIME_NONE
+import java.time.LocalDateTime
 
 data class IsComponent(
     var id: IsComponentId = IsComponentId.NONE,
     var name: String = "",
-    var createDate: Instant = Instant.NONE,
+    var createDate: LocalDateTime = LOCAL_DATE_TIME_NONE,
     var scientificName: String = "",
     var description: String = "",
     var sources: String = "",

@@ -2,6 +2,7 @@ package net.otuskotlin.ingredientscan.api.v1.external.test
 
 import net.otuskotlin.ingredientscan.api.v1.external.apiV1ExternalMapper
 import net.otuskotlin.ingredientscan.api.v1.external.models.*
+import java.time.OffsetDateTime
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -18,7 +19,7 @@ private val TEST_COMPONENT = Component(
 private val TEST_ANALYSIS = Analysis(
     id = "analysis-123",
     compositionId = "composition-123",
-    createDate = "2025-11-28T10:00:00Z",
+    createDate = OffsetDateTime.parse("2025-11-28T10:00:00Z"),
     description = "Высокий риск. Продукт содержит критические компоненты.",
     rating = 1.2,
     color = Analysis.Color.DARK_RED,
@@ -28,7 +29,7 @@ private val TEST_ANALYSIS = Analysis(
 
 private val TEST_COMPOSITION = Composition(
     id = "composition-123",
-    createDate = "2025-11-28T09:00:00Z",
+    createDate = OffsetDateTime.parse("2025-11-28T09:00:00Z"),
     text = "Вода, сахар, пальмовое масло, краситель E100.",
     analysisId = "analysis-123",
     useCount = 5
