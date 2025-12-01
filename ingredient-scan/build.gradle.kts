@@ -22,3 +22,18 @@ ext {
     set("spec-v1-internal", specDir.file("specs-internal-api-v1.yaml").toString())
     set("spec-log1", specDir.file("specs-scan-log1.yaml").toString())
 }
+
+tasks {
+    register("build" ) {
+        group = "build"
+    }
+    register("check" ) {
+        group = "verification"
+        subprojects.forEach { proj ->
+            println("PROJ $proj")
+            proj.getTasksByName("check", false).also {
+                this@register.dependsOn(it)
+            }
+        }
+    }
+}
