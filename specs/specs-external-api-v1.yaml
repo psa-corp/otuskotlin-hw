@@ -16,18 +16,11 @@ tags:
     description: Скачивание файлов
 
 paths:
-  /analysis/get/{id}:
+  /analysis/get:
     post:
       tags: [analysis]
       summary: Получение анализа состава по ID
       operationId: analysisGet
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID анализа
       requestBody:
         content:
           application/json:
@@ -53,18 +46,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /analysis/regenerate/{id}:
+  /analysis/regenerate:
     post:
       tags: [analysis]
       summary: Перегенерация анализа состава
       operationId: analysisRegenerate
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID анализа
       requestBody:
         content:
           application/json:
@@ -233,6 +219,14 @@ components:
         - success
         - error
 
+    RequestDebugStub:
+      type: string
+      description: Кейс стабовых данных
+      enum:
+        - SUCCESS
+        - NOT_FOUND
+        - BAD_ID
+
     Error:
       type: object
       properties:
@@ -251,9 +245,12 @@ components:
 
     RequestDebug:
       type: object
+      description: Настройки режима работы (debug)
       properties:
         mode:
           $ref: '#/components/schemas/DebugMode'
+        stub:
+          $ref: '#/components/schemas/RequestDebugStub'
 
     IRequest:
       type: object
@@ -306,6 +303,10 @@ components:
           properties:
             debug:
               $ref: '#/components/schemas/RequestDebug'
+            analysisId:
+              type: string
+              description: ID анализа для получения
+              example: "analysis_123"
 
     AnalysisRegenerateRequest:
       allOf:
@@ -314,6 +315,10 @@ components:
           properties:
             debug:
               $ref: '#/components/schemas/RequestDebug'
+            analysisId:
+              type: string
+              description: ID анализа для получения
+              example: "analysis_123"
 
     CompositionCreateByManualRequest:
       allOf:
@@ -322,16 +327,19 @@ components:
           properties:
             debug:
               $ref: '#/components/schemas/RequestDebug'
-        - type: object
-          properties:
             scan:
               $ref: '#/components/schemas/ScanManualDto'
+        - type: object
 
     CompositionCreateByPhotosRequest:
       allOf:
         - $ref: '#/components/schemas/IRequest'
-        - $ref: '#/components/schemas/RequestDebug'
-        - $ref: '#/components/schemas/ScanPhotosDto'
+        - type: object
+          properties:
+            debug:
+              $ref: '#/components/schemas/RequestDebug'
+            scan:
+              $ref: '#/components/schemas/ScanPhotosDto'
         # Фотографии передаются через multipart/form-data, DTO ScanPhotosDto передается в поле 'scan'
 
     CompositionGetRequest:
