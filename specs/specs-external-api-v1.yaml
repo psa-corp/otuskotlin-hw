@@ -459,13 +459,14 @@ components:
     ScanManualDto:
       type: object
       required:
-        - data
+        - text
+        - type
       properties:
         id:
           type: string
         type:
           $ref: '#/components/schemas/ScanType'
-        data:
+        text:
           type: string
           minLength: 10
           maxLength: 5000
