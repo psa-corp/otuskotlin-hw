@@ -4,8 +4,15 @@ import java.time.Instant
 import java.time.ZoneOffset
 import net.otuskotlin.ingredientscan.api.log1.models.*
 import net.otuskotlin.ingredientscan.core.common.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsColor
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
+import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsError
+import net.otuskotlin.ingredientscan.core.common.external.models.IsRequestId
 import net.otuskotlin.ingredientscan.core.common.logging.IsLogLevel
-import net.otuskotlin.ingredientscan.core.common.models.*
 
 fun IsContext.toLog(logId: String) = CommonLogModel(
     messageTime = Instant.now().atOffset(ZoneOffset.UTC),

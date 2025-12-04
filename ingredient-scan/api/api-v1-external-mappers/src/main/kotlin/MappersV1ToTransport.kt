@@ -2,7 +2,16 @@ package net.otuskotlin.ingredientscan.mappers.v1
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.core.common.IsContext
-import net.otuskotlin.ingredientscan.core.common.models.*
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsColor
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
+import net.otuskotlin.ingredientscan.core.common.external.models.IsComponent
+import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsError
+import net.otuskotlin.ingredientscan.core.common.external.models.IsRiskLevel
+import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownIsCommand
 import java.time.ZoneOffset
 

@@ -1,7 +1,16 @@
 package net.otuskotlin.ingredientscan.core.common
 
-import net.otuskotlin.ingredientscan.core.common.models.*
-import net.otuskotlin.ingredientscan.core.common.stubs.IsStubs
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
+import net.otuskotlin.ingredientscan.core.common.external.models.IsComponent
+import net.otuskotlin.ingredientscan.core.common.external.models.IsComponentFilter
+import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
+import net.otuskotlin.ingredientscan.core.common.external.models.IsError
+import net.otuskotlin.ingredientscan.core.common.external.models.IsRequestId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsScan
+import net.otuskotlin.ingredientscan.core.common.external.models.IsState
+import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
+import net.otuskotlin.ingredientscan.core.common.external.stubs.IsStubs
 import java.time.LocalDateTime
 
 data class IsContext(

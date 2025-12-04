@@ -2,18 +2,26 @@ import net.otuskotlin.ingredientscan.api.v1.external.models.Analysis
 import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisGetResponse
 import net.otuskotlin.ingredientscan.api.v1.external.models.ResponseResult
 import net.otuskotlin.ingredientscan.core.common.IsContext
-import net.otuskotlin.ingredientscan.core.common.models.*
 import net.otuskotlin.ingredientscan.mappers.v1.toTransportAnalysisGet // Ваша исправленная функция
 import org.junit.Test
 import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisGetRequest
 import net.otuskotlin.ingredientscan.api.v1.external.models.RequestDebug
-import net.otuskotlin.ingredientscan.core.common.stubs.IsStubs
+import net.otuskotlin.ingredientscan.core.common.external.stubs.IsStubs
 import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
 import net.otuskotlin.ingredientscan.mappers.v1.toTransport
 import kotlin.test.assertEquals
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.DebugMode
 import net.otuskotlin.ingredientscan.api.v1.external.models.RequestDebugStub
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsColor
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsError
+import net.otuskotlin.ingredientscan.core.common.external.models.IsRequestId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsState
+import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
 import java.time.LocalDateTime
 
 // Простая заглушка для тестирования (в реальном проекте вынесена в IsAnalysisStub) (Запланирована)

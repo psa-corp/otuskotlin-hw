@@ -2,8 +2,13 @@ package net.otuskotlin.ingredientscan.mappers.v1
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.core.common.IsContext
-import net.otuskotlin.ingredientscan.core.common.models.*
-import net.otuskotlin.ingredientscan.core.common.stubs.IsStubs
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
+import net.otuskotlin.ingredientscan.core.common.external.models.IsScan
+import net.otuskotlin.ingredientscan.core.common.external.models.IsScanId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsScanType
+import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
+import net.otuskotlin.ingredientscan.core.common.external.stubs.IsStubs
 import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownRequestClass
 
 fun IsContext.fromTransport(request: IRequest) = when (request) {

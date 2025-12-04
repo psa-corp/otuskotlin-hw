@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.core.common.models
+package net.otuskotlin.ingredientscan.core.common.external.models
 
 
 import net.otuskotlin.ingredientscan.core.common.LOCAL_DATE_TIME_NONE

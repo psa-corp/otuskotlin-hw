@@ -1,6 +1,6 @@
-package net.otuskotlin.ingredientscan.core.common.helpers
+package net.otuskotlin.ingredientscan.core.common.external.helpers
 
-import net.otuskotlin.ingredientscan.core.common.models.IsError
+import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 
 fun Throwable.asIsError(
     code: String = "unknown",

@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.core.common.models
+package net.otuskotlin.ingredientscan.core.common.external.models
 
 import kotlin.jvm.JvmInline
 
