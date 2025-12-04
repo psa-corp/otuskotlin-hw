@@ -33,5 +33,6 @@ include(":scanner") // Тоже лучше использовать kebab-case
 include(":core-common")
 include(":api:api-v1-external-jackson")
 include(":api:api-v1-external-mappers")
+include(":api:api-log1")
 
 

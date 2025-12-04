@@ -22,7 +22,7 @@ components:
           type: string
         source:
           type: string
-          enum: [external-api, internal-api, analysis-service, composition-service, component-service]
+          enum: [external-api, internal-api, scanner]
         scan:
           $ref: '#/components/schemas/IngredientScanLogModel'
         errors:
@@ -153,7 +153,7 @@ components:
           type: string
         rating:
           type: number
-          format: float
+          format: double
         color:
           type: string
           enum: [dark_red, red, orange, yellow, light_yellow, light_green, green, dark_green]
