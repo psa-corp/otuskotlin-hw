@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/v1/composition/create/photos"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "responseType": "compositionCreateByPhotos",
+      "result": "success",
+      "compositionId": "{{randomValue length=10 type='ALPHANUMERIC' uppercase=true}}_photo"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/v1/composition/get/[^/]+"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "responseType": "compositionGet",
+      "result": "success",
+      "composition": {
+        "id": "{{{request.pathSegments.[3]}}}",
+        "text": "молоко, сахар, консервант E202",
+        "createDate": "{{now}}",
+        "analysisId": "analysis_123",
+        "useCount": 1
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"]
+  }
+}
