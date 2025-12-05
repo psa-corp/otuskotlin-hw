@@ -1,7 +1,7 @@
 package net.otuskotlin.ingredientscan.mappers.v1
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.*
-import net.otuskotlin.ingredientscan.core.common.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsColor

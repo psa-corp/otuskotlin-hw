@@ -1,6 +1,6 @@
 package net.otuskotlin.ingredientscan.core.common.external.models
 
-import net.otuskotlin.ingredientscan.core.common.LOCAL_DATE_TIME_NONE
+import net.otuskotlin.ingredientscan.core.common.external.LOCAL_DATE_TIME_NONE
 import java.time.LocalDateTime
 
 data class IsComponent(

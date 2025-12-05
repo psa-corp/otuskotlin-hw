@@ -3,7 +3,7 @@ package net.otuskotlin.ingredientscan.api.log1.mapper
 import java.time.Instant
 import java.time.ZoneOffset
 import net.otuskotlin.ingredientscan.api.log1.models.*
-import net.otuskotlin.ingredientscan.core.common.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsColor

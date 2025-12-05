@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.core.common
+package net.otuskotlin.ingredientscan.core.common.external
 
 import java.time.LocalDateTime
 

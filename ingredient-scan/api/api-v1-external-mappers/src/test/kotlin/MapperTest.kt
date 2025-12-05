@@ -1,7 +1,7 @@
 import net.otuskotlin.ingredientscan.api.v1.external.models.Analysis
 import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisGetResponse
 import net.otuskotlin.ingredientscan.api.v1.external.models.ResponseResult
-import net.otuskotlin.ingredientscan.core.common.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.mappers.v1.toTransportAnalysisGet // Ваша исправленная функция
 import org.junit.Test
 import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisGetRequest
