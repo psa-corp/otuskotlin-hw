@@ -7,9 +7,9 @@ plugins {
 	alias(libs.plugins.jib)
 }
 
-group = "net.otuskotlin.ingredientscan.scaner"
+group = "net.otuskotlin.ingredientscan.scanner"
 version = "0.0.1"
-description = "Spring ingredient-scan-scan "
+description = "Spring ingredient-scan scanner"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")

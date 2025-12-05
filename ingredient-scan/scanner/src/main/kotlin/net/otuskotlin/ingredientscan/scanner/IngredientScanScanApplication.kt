@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.scaner
+package net.otuskotlin.ingredientscan.scanner
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
