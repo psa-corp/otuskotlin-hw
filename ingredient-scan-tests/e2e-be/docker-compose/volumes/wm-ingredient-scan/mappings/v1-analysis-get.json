@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/v1/analysis/get"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "responseType": "analysisGet",
+      "result": "success",
+      "analysis": {
+        "id": "{{{jsonPath request.body '$.analysisId'}}}",
+        "createDate": "{{now}}",
+        "compositionId": "composition_123",
+        "rating": 3.2,
+        "color": "light_yellow",
+        "problematicComponents": [],
+        "safeComponents": ["компонент1", "компонент2"],
+        "description": "Анализ выполнен"
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"]
+  }
+}

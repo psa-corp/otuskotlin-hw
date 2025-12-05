@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/v1/composition/create/manual"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "responseType": "compositionCreateByManual",
+      "result": "success",
+      "composition": {
+        "id": "{{randomValue length=10 type='ALPHANUMERIC' uppercase=true}}",
+        "text": "{{{jsonPath request.body '$.scan.text'}}}",
+        "createDate": "{{now}}"
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"]
+  }
+}
