@@ -82,6 +82,7 @@ open class BaseWiremockTest {
         ).execute()
     }
 
+    // Хелпер для десериализации
     protected inline fun <reified T> readResponse(response: okhttp3.Response): T {
         return mapper.readValue(response.body!!.string(), T::class.java)
     }
