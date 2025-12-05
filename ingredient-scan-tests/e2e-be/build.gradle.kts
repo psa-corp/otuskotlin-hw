@@ -9,6 +9,10 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
 
+    implementation("net.otuskotlin.ingredientscan:core-common")
+    implementation("net.otuskotlin.ingredientscan:api-v1-external-jackson")
+    implementation("net.otuskotlin.ingredientscan:api-v1-external-mappers")
+
     testImplementation(platform(libs.junit.bom))
 
     // Добавляем нужные модули без указания версий
@@ -19,9 +23,12 @@ dependencies {
 
     testImplementation(libs.bundles.testcontainers)
     testImplementation(libs.okhttp)
-    testImplementation(libs.jackson.kotlin)
-    testImplementation(libs.slf4j.simple)
 
+    testImplementation(libs.jackson.databind)
+    testImplementation(libs.jackson.kotlin)
+    testImplementation(libs.jackson.datatype)
+
+    testImplementation(libs.slf4j.simple)
 
     testImplementation(libs.assertj.core)
     testImplementation(libs.assertk)

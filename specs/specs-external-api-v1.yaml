@@ -349,6 +349,10 @@ components:
           properties:
             debug:
               $ref: '#/components/schemas/RequestDebug'
+            compositionId:
+              type: string
+              description: ID состава
+              example: "composition_123"
 
     DownloadFileRequest:
       allOf:

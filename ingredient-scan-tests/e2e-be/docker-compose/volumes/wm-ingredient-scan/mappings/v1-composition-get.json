@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "urlPathPattern": "/v1/composition/get/[^/]+"
+    "url": "/v1/composition/get"
   },
   "response": {
     "status": 200,
@@ -9,7 +9,7 @@
       "responseType": "compositionGet",
       "result": "success",
       "composition": {
-        "id": "{{{request.pathSegments.[3]}}}",
+        "id": "{{{jsonPath request.body '$.compositionId'}}}",
         "text": "молоко, сахар, консервант E202",
         "createDate": "{{now}}",
         "analysisId": "analysis_123",

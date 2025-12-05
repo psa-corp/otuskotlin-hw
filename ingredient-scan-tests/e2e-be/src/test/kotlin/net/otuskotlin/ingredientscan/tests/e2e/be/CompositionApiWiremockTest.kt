@@ -1,11 +1,12 @@
 package net.otuskotlin.ingredientscan.tests.e2e.be
 
+import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.tests.e2e.be.base.BaseWiremockTest
-import net.otuskotlin.ingredientscan.tests.e2e.be.models.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
+import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -29,9 +30,9 @@ class CompositionApiWiremockTest : BaseWiremockTest() {
         )
 
         // Then
-        Assertions.assertThat(response.code).isEqualTo(200)
+        assertThat(response.code).isEqualTo(200)
 
-        val responseBody = mapper.readValue<CompositionCreateByManualResponse>(response.body!!.string())
+        val responseBody: CompositionCreateByManualResponse = readResponse(response)
         assertThat(responseBody.result).isEqualTo(ResponseResult.SUCCESS)
         assertThat(responseBody.compositionId).isNotEmpty()
         assertThat(responseBody.compositionId).isNotBlank()
@@ -41,20 +42,21 @@ class CompositionApiWiremockTest : BaseWiremockTest() {
     fun `T-007 - composition get by id - success`() {
         // Given
         val compositionId = "composition_123"
+
         val request = CompositionGetRequest(
-            requestType = "compositionGet"
+            requestType = "compositionGet",
+            compositionId = compositionId
         )
 
-        // When
         val response = executePost(
-            path = "/v1/composition/get/$compositionId",
+            path = "/v1/composition/get",
             body = mapper.writeValueAsString(request)
         )
 
         // Then
-        Assertions.assertThat(response.code).isEqualTo(200)
+        assertThat(response.code).isEqualTo(200)
 
-        val responseBody = mapper.readValue<CompositionGetResponse>(response.body!!.string())
+        val responseBody: CompositionGetResponse = readResponse(response)
         assertThat(responseBody.result).isEqualTo(ResponseResult.SUCCESS)
         assertThat(responseBody.composition).isNotNull
         assertThat(responseBody.composition?.id).isEqualTo(compositionId)
@@ -64,46 +66,49 @@ class CompositionApiWiremockTest : BaseWiremockTest() {
 
     @Test
     fun `composition create photos - multipart upload - success`() {
-        // Тест загрузки фото (требует реального файла в тестовых ресурсах)
-        val testFile = File("src/test/resources/test_label.jpg")
-        if (!testFile.exists()) {
-            // Создаем временный файл для теста
-            testFile.parentFile.mkdirs()
-            testFile.writeBytes(ByteArray(1024)) // 1KB dummy file
-        }
+        // Создаём временный файл для теста
+        val testFile = File.createTempFile("test_label", ".jpg")
+        testFile.writeBytes(ByteArray(1024)) // 1KB dummy file
 
-        // Create multipart request
-        val requestBody = MultipartBody.Builder()
-            .setType(MultipartBody.Companion.FORM)
-            .addFormDataPart(
-                "scan",
-                mapper.writeValueAsString(
-                    CompositionCreateByPhotosRequest(
-                        requestType = "compositionCreateByPhotos",
-                        scan = ScanPhotosDto(
-                            type = ScanType.PHOTO
+        try {
+            // Create multipart request
+            val requestBody = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)  // Убрали .Companion
+                .addFormDataPart(
+                    "scan",
+                    mapper.writeValueAsString(
+                        CompositionCreateByPhotosRequest(
+                            requestType = "compositionCreateByPhotos",
+                            scan = ScanPhotosDto(
+                                type = ScanType.PHOTO,
+                                id = "scan_new_01"
+                            )
                         )
                     )
                 )
-            )
-            .addFormDataPart(
-                "photos",
-                testFile.name,
-                testFile.asRequestBody("image/jpeg".toMediaType())
-            )
-            .build()
+                .addFormDataPart(
+                    "photos",
+                    testFile.name,
+                    testFile.asRequestBody("image/jpeg".toMediaType())
+                )
+                .build()
 
-        val request = Request.Builder()
-            .url("${getBaseUrl()}/v1/composition/create/photos")
-            .post(requestBody)
-            .build()
+            val request = Request.Builder()
+                .url("${getBaseUrl()}/v1/composition/create/photos")
+                .post(requestBody)
+                .build()
 
-        val response = client.newCall(request).execute()
+            val response = client.newCall(request).execute()
 
-        Assertions.assertThat(response.code).isEqualTo(200)
+            assertThat(response.code).isEqualTo(200)
 
-        val responseBody = mapper.readValue<CompositionCreateByPhotosResponse>(response.body!!.string())
-        assertThat(responseBody.result).isEqualTo(ResponseResult.SUCCESS)
-        assertThat(responseBody.compositionId).isNotEmpty()
+            val responseBody: CompositionCreateByPhotosResponse = readResponse(response)
+            assertThat(responseBody.result).isEqualTo(ResponseResult.SUCCESS)
+            assertThat(responseBody.compositionId).isNotEmpty()
+        } finally {
+            // Cleanup
+            testFile.delete()
+        }
     }
+
 }

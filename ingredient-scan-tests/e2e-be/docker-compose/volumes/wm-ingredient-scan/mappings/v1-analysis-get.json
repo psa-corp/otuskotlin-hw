@@ -14,8 +14,8 @@
         "compositionId": "composition_123",
         "rating": 3.2,
         "color": "light_yellow",
-        "problematicComponents": [],
-        "safeComponents": ["компонент1", "компонент2"],
+        "problematicComponent": [],
+        "safeComponent": [],
         "description": "Анализ выполнен"
       }
     },

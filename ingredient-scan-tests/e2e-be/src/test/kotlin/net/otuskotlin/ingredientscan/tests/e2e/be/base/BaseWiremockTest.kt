@@ -1,10 +1,11 @@
 package net.otuskotlin.ingredientscan.tests.e2e.be.base
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.slf4j.LoggerFactory
@@ -21,8 +22,12 @@ open class BaseWiremockTest {
         private const val SERVICE_PORT = 8080
 
         protected var wireMockPort: Int = 8080
+        @JvmStatic
         protected lateinit var client: OkHttpClient
-        protected val mapper = jacksonObjectMapper()
+
+        @JvmStatic
+        protected val mapper: ObjectMapper = jacksonObjectMapper()
+            .registerModule(com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
 
         private lateinit var compose: DockerComposeContainer<*>
 
@@ -62,14 +67,12 @@ open class BaseWiremockTest {
             .build()
     ).execute()
 
-    protected fun executePost(path: String, body: String, contentType: String = "application/json"): okhttp3.Response {
-        // Мы знаем, что "application/json" и "image/jpeg" валидные MediaType
-        val mediaType = when (contentType) {
-            "application/json" -> "application/json".toMediaType()
-            "image/jpeg" -> "image/jpeg".toMediaType()
-            "multipart/form-data" -> "multipart/form-data".toMediaType()
-            else -> throw IllegalArgumentException("Unsupported content type: $contentType")
-        }
+    protected fun executePost(
+        path: String,
+        body: String,
+        contentType: String = "application/json"
+    ): okhttp3.Response {
+        val mediaType = contentType.toMediaType()
 
         return client.newCall(
             Request.Builder()
@@ -77,5 +80,9 @@ open class BaseWiremockTest {
                 .post(body.toRequestBody(mediaType))
                 .build()
         ).execute()
+    }
+
+    protected inline fun <reified T> readResponse(response: okhttp3.Response): T {
+        return mapper.readValue(response.body!!.string(), T::class.java)
     }
 }

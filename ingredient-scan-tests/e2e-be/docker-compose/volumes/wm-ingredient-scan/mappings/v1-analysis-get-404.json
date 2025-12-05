@@ -1,11 +1,12 @@
 {
+  "priority": 1,
   "request": {
     "method": "POST",
     "url": "/v1/analysis/get",
     "bodyPatterns": [
       {
-        "equalToJson": {
-          "analysisId": "analysis_99999"
+        "matchesJsonPath": {
+          "expression": "$[?(@.analysisId == 'analysis_99999')]"
         }
       }
     ]
@@ -13,16 +14,19 @@
   "response": {
     "status": 404,
     "jsonBody": {
-      "responseType": "analysisGet",
-      "result": "failure",
+      "responseType": "error",
+      "result": "error",
       "errors": [
         {
+          "code": "ANALYSIS_NOT_FOUND",
           "message": "Анализ не найден"
         }
-      ]
+      ],
+      "timestamp": "{{now}}"
     },
     "headers": {
       "Content-Type": "application/json"
-    }
+    },
+    "transformers": ["response-template"]
   }
 }
