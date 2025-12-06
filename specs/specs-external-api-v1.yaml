@@ -462,11 +462,6 @@ components:
           type: string
           minLength: 10
           maxLength: 5000
-        analysisId:
-          type: string
-        useCount:
-          type: integer
-          format: int64
 
     ScanManualDto:
       type: object

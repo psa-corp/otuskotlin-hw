@@ -8,8 +8,6 @@ data class IsComposition(
     var id: IsCompositionId = IsCompositionId.NONE,
     var createDate: LocalDateTime = LOCAL_DATE_TIME_NONE,
     var text: String = "",
-    var analysisId: IsAnalysisId = IsAnalysisId.NONE,
-    var useCount: Long = 0,
 ) {
     fun isEmpty() = this == NONE
 
