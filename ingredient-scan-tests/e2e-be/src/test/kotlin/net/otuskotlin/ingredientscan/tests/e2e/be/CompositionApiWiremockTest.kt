@@ -8,9 +8,11 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import java.io.File
 
 class CompositionApiWiremockTest : BaseWiremockTest() {
+    private val log = LoggerFactory.getLogger(CompositionApiWiremockTest::class.java)
 
     @Test
     fun `T-001 - composition create manual - success`() {
@@ -23,10 +25,13 @@ class CompositionApiWiremockTest : BaseWiremockTest() {
             )
         )
 
+        val requestBody = readRequest(request)
+        log.info("Request body: $requestBody")
+
         // When
         val response = executePost(
             path = "/v1/composition/create/manual",
-            body = mapper.writeValueAsString(request)
+            body = requestBody
         )
 
         // Then
@@ -48,9 +53,12 @@ class CompositionApiWiremockTest : BaseWiremockTest() {
             compositionId = compositionId
         )
 
+        val requestBody = readRequest(request)
+        log.info("Request body: $requestBody")
+
         val response = executePost(
             path = "/v1/composition/get",
-            body = mapper.writeValueAsString(request)
+            body = requestBody
         )
 
         // Then
@@ -61,7 +69,6 @@ class CompositionApiWiremockTest : BaseWiremockTest() {
         assertThat(responseBody.composition).isNotNull
         assertThat(responseBody.composition?.id).isEqualTo(compositionId)
         assertThat(responseBody.composition?.text).contains("молоко")
-        assertThat(responseBody.composition?.useCount).isGreaterThan(0)
     }
 
     @Test
@@ -70,21 +77,23 @@ class CompositionApiWiremockTest : BaseWiremockTest() {
         val testFile = File.createTempFile("test_label", ".jpg")
         testFile.writeBytes(ByteArray(1024)) // 1KB dummy file
 
+        val request = CompositionCreateByPhotosRequest(
+            requestType = "compositionCreateByPhotos",
+            scan = ScanPhotosDto(
+                type = ScanType.PHOTO,
+            )
+        )
+
+        val requestDataPart = readRequest(request)
+        log.info("Request body: $requestDataPart")
+
         try {
             // Create multipart request
             val requestBody = MultipartBody.Builder()
-                .setType(MultipartBody.FORM)  // Убрали .Companion
+                .setType(MultipartBody.FORM)
                 .addFormDataPart(
                     "scan",
-                    mapper.writeValueAsString(
-                        CompositionCreateByPhotosRequest(
-                            requestType = "compositionCreateByPhotos",
-                            scan = ScanPhotosDto(
-                                type = ScanType.PHOTO,
-                                id = "scan_new_01"
-                            )
-                        )
-                    )
+                    requestDataPart
                 )
                 .addFormDataPart(
                     "photos",
@@ -105,6 +114,7 @@ class CompositionApiWiremockTest : BaseWiremockTest() {
             val responseBody: CompositionCreateByPhotosResponse = readResponse(response)
             assertThat(responseBody.result).isEqualTo(ResponseResult.SUCCESS)
             assertThat(responseBody.compositionId).isNotEmpty()
+            assertThat(responseBody.compositionId).isNotBlank()
         } finally {
             // Cleanup
             testFile.delete()

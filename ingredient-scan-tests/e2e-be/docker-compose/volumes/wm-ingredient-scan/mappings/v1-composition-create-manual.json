@@ -8,11 +8,8 @@
     "jsonBody": {
       "responseType": "compositionCreateByManual",
       "result": "success",
-      "composition": {
-        "id": "{{randomValue length=10 type='ALPHANUMERIC' uppercase=true}}",
-        "text": "{{{jsonPath request.body '$.scan.text'}}}",
-        "createDate": "{{now}}"
-      }
+      "errors": null,
+      "compositionId": "{{randomValue length=10 type='ALPHANUMERIC' uppercase=true}}"
     },
     "headers": {
       "Content-Type": "application/json"

@@ -11,9 +11,7 @@
       "composition": {
         "id": "{{{jsonPath request.body '$.compositionId'}}}",
         "text": "молоко, сахар, консервант E202",
-        "createDate": "{{now}}",
-        "analysisId": "analysis_123",
-        "useCount": 1
+        "createDate": "{{now}}"
       }
     },
     "headers": {

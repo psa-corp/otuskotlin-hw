@@ -1,7 +1,17 @@
 {
   "request": {
     "method": "POST",
-    "url": "/v1/analysis/get"
+    "url": "/v1/analysis/get",
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.analysisId",
+        "equalTo": "analysis_123"
+      },
+      {
+        "matchesJsonPath": "$.requestType",
+        "equalTo": "analysisGet"
+      }
+    ]
   },
   "response": {
     "status": 200,

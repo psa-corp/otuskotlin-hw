@@ -1,7 +1,9 @@
 package net.otuskotlin.ingredientscan.tests.e2e.be.base
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import net.otuskotlin.ingredientscan.api.v1.external.apiV1ExternalRequestSerialize
+import net.otuskotlin.ingredientscan.api.v1.external.apiV1ExternalResponseDeserialize
+import net.otuskotlin.ingredientscan.api.v1.external.models.IRequest
+import net.otuskotlin.ingredientscan.api.v1.external.models.IResponse
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -24,10 +26,6 @@ open class BaseWiremockTest {
         protected var wireMockPort: Int = 8080
         @JvmStatic
         protected lateinit var client: OkHttpClient
-
-        @JvmStatic
-        protected val mapper: ObjectMapper = jacksonObjectMapper()
-            .registerModule(com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
 
         private lateinit var compose: DockerComposeContainer<*>
 
@@ -82,8 +80,15 @@ open class BaseWiremockTest {
         ).execute()
     }
 
-    // Хелпер для десериализации
-    protected inline fun <reified T> readResponse(response: okhttp3.Response): T {
-        return mapper.readValue(response.body!!.string(), T::class.java)
+    protected inline fun <reified T : IResponse> readResponse(response: okhttp3.Response): T {
+        val responseBodyText = response.body?.string()
+            ?: throw IllegalStateException("Response body is null")
+
+        return apiV1ExternalResponseDeserialize(responseBodyText)
     }
+
+    protected fun readRequest(request: IRequest): String {
+        return apiV1ExternalRequestSerialize(request)
+    }
+
 }
