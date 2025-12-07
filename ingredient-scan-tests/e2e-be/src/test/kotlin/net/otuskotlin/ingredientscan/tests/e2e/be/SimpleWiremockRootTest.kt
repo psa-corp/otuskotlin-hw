@@ -1,0 +1,29 @@
+package net.otuskotlin.ingredientscan.tests.e2e.be
+
+import net.otuskotlin.ingredientscan.tests.e2e.be.base.BaseWiremockTest
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
+
+class SimpleWiremockRootTest : BaseWiremockTest() {
+    private val log = LoggerFactory.getLogger(SimpleWiremockRootTest::class.java)
+
+    @Test
+    fun `WireMock should return Hello World on root request`() {
+        // Проверяем, что WireMock доступен
+        val adminResponse = executeGet("/__admin")
+        val adminResponseBody = adminResponse.body.string()
+        log.info("Admin response: ${adminResponse.code}")
+        log.info("Admin body (first 200 chars): ${adminResponseBody?.take(200)}")
+        assertEquals(200, adminResponse.code)
+
+        // Тестируем root endpoint
+        val response = executeGet("/")
+        val responseBody = response.body.string()
+        log.info("Root response: ${response.code}")
+        log.info("Root body: $responseBody")
+
+        assertEquals(200, response.code)
+        assertEquals("Hello, world!", responseBody)
+    }
+}

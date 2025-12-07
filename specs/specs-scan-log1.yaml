@@ -1,0 +1,253 @@
+openapi: 3.0.4
+info:
+  title: Ingredient Scan Log Models
+  description: Log models for logging services of ingredient scan application
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+paths: {}
+
+components:
+  schemas:
+    CommonLogModel:
+      title: Общая модель лога
+      description: Общая модель лога для всех микросервисов системы Ingredient Scan
+      type: object
+      properties:
+        messageTime:
+          type: string
+          format: date-time
+        logId:
+          type: string
+        source:
+          type: string
+          enum: [external-api, internal-api, scanner]
+        scan:
+          $ref: '#/components/schemas/IngredientScanLogModel'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorLogModel'
+        performance:
+          $ref: '#/components/schemas/PerformanceMetrics'
+
+    IngredientScanLogModel:
+      title: Модель лога для микросервиса Ingredient Scan
+      type: object
+      properties:
+        requestId:
+          type: string
+        userId:
+          type: string
+        userType:
+          type: string
+          enum: [free, premium, internal]
+        operation:
+          $ref: '#/components/schemas/ScanLogOperation'
+        requestScan:
+          $ref: '#/components/schemas/ScanLog'
+        requestComposition:
+          $ref: '#/components/schemas/CompositionLog'
+        requestAnalysis:
+          $ref: '#/components/schemas/AnalysisLog'
+        requestComponent:
+          $ref: '#/components/schemas/ComponentLog'
+        requestFilter:
+          $ref: '#/components/schemas/ComponentFilterLog'
+        responseComposition:
+          $ref: '#/components/schemas/CompositionLog'
+        responseAnalysis:
+          $ref: '#/components/schemas/AnalysisLog'
+        responseComponent:
+          $ref: '#/components/schemas/ComponentLog'
+        responseComponents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComponentLog'
+        fileOperation:
+          $ref: '#/components/schemas/FileOperationLog'
+
+    ScanLogOperation:
+      type: string
+      enum:
+        # Composition operations
+        - composition.create.manual
+        - composition.create.photos
+        - composition.get
+        # Analysis operations
+        - analysis.get
+        - analysis.regenerate
+        # Component operations
+        - component.get
+        - component.search
+        # Scan operations
+        - scan.get
+        # File operations
+        - download.file
+        - uploader.upload
+        # System operations
+        - init
+        - finish
+
+    ErrorLogModel:
+      title: Модель лога для ошибки
+      type: object
+      properties:
+        message:
+          type: string
+        field:
+          type: string
+        code:
+          type: string
+        level:
+          type: string
+          enum: [ERROR, WARN, INFO, DEBUG]
+        stackTrace:
+          type: string
+
+    ScanLog:
+      title: Модель лога для сканирования
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [MANUAL, PHOTO]
+        compositionId:
+          type: string
+        userId:
+          type: string
+        textLength:
+          type: integer
+        ocrConfidence:
+          type: number
+          format: float
+        category:
+          type: string
+
+    CompositionLog:
+      title: Модель лога для состава
+      type: object
+      properties:
+        id:
+          type: string
+        textLength:
+          type: integer
+        analysisId:
+          type: string
+        useCount:
+          type: integer
+        createDate:
+          type: string
+          format: date-time
+
+    AnalysisLog:
+      title: Модель лога для анализа
+      type: object
+      properties:
+        id:
+          type: string
+        compositionId:
+          type: string
+        rating:
+          type: number
+          format: double
+        color:
+          type: string
+          enum: [dark_red, red, orange, yellow, light_yellow, light_green, green, dark_green]
+        problematicComponentsCount:
+          type: integer
+        safeComponentsCount:
+          type: integer
+        regenerationCount:
+          type: integer
+
+    ComponentLog:
+      title: Модель лога для компонента
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        riskLevel:
+          type: string
+          enum: [MINIMAL, LOW, MEDIUM, HIGH, CRITICAL]
+        scientificName:
+          type: string
+
+    ComponentFilterLog:
+      title: Модель лога фильтра компонентов
+      properties:
+        name:
+          type: string
+        riskLevel:
+          type: string
+        scientificName:
+          type: string
+
+    FileOperationLog:
+      title: Модель лога для операций с файлами
+      type: object
+      properties:
+        fileName:
+          type: string
+        fileSize:
+          type: integer
+        operation:
+          type: string
+          enum: [upload, download]
+        path:
+          type: string
+        success:
+          type: boolean
+
+    PerformanceMetrics:
+      title: Метрики производительности
+      type: object
+      properties:
+        processingTimeMs:
+          type: integer
+        ocrProcessingTimeMs:
+          type: integer
+        analysisProcessingTimeMs:
+          type: integer
+        memoryUsageMb:
+          type: number
+          format: float
+        dailyRequests:
+          type: integer
+        requestsLimit:
+          type: integer
+
+    BusinessMetrics:
+      title: Бизнес-метрики
+      type: object
+      properties:
+        scanType:
+          type: string
+          enum: [manual, photo]
+        accuracyScore:
+          type: number
+          format: float
+        userSatisfaction:
+          type: number
+          format: float
+        componentRecognitionRate:
+          type: number
+          format: float
+        riskDistribution:
+          type: object
+          properties:
+            minimal:
+              type: integer
+            low:
+              type: integer
+            medium:
+              type: integer
+            high:
+              type: integer
+            critical:
+              type: integer

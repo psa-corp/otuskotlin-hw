@@ -1,0 +1,206 @@
+openapi: 3.0.4
+info:
+  title: "Ingredient Scan Internal API"
+  description: Внутреннее API для общения между сервисами
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/v1
+    description: Development server
+
+tags:
+  - name: component
+    description: Управление компонентами
+  - name: scan
+    description: Управление сканированиями
+  - name: uploader
+    description: Загрузка файлов
+
+paths:
+  /component/get/{id}:
+    post:
+      tags: [component]
+      summary: Получение компонента по ID
+      operationId: componentGet
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID компонента
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Component'
+        '404':
+          description: Компонент не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /component/search:
+    post:
+      tags: [component]
+      summary: Поиск компонентов
+      operationId: componentSearch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentFilter'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Component'
+        '400':
+          description: Неверные параметры поиска
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /scan/get/{id}:
+    post:
+      tags: [scan]
+      summary: Получение сканирования по ID
+      operationId: scanGet
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID сканирования
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scan'
+        '404':
+          description: Сканирование не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /uploader/upload:
+    post:
+      tags: [uploader]
+      summary: Загрузка файлов
+      operationId: uploaderUpload
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                path:
+                  type: string
+                  description: Путь для сохранения
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Файлы для загрузки
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: Ошибка загрузки файлов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Component:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        createDate:
+          type: string
+          format: date-time
+        scientificName:
+          type: string
+        description:
+          type: string
+        sources:
+          type: string
+        riskLevel:
+          $ref: '#/components/schemas/RiskLevel'
+        healthRisks:
+          type: string
+
+    ComponentFilter:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Название компонента для поиска
+
+    Scan:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          $ref: '#/components/schemas/ScanType'
+        time:
+          type: string
+          format: date-time
+        data:
+          type: string
+        text:
+          type: string
+        ocr:
+          type: integer
+          format: int64
+        compositionId:
+          type: string
+        userId:
+          type: string
+        category:
+          type: string
+
+    ScanType:
+      type: string
+      enum: [MANUAL, PHOTO]
+
+    RiskLevel:
+      type: string
+      enum: [MINIMAL, LOW, MEDIUM, HIGH, CRITICAL]
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "NOT_FOUND"
+        message:
+          type: string
+          example: "Ресурс не найден"
+        timestamp:
+          type: string
+          format: date-time

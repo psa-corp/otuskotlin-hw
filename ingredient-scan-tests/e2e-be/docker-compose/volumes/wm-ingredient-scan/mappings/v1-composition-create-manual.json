@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/v1/composition/create/manual"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "responseType": "compositionCreateByManual",
+      "result": "success",
+      "errors": null,
+      "compositionId": "{{randomValue length=10 type='ALPHANUMERIC' uppercase=true}}"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/v1/composition/get"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "responseType": "compositionGet",
+      "result": "success",
+      "composition": {
+        "id": "{{{jsonPath request.body '$.compositionId'}}}",
+        "text": "молоко, сахар, консервант E202",
+        "createDate": "{{now}}"
+      }
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "transformers": ["response-template"]
+  }
+}
