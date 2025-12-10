@@ -18,9 +18,19 @@ dependencies {
 	implementation(projects.api.apiV1ExternalMappers)
 	implementation(projects.coreCommon)
 
+	implementation(projects.api.apiLog1)
+	implementation(projects.api.apiV1ExternalJackson)
+	implementation(projects.api.apiV1ExternalMappers)
+	implementation(projects.coreCommon)
+
 	implementation(libs.spring.boot.starter.web)
 	implementation(libs.spring.boot.starter.actuator)
+	implementation(libs.spring.boot.starter.validation)
 	implementation(libs.jackson.kotlin)
+	implementation(libs.jackson.datatype)
+
+	implementation(libs.swagger.core)
+
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

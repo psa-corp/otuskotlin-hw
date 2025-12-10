@@ -13,13 +13,16 @@ sourceSets {
  * Настраиваем генерацию здесь
  */
 openApiGenerate {
+
+    //TODO: пусть вся генерация будет в одном месте.
+    // Хорошо для совместимости, но плохо для миграции на другой framework
     val openapiGroup = "${rootProject.group}.api.v1.external"
-    generatorName.set("kotlin") // Это и есть активный генератор
+    generatorName.set("kotlin-spring") // Это и есть активный генератор
     packageName.set(openapiGroup)
     apiPackage.set("$openapiGroup.api")
     modelPackage.set("$openapiGroup.models")
     invokerPackage.set("$openapiGroup.invoker")
-//    inputSpec.set("$specDir/specs-ad-v1.yaml")
+
     inputSpec.set(rootProject.ext["spec-v1-external"] as String) // <-
 
     /**
@@ -28,7 +31,9 @@ openApiGenerate {
      */
     globalProperties.apply {
         put("models", "")
+        put("apis", "")
         put("modelDocs", "false")
+//        put("apiDocs", "false")
     }
 
     /**
@@ -40,16 +45,41 @@ openApiGenerate {
             "dateLibrary" to "java8",
             "enumPropertyNaming" to "UPPERCASE",
             "serializationLibrary" to "jackson",
-            "collectionType" to "list"
+            "collectionType" to "list",
+
+            "useSpringBoot3" to "true", // добавляем для Spring Boot 3
+            "interfaceOnly" to "true",   // генерируем интерфейсы API
+            "reactive" to "false",
+            "serviceInterface" to "false",
+            "useTags" to "true",
+            "delegatePattern" to "false",
+            "skipDefaultInterface" to "true"
+        )
+    )
+
+    // Для multipart запросов
+    typeMappings.set(
+        mapOf(
+            "file" to "org.springframework.web.multipart.MultipartFile"
+        )
+    )
+
+    importMappings.set(
+        mapOf(
+            "org.springframework.web.multipart.MultipartFile" to "org.springframework.web.multipart.MultipartFile",
+            "java.time.OffsetDateTime" to "java.time.OffsetDateTime",
+            "java.time.LocalDate" to "java.time.LocalDate"
         )
     )
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
-//    implementation(libs.kotlinx.datetime)
+    implementation(libs.spring.boot.starter.web)
+    implementation(libs.spring.boot.starter.validation)
     implementation(libs.jackson.kotlin)
     implementation(libs.jackson.datatype)
+    implementation(libs.swagger.core)
     testImplementation(kotlin("test-junit"))
 }
 

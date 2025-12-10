@@ -11,6 +11,8 @@ jreImage = "21-jdk-alpine"
 kotlinx-serialization = "1.8.1"
 openapi-generator = "7.15.0"
 jackson = "2.20.1"
+# apiDocs
+swagger = "2.2.41"
 
 # Тестовые зависимости
 junit = "5.14.0"
@@ -43,6 +45,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 # Spring Boot
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }
+spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "spring-boot" }
 
 # Сериализация
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
@@ -79,6 +82,9 @@ logback-jackson = { module = "ch.qos.logback.contrib:logback-jackson", version.r
 # ASSERTION LIBRARIES
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }
+
+swagger-core = { module = "io.swagger.core.v3:swagger-annotations", version.ref = "swagger" }
+
 
 [bundles]
 

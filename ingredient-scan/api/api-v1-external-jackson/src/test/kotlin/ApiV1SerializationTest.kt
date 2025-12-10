@@ -31,8 +31,6 @@ private val TEST_COMPOSITION = Composition(
     id = "composition-123",
     createDate = OffsetDateTime.parse("2025-11-28T09:00:00Z"),
     text = "Вода, сахар, пальмовое масло, краситель E100.",
-    analysisId = "analysis-123",
-    useCount = 5
 )
 
 private val DEBUG_MODE = RequestDebug(
