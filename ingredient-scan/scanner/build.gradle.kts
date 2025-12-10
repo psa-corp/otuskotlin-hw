@@ -12,10 +12,16 @@ version = "0.0.1"
 description = "Spring ingredient-scan scanner"
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-actuator")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-	implementation("org.jetbrains.kotlin:kotlin-reflect")
+	implementation(kotlin("stdlib"))
+	implementation(projects.api.apiLog1)
+	implementation(projects.api.apiV1ExternalJackson)
+	implementation(projects.api.apiV1ExternalMappers)
+	implementation(projects.coreCommon)
+
+	implementation(libs.spring.boot.starter.web)
+	implementation(libs.spring.boot.starter.actuator)
+	implementation(libs.jackson.kotlin)
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
