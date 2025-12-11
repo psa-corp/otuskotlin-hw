@@ -7,7 +7,6 @@ import org.junit.Test
 import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisGetRequest
 import net.otuskotlin.ingredientscan.api.v1.external.models.RequestDebug
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsStubs
-import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
 import net.otuskotlin.ingredientscan.mappers.v1.toTransport
 import kotlin.test.assertEquals
 
@@ -22,6 +21,7 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.core.common.external.models.IsRequestId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
+import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
 import java.time.LocalDateTime
 
 // Простая заглушка для тестирования (в реальном проекте вынесена в IsAnalysisStub) (Запланирована)

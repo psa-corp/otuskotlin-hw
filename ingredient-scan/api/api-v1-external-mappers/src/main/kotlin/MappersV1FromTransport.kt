@@ -9,17 +9,7 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsScanId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsScanType
 import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsStubs
-import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownRequestClass
 
-fun IsContext.fromTransport(request: IRequest) = when (request) {
-    is AnalysisGetRequest -> fromTransport(request)
-    is AnalysisRegenerateRequest -> fromTransport(request)
-    is CompositionCreateByManualRequest -> fromTransport(request)
-    is CompositionCreateByPhotosRequest -> fromTransport(request)
-    is CompositionGetRequest -> fromTransport(request)
-    is DownloadFileRequest -> fromTransport(request)
-    else -> throw UnknownRequestClass(request.javaClass)
-}
 
 // --- Analysis Mappers ---
 
@@ -53,10 +43,10 @@ fun IsContext.fromTransport(request: CompositionCreateByManualRequest) {
     stubCase = request.debug.transportToStubCase()
 }
 
-fun IsContext.fromTransport(request: CompositionCreateByPhotosRequest) {
+fun IsContext.fromTransport(request: CompositionCreateByPhotosRequest, photos: MutableList<String>) {
     command = IsCommand.COMPOSITION_CREATE_PHOTOS
 
-    scanRequest = request.scan?.toInternal() ?: IsScan()
+    scanRequest = request.scan?.toInternal(photos) ?: IsScan()
 
     workMode = request.debug.transportToWorkMode()
     stubCase = request.debug.transportToStubCase()
@@ -84,9 +74,9 @@ private fun ScanManualDto.toInternal(): IsScan = IsScan(
     type = this.type.toInternal()
 )
 
-private fun ScanPhotosDto.toInternal(): IsScan = IsScan(
+private fun ScanPhotosDto.toInternal(photos : MutableList<String>): IsScan = IsScan(
     id = this.id.toScanId(),
-    files = mutableListOf(),
+    files = photos,
     type = this.type.toInternal()
 )
 

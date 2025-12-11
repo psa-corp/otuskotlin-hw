@@ -53,14 +53,15 @@ openApiGenerate {
             "serviceInterface" to "false",
             "useTags" to "true",
             "delegatePattern" to "false",
-            "skipDefaultInterface" to "true"
+            "skipDefaultInterface" to "true",
+            "useResponseEntityAlways" to "true"
         )
     )
 
-    // Для multipart запросов
     typeMappings.set(
         mapOf(
-            "file" to "org.springframework.web.multipart.MultipartFile"
+            "binary" to "org.springframework.core.io.Resource", // для скачивания файлов
+            "string" to "kotlin.String"
         )
     )
 
@@ -71,6 +72,7 @@ openApiGenerate {
             "java.time.LocalDate" to "java.time.LocalDate"
         )
     )
+    library.set("spring-boot") // или "jvm-spring"
 }
 
 dependencies {

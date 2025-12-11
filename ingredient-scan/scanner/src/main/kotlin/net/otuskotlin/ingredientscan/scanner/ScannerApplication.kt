@@ -4,8 +4,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-open class IngredientScanScanApplication
+open class ScannerApplication
 
 fun main(args: Array<String>) {
-	runApplication<IngredientScanScanApplication>(*args)
+	runApplication<ScannerApplication>(*args)
 }

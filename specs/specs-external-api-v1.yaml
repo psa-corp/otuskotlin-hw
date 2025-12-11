@@ -22,6 +22,7 @@ paths:
       summary: Получение анализа состава по ID
       operationId: analysisGet
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -52,6 +53,7 @@ paths:
       summary: Перегенерация анализа состава
       operationId: analysisRegenerate
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -118,6 +120,7 @@ paths:
           multipart/form-data:
             schema:
               type: object
+              required: [photos, scan]
               properties:
                 photos:
                   type: array
@@ -147,19 +150,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /composition/get/{id}:
+  /composition/get:
     post:
       tags: [composition]
       summary: Получение состава по ID
       operationId: compositionGet
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID состава
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -179,7 +176,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
   /download/file/{fileName}:
-    post:
+    get:
       tags: [download]
       summary: Скачивание файла
       operationId: downloadFile
@@ -190,11 +187,6 @@ paths:
           schema:
             type: string
           description: Имя файла
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DownloadFileRequest'
       responses:
         '200':
           description: Успешный ответ

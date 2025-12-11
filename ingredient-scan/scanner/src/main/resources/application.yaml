@@ -1,3 +1,22 @@
 spring:
   application:
     name: ingredient-scan-scan
+#  lifecycle:
+#    timeout-per-shutdown-phase: "3m"
+  mandatory-file-encoding: UTF-8
+  main:
+    banner-mode: off
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: NON_NULL
+#    deserialization:
+#      accept-single-value-as-array: true
+
+server:
+  servlet:
+    context-path: /v1
+#  shutdown: graceful
