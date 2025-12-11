@@ -22,9 +22,15 @@ services:
       - DATABASE_URL=jdbc:postgresql://postgres:5432/ingredient_scan
       - SPRING_DATASOURCE_USERNAME=ingredient_user
       - SPRING_DATASOURCE_PASSWORD=ingredient_pass
+      - S3_ENDPOINT_URL=http://minio:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadminpassword
+      - S3_BUCKET_NAME=scans
     ports:
       - "8081:8080" # !!! Прямой доступ к приложению (для отладки, в обход Envoy)
     depends_on:
+      minio:
+        condition: service_healthy
       # ИЗМЕНЕНИЕ: Ждем, пока Keycloak будет HEALTHY
       keycloak:
         condition: service_healthy
@@ -156,6 +162,27 @@ services:
       timeout: 5s
       retries: 20
       start_period: 30s
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio_server
+    ports:
+      - "9000:9000" # Порт API S3
+      - "9001:9001" # Порт веб-консоли (UI)
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadminpassword
+      # Необязательно: Переменные для создания бакета при первом запуске
+      MINIO_DEFAULT_BUCKETS: photos
+    volumes:
+      # Монтируем локальную папку './volumes/minio_data' на хосте
+      - ./volumes/minio_data:/data
+    command: server /data --console-address :9001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
 
 volumes:
   opensearch-data:
