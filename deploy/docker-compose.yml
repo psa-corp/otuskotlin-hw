@@ -29,8 +29,6 @@ services:
     ports:
       - "8081:8080" # !!! Прямой доступ к приложению (для отладки, в обход Envoy)
     depends_on:
-      minio:
-        condition: service_healthy
       # ИЗМЕНЕНИЕ: Ждем, пока Keycloak будет HEALTHY
       keycloak:
         condition: service_healthy
@@ -38,6 +36,10 @@ services:
         condition: service_started
       opensearch:
         condition: service_started
+      kafka:
+        condition: service_started
+      minio:
+        condition: service_healthy
     healthcheck:
       # Alpine не имеет curl, используем wget. Путь к Actuator health.
       test: wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
@@ -184,5 +186,48 @@ services:
       timeout: 20s
       retries: 3
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2181
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka_broker
+    ports:
+      - "9092:9092" # Порт для подключения внешних клиентов (вашего приложения)
+    environment:
+      # Настройки для ZooKeeper
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      # --- Важно: Настройка доступа к Kafka ---
+
+      # 1. Internal Listener (Внутри Docker сети)
+      KAFKA_LISTENERS: INTERNAL://:9093,EXTERNAL://:9092
+
+      # 2. External Listener (Снаружи Docker, с вашего хоста)
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://localhost:9092
+
+      # 3. Назначение протоколов безопасности для листенеров
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+
+      # Дополнительные настройки
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+    # Kafka должна запуститься только после ZooKeeper
+    depends_on:
+      zookeeper:
+        condition: service_started
+    restart: unless-stopped
+
 volumes:
   opensearch-data:
+  zookeeper_data:
+  kafka_data:
