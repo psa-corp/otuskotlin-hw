@@ -13,6 +13,7 @@ openapi-generator = "7.15.0"
 jackson = "2.20.1"
 # apiDocs
 swagger = "2.2.41"
+springdoc = "3.0.0"
 
 # Тестовые зависимости
 junit = "5.14.0"
@@ -27,6 +28,10 @@ logback = "1.4.14"
 logstash-logback-encoder = "7.4"
 logback-json-classic = "0.1.5"
 logback-jackson = "0.1.5"
+
+#S3
+awssdk = "2.38.7"
+awspring = "3.3.1"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -46,6 +51,8 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "spring-boot" }
+
+
 
 # Сериализация
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
@@ -84,11 +91,14 @@ assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }
 
 swagger-core = { module = "io.swagger.core.v3:swagger-annotations", version.ref = "swagger" }
+springdoc-openapi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+
+#s3
+spring-cloud-aws = { module = "io.awspring.cloud:spring-cloud-aws-starter-s3", version.ref = "awspring" }
+software-amazon = { module = "software.amazon.awssdk:s3", version.ref = "awssdk" }
 
 
 [bundles]
-
-
 testcontainers = [
     "testcontainers-core",
     "testcontainers-junit"

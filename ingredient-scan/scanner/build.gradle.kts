@@ -28,8 +28,11 @@ dependencies {
 	implementation(libs.spring.boot.starter.validation)
 	implementation(libs.jackson.kotlin)
 	implementation(libs.jackson.datatype)
-
+	implementation(libs.spring.cloud.aws)
+	implementation(libs.software.amazon)
 	implementation(libs.swagger.core)
+	implementation(libs.springdoc.openapi)
+
 
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

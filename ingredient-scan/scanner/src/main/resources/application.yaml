@@ -15,8 +15,38 @@ spring:
     default-property-inclusion: NON_NULL
 #    deserialization:
 #      accept-single-value-as-array: true
+  cloud:
+    aws:
+      credentials:
+        access-key: minioadmin
+        secret-key: minioadminpassword
+      region:
+        static: us-east-1
+      endpoint: http://localhost:9000
+
+      s3:
+        # Ключевой параметр для MinIO
+        path-style-access-enabled: true
+        bucket:
+          name: photos # Имя вашего бакета в MinIO
 
 server:
   servlet:
     context-path: /v1
 #  shutdown: graceful
+
+logging:
+  level:
+    # Для отслеживания запросов
+    org.springframework.web: DEBUG
+    org.springframework.web.servlet: DEBUG
+
+    # Для отслеживания регистрации контроллеров
+    org.springframework.boot.autoconfigure: DEBUG
+    org.springframework.context.annotation.ClassPathBeanDefinitionScanner: DEBUG
+
+    # Ваши пакеты
+    net.otuskotlin.ingredientscan: DEBUG
+
+    # Spring MVC
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
