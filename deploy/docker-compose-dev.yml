@@ -1,5 +1,6 @@
 # Минимальная версия инфраструктуры на базе
 # Dev
+name: ingredient-scanner-dev
 services:
   minio:
     image: minio/minio:latest

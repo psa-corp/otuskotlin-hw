@@ -26,18 +26,36 @@ dependencies {
 	implementation(libs.spring.boot.starter.web)
 	implementation(libs.spring.boot.starter.actuator)
 	implementation(libs.spring.boot.starter.validation)
+	implementation(libs.spring.boot.docker.compose)
+	implementation(libs.springdoc.openapi)
+	implementation(libs.spring.cloud.aws)
+
+
 	implementation(libs.jackson.kotlin)
 	implementation(libs.jackson.datatype)
-	implementation(libs.spring.cloud.aws)
+
 	implementation(libs.software.amazon)
 	implementation(libs.swagger.core)
-	implementation(libs.springdoc.openapi)
 
 
+	testImplementation(platform(libs.junit.bom))
+	testImplementation(libs.spring.boot.starter.test)
+	testImplementation(libs.junit.jupiter.api)
+	testImplementation(libs.junit.jupiter.params)
+	testRuntimeOnly(libs.junit.jupiter.engine)
+	testRuntimeOnly(libs.junit.platform.launcher)
 
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testImplementation(libs.bundles.testcontainers)
+	testImplementation(libs.okhttp)
+
+	testImplementation(libs.jackson.databind)
+	testImplementation(libs.jackson.kotlin)
+	testImplementation(libs.jackson.datatype)
+
+	testImplementation(libs.slf4j.simple)
+
+	testImplementation(libs.assertj.core)
+	testImplementation(libs.assertk)
 }
 
 kotlin {
@@ -67,4 +85,5 @@ jib {
 		ports = listOf("8080")
 		creationTime = "USE_CURRENT_TIMESTAMP"
 	}
+
 }

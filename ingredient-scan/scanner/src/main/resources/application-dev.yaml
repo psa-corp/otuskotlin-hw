@@ -29,9 +29,31 @@ spring:
         path-style-access-enabled: true
         bucket:
           name: photos # Имя вашего бакета в MinIO
+  docker:
+    compose:
+      enabled: true
+      file: file:${user.dir}/deploy/docker-compose-dev.yml
+      lifecycle-management: start-and-stop
 
 server:
   servlet:
     context-path: /v1
 #  shutdown: graceful
 
+logging:
+  level:
+    # Для отслеживания запросов
+    org.springframework.web: DEBUG
+    org.springframework.web.servlet: DEBUG
+
+    # Для отслеживания регистрации контроллеров
+    org.springframework.boot.autoconfigure: DEBUG
+    org.springframework.context.annotation.ClassPathBeanDefinitionScanner: DEBUG
+
+    # Ваши пакеты
+    net.otuskotlin.ingredientscan: DEBUG
+
+    # Spring MVC
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
+
+    org.springframework.boot.docker.compose: DEBUG
