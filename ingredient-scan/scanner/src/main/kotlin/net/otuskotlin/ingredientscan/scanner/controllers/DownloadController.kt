@@ -7,7 +7,6 @@ import net.otuskotlin.ingredientscan.scanner.services.s3.JsonErrorResource
 import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
 import org.springframework.core.io.Resource
 import org.springframework.http.*
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.RestController
 import java.nio.charset.StandardCharsets
 

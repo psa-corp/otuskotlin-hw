@@ -27,7 +27,9 @@ class S3CloudService(
     private val s3Template: S3Template,
     private val s3Client: S3Client,
     @Value("\${spring.cloud.aws.s3.bucket.name:photos}")
-    private val bucketName: String
+    private val bucketName: String,
+    @Value("\${app.upload.max-files:5}")
+    private val maxFiles: Int
 ) {
 
     private val log = LoggerFactory.getLogger(S3CloudService::class.java)
@@ -49,10 +51,35 @@ class S3CloudService(
     }
 
     companion object {
+
         fun chunks(path: String, filename: String, hasLength: Boolean): Array<String> {
             val p = if (hasLength) filename.substring(path.length) else filename
             return p.split("/").toTypedArray()
         }
+    }
+
+    fun uploadFiles(context: IsContext, files: Array<MultipartFile>, prefix: String?): MutableList<String> {
+        val result = mutableListOf<String>()
+
+        if (files.isEmpty()) {
+            context.errors.add(createError("NO_FILES", "No files provided"))
+            return result
+        }
+
+        if (files.size > maxFiles) {
+            context.errors.add(createError("TOO_MANY_FILES", "Too many files: max $maxFiles allowed"))
+            return result
+        }
+
+        for (file in files) {
+            val fileName = uploadFile(context, file, prefix)
+            if (fileName == null) {
+                break
+            }
+            result.add(fileName)
+        }
+
+        return result
     }
 
     fun uploadFile(context: IsContext, file: MultipartFile, prefix: String?): String? {

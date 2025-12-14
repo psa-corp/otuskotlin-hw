@@ -6,6 +6,8 @@ import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisGetResponse
 import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisRegenerateRequest
 import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisRegenerateResponse
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.models.IsState
+import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub.Companion.STUB_ANALYSIS
 import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
 import net.otuskotlin.ingredientscan.mappers.v1.toTransportAnalysisGet
 import net.otuskotlin.ingredientscan.mappers.v1.toTransportAnalysisRegenerate
@@ -17,12 +19,16 @@ open class AnalysisController: AnalysisApi {
     override fun analysisGet(analysisGetRequest: AnalysisGetRequest): ResponseEntity<AnalysisGetResponse> {
         val context = IsContext()
         context.fromTransport(analysisGetRequest)
+        context.analysisResponse = STUB_ANALYSIS
+        context.state = IsState.FINISHING
         return ResponseEntity.ok(context.toTransportAnalysisGet())
     }
 
     override fun analysisRegenerate(analysisRegenerateRequest: AnalysisRegenerateRequest): ResponseEntity<AnalysisRegenerateResponse> {
         val context = IsContext()
         context.fromTransport(analysisRegenerateRequest)
+        context.analysisResponse = STUB_ANALYSIS
+        context.state = IsState.FINISHING
         return ResponseEntity.ok(context.toTransportAnalysisRegenerate())
     }
 }

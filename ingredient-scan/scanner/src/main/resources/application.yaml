@@ -35,3 +35,6 @@ server:
     context-path: /v1
 #  shutdown: graceful
 
+app:
+  upload:
+    max-files: 5
