@@ -1,4 +1,30 @@
 spring:
+  docker:
+    compose:
+      enabled: false
   cloud:
     aws:
-      enabled: false
+      credentials:
+        access-key: test
+        secret-key: test
+      region:
+        static: us-east-1
+      s3:
+        path-style-access-enabled: true
+        bucket:
+          name: test-bucket
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 5MB
+app:
+  upload:
+    max-files: 3
+
+server:
+  servlet:
+    context-path: /v1
+
+logging:
+  level:
+    net.otuskotlin: WARN

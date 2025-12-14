@@ -18,11 +18,6 @@ dependencies {
 	implementation(projects.api.apiV1ExternalMappers)
 	implementation(projects.coreCommon)
 
-	implementation(projects.api.apiLog1)
-	implementation(projects.api.apiV1ExternalJackson)
-	implementation(projects.api.apiV1ExternalMappers)
-	implementation(projects.coreCommon)
-
 	implementation(libs.spring.boot.starter.web)
 	implementation(libs.spring.boot.starter.actuator)
 	implementation(libs.spring.boot.starter.validation)
@@ -30,32 +25,28 @@ dependencies {
 	implementation(libs.springdoc.openapi)
 	implementation(libs.spring.cloud.aws)
 
-
 	implementation(libs.jackson.kotlin)
 	implementation(libs.jackson.datatype)
 
 	implementation(libs.software.amazon)
 	implementation(libs.swagger.core)
 
-
-	testImplementation(platform(libs.junit.bom))
 	testImplementation(libs.spring.boot.starter.test)
-	testImplementation(libs.junit.jupiter.api)
-	testImplementation(libs.junit.jupiter.params)
-	testRuntimeOnly(libs.junit.jupiter.engine)
-	testRuntimeOnly(libs.junit.platform.launcher)
 
 	testImplementation(libs.bundles.testcontainers)
+	testImplementation(libs.testcontainers.minio)
 	testImplementation(libs.okhttp)
 
 	testImplementation(libs.jackson.databind)
 	testImplementation(libs.jackson.kotlin)
 	testImplementation(libs.jackson.datatype)
 
-	testImplementation(libs.slf4j.simple)
+//	testImplementation(libs.slf4j.simple)
 
 	testImplementation(libs.assertj.core)
 	testImplementation(libs.assertk)
+	testImplementation(libs.mockito.kotlin)
+
 }
 
 kotlin {
@@ -75,15 +66,14 @@ jib {
 	to {
 		image = "darthchain/ingredient-scan-scan"
 		tags = setOf("latest", version.toString())
-		 auth {
-		    username = ""
-		    password = ""
-		 }
+		auth {
+			username = ""
+			password = ""
+		}
 
 	}
 	container {
 		ports = listOf("8080")
 		creationTime = "USE_CURRENT_TIMESTAMP"
 	}
-
 }
