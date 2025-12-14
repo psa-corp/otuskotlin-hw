@@ -34,6 +34,8 @@ spring:
       enabled: true
       file: file:${user.dir}/deploy/docker-compose-dev.yml
       lifecycle-management: start-and-stop
+#      lifecycle-management: start-only
+      
 
 server:
   servlet:
