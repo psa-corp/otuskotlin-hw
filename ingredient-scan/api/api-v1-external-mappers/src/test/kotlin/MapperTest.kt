@@ -1,41 +1,15 @@
-import net.otuskotlin.ingredientscan.api.v1.external.models.Analysis
-import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisGetResponse
-import net.otuskotlin.ingredientscan.api.v1.external.models.ResponseResult
+import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
-import net.otuskotlin.ingredientscan.mappers.v1.toTransportAnalysisGet // Ваша исправленная функция
-import org.junit.Test
-import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisGetRequest
-import net.otuskotlin.ingredientscan.api.v1.external.models.RequestDebug
+import net.otuskotlin.ingredientscan.core.common.external.models.*
+import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub.Companion.STUB_ANALYSIS
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsStubs
+import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
 import net.otuskotlin.ingredientscan.mappers.v1.toTransport
+import net.otuskotlin.ingredientscan.mappers.v1.toTransportAnalysisGet
+import org.junit.Test
 import kotlin.test.assertEquals
 
-import net.otuskotlin.ingredientscan.api.v1.external.models.DebugMode
-import net.otuskotlin.ingredientscan.api.v1.external.models.RequestDebugStub
-import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
-import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsColor
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsError
-import net.otuskotlin.ingredientscan.core.common.external.models.IsRequestId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsState
-import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
-import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
-import java.time.LocalDateTime
-
-// Простая заглушка для тестирования (в реальном проекте вынесена в IsAnalysisStub) (Запланирована)
-val STUB_ANALYSIS: IsAnalysis = IsAnalysis(
-    id = IsAnalysisId("analysis-test-123"),
-    compositionId = IsCompositionId("comp-test-456"),
-    createDate = LocalDateTime.now(),
-    description = "Test analysis description",
-    rating = 4.5,
-    color = IsColor.GREEN,
-)
-
-// Предполагаем, что есть функция-расширение для маппинга IsAnalysis -> Analysis?
-fun IsAnalysis.toTransportAnalysis(): Analysis? = this.toTransport() // или соответствующая функция
+fun IsAnalysis.toTransportAnalysis(): Analysis? = this.toTransport()
 
 class AnalysisMapperTest {
 
