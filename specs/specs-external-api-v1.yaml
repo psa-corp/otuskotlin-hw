@@ -292,6 +292,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/IRequest'
         - type: object
+          required:
+            - analysisId
           properties:
             debug:
               $ref: '#/components/schemas/RequestDebug'
@@ -299,11 +301,14 @@ components:
               type: string
               description: ID анализа для получения
               example: "analysis_123"
+              nullable: false
 
     AnalysisRegenerateRequest:
       allOf:
         - $ref: '#/components/schemas/IRequest'
         - type: object
+          required:
+            - analysisId
           properties:
             debug:
               $ref: '#/components/schemas/RequestDebug'
@@ -311,17 +316,20 @@ components:
               type: string
               description: ID анализа для получения
               example: "analysis_123"
+              nullable: false
 
     CompositionCreateByManualRequest:
       allOf:
         - $ref: '#/components/schemas/IRequest'
         - type: object
+          required:
+            - scan
           properties:
             debug:
               $ref: '#/components/schemas/RequestDebug'
             scan:
               $ref: '#/components/schemas/ScanManualDto'
-        - type: object
+              nullable: false
 
     CompositionCreateByPhotosRequest:
       allOf:
@@ -503,6 +511,7 @@ components:
     ScanType:
       type: string
       enum: [MANUAL, PHOTO]
+      description: "Тип сканирования"
 
     RiskLevel:
       type: string

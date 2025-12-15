@@ -43,7 +43,11 @@ class ApiV1SerializationTest {
 
     @Test
     fun testAnalysisGetRequestSerialization() {
-        val request = AnalysisGetRequest(requestType = "analysisGet", debug = DEBUG_MODE)
+        val request = AnalysisGetRequest(
+            requestType = "analysisGet",
+            debug = DEBUG_MODE,
+            analysisId = "analysis-test-123")
+
         val json = apiV1ExternalMapper.writeValueAsString(request)
 
         assertContains(json, "\"requestType\":\"analysisGet\"")
@@ -155,7 +159,7 @@ class ApiV1SerializationTest {
 
     @Test
     fun testRequestPolymorphism() {
-        val jsonGet = apiV1ExternalMapper.writeValueAsString(AnalysisGetRequest(requestType = "analysisGet"))
+        val jsonGet = apiV1ExternalMapper.writeValueAsString(AnalysisGetRequest(requestType = "analysisGet", analysisId = "analysis-test-123"))
         val jsonCreate = apiV1ExternalMapper.writeValueAsString(createManualRequest)
 
         val objGet = apiV1ExternalMapper.readValue(jsonGet, IRequest::class.java)
