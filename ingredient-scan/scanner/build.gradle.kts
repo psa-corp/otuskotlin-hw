@@ -41,8 +41,6 @@ dependencies {
 	testImplementation(libs.jackson.kotlin)
 	testImplementation(libs.jackson.datatype)
 
-//	testImplementation(libs.slf4j.simple)
-
 	testImplementation(libs.assertj.core)
 	testImplementation(libs.assertk)
 	testImplementation(libs.mockito.kotlin)
@@ -57,6 +55,7 @@ kotlin {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	jvmArgs = listOf("-XX:+EnableDynamicAgentLoading")
 }
 
 jib {

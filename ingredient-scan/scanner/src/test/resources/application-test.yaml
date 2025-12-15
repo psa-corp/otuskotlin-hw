@@ -27,4 +27,8 @@ server:
 
 logging:
   level:
-    net.otuskotlin: WARN
+    net.otuskotlin: DEBUG
+    org.springframework.web: DEBUG
+    root: INFO
+    org.springframework.web.servlet.mvc.method.annotation: DEBUG
+    org.springframework.test.web.servlet: DEBUG
