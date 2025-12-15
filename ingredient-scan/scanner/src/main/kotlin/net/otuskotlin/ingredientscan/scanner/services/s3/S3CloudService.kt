@@ -61,6 +61,9 @@ class S3CloudService(
     fun uploadFiles(context: IsContext, files: Array<MultipartFile>, prefix: String?): MutableList<String> {
         val result = mutableListOf<String>()
 
+        log.info("!!!!!!!!!!! files:{}, files size:{}", files, files.size)
+        log.info("!!!!!!!!!!! maxFiles:{}", maxFiles)
+
         if (files.isEmpty()) {
             context.errors.add(createError("NO_FILES", "No files provided"))
             return result
