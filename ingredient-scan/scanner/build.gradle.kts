@@ -22,6 +22,10 @@ dependencies {
 	implementation(libs.spring.boot.starter.actuator)
 	implementation(libs.spring.boot.starter.validation)
 	implementation(libs.spring.boot.docker.compose)
+
+	implementation(libs.spring.kafka)
+	implementation(libs.kafka.streams)
+
 	implementation(libs.springdoc.openapi)
 	implementation(libs.spring.cloud.aws)
 

@@ -33,11 +33,26 @@ spring:
     compose:
       enabled: true
       file: file:${user.dir}/deploy/docker-compose-dev.yml
+      wait:
+        enabled: true
+        timeout: 180s
       lifecycle-management: start-and-stop
 #      lifecycle-management: start-only
-      
+
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ingredient-scanner-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
 
 server:
+  port: 8081
   servlet:
     context-path: /v1
 #  shutdown: graceful
