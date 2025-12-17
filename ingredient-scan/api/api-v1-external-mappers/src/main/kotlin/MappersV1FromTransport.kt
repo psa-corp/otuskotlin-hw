@@ -4,6 +4,7 @@ import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsScan
 import net.otuskotlin.ingredientscan.core.common.external.models.IsScanId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsScanType
@@ -54,6 +55,7 @@ fun IsContext.fromTransport(request: CompositionCreateByPhotosRequest, photos: M
 
 fun IsContext.fromTransport(request: CompositionGetRequest) {
     command = IsCommand.COMPOSITION_GET
+    compositionIdRequest = IsCompositionId(request.compositionId.toString())
     workMode = request.debug.transportToWorkMode()
     stubCase = request.debug.transportToStubCase()
 }

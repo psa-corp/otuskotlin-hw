@@ -2,17 +2,24 @@ package net.otuskotlin.ingredientscan.core.common.external.models
 
 import kotlin.jvm.JvmInline
 
-        @JvmInline
-        value class IsAnalysisId(private val id: String) {
-            fun asString() = id
-            companion object { val NONE = IsAnalysisId("") }
-        }
+@JvmInline
+value class IsAnalysisId(private val id: String) {
+    fun asString() = id
+    companion object { val NONE = IsAnalysisId("") }
+}
 
 @JvmInline
 value class IsCompositionId(private val id: String) {
     fun asString() = id
     companion object { val NONE = IsCompositionId("") }
 }
+
+@JvmInline
+value class IsContextId(private val id: String) {
+    fun asString() = id
+    companion object { val NONE = IsCompositionId("") }
+}
+
 
 @JvmInline
 value class IsComponentId(private val id: String) {
