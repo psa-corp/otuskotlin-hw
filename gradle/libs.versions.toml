@@ -39,6 +39,8 @@ mockito-kotlin = "5.2.1"
 awssdk = "2.38.7"
 awspring = "3.3.1"
 
+caffeine = "3.2.2"
+
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -112,6 +114,8 @@ springdoc-openapi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-u
 #s3
 spring-cloud-aws = { module = "io.awspring.cloud:spring-cloud-aws-starter-s3", version.ref = "awspring" }
 software-amazon = { module = "software.amazon.awssdk:s3", version.ref = "awssdk" }
+
+github-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 
 [bundles]
 testcontainers = [

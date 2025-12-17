@@ -35,6 +35,8 @@ dependencies {
 	implementation(libs.software.amazon)
 	implementation(libs.swagger.core)
 
+	implementation(libs.github.caffeine)
+
 	testImplementation(libs.spring.boot.starter.test)
 
 	testImplementation(libs.bundles.testcontainers)
