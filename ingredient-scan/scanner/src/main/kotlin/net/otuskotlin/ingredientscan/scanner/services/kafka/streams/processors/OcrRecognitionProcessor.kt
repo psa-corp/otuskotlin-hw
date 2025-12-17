@@ -1,11 +1,10 @@
 package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors
 
-
-import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION
 import net.otuskotlin.ingredientscan.core.common.mappers.apiContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
+import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
 
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.KafkaHeaders
@@ -14,7 +13,7 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Service
 
 @Service
-class OcrRecognitionProcessor() {
+class OcrRecognitionProcessor(private val contextRepository: InMemoryContextRepository) {
 
     private val log = LoggerFactory.getLogger(OcrRecognitionProcessor::class.java)
 
@@ -23,12 +22,10 @@ class OcrRecognitionProcessor() {
         @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
     ): String {
         log.info("=== OCR Recognition started ===\nkey: {}", key)
-
+        val context = apiContextDeserialize(json)
         return try {
-            // Десериализуем контекст
-            val context = apiContextDeserialize(json)
 
-            log.debug("Received context:\n" +
+            log.info("Received context:\n" +
                     "  command: {}\n" +
                     "  photoUrls: {}",
                 context.command,
@@ -37,7 +34,7 @@ class OcrRecognitionProcessor() {
 
             // STUB: Распознавание текста
             val recognizedText = performOcrRecognition(context.scanRequest.text)
-            log.debug("OCR recognized text: {}", recognizedText)
+            log.info("OCR recognized text: {}", recognizedText)
 
             // Добавляем распознанный текст в контекст
             context.compositionRequest.text = recognizedText
@@ -48,12 +45,12 @@ class OcrRecognitionProcessor() {
 
             log.info("=== OCR Recognition completed ===\nRecognized text: {}", recognizedText)
 
-            // Сериализуем и возвращаем
+            contextRepository.save(context.id.asString(), context)
             commonContextSerialize(context)
 
         } catch (e: Exception) {
             log.error("Error during OCR recognition", e)
-            val errorContext = IsContext().apply {
+            val errorContext = context.apply {
                 errors.add(
                     IsError(
                         code = "OCR_ERROR",
@@ -64,6 +61,7 @@ class OcrRecognitionProcessor() {
                 )
                 state = IsState.FAILING
             }
+            contextRepository.save(context.id.asString(), context)
             commonContextSerialize(errorContext)
         }
     }

@@ -1,18 +1,23 @@
-package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors
+package net.otuskotlin.ingredientscan.scanner.services.kafka.streams
 
-import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.*
-import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION
 import net.otuskotlin.ingredientscan.core.common.mappers.apiContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
+import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryCompositionRepository
+import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
+import java.util.UUID
 
 @Service
-class CompositionSaveProcessor() {
+class CompositionSaveProcessor(
+    private val compositionRepository: InMemoryCompositionRepository,
+    private val contextRepository: InMemoryContextRepository
+) {
 
     private val log = LoggerFactory.getLogger(CompositionSaveProcessor::class.java)
 
@@ -21,42 +26,44 @@ class CompositionSaveProcessor() {
         @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
     ): String {
         log.info("=== Composition Save started ===\nkey: {}", key)
-
+        val context = apiContextDeserialize(json)
         return try {
-            val context = apiContextDeserialize(json)
 
             // Проверяем: есть ли ошибки от предыдущих процессоров
             if (context.errors.isNotEmpty()) {
-                log.warn("Skipping save due to errors:\n{}",
+                log.error("Skipping save due to errors:\n{}",
                     context.errors.map { "${it.code}: ${it.message}" }.joinToString("\n")
                 )
                 context.state = IsState.FAILING
+                contextRepository.save(context.id.asString(), context)
                 return commonContextSerialize(context)
             }
 
             log.debug("Received context for saving:\n" +
-                    "  command: {}\n" +
-                    "  compositionText: {}",
+                    " command: {}\n" +
+                    " compositionText: {}",
                 context.command,
                 context.compositionRequest.text.take(50) + "..."
             )
 
-            // STUB: Сохранение в БД
-            val savedComposition = saveToDatabase(context.compositionRequest)
+            val textToSave = context.compositionRequest.text
 
-            log.info("Composition saved with ID: {}", savedComposition.id.asString())
+            // Идемпотентность
+            val existingComposition = findOrCreateComposition(textToSave)
 
-            // Добавляем сохранённый состав в ответ
-            context.compositionResponse = savedComposition
+            log.info("Composition processed with ID: {}", existingComposition.id.asString())
+
+            // Добавляем результат в ответ
+            context.compositionResponse = existingComposition
             context.state = IsState.FINISHING
 
             log.info("=== Composition Save completed successfully ===")
-
+            contextRepository.save(context.id.asString(), context)
             commonContextSerialize(context)
 
         } catch (e: Exception) {
             log.error("Error during composition save", e)
-            val errorContext = IsContext().apply {
+            val errorContext = context.apply {
                 errors.add(
                     IsError(
                         code = "SAVE_ERROR",
@@ -67,17 +74,30 @@ class CompositionSaveProcessor() {
                 )
                 state = IsState.FAILING
             }
+            contextRepository.save(context.id.asString(), context)
             commonContextSerialize(errorContext)
         }
     }
 
-    private fun saveToDatabase(composition: IsComposition): IsComposition {
-        log.debug("STUB: Saving composition to database")
+    private fun findOrCreateComposition(text: String): IsComposition {
+        log.info("Looking for existing composition with text: {}", text.take(30))
 
-        // STUB: Сохранение (в реальном приложении здесь repository.save())
-        val saved = STUB_COMPOSITION
+        val existing = compositionRepository.findByText(text)
 
-        log.info("STUB: Composition saved with ID: {}", saved.id.asString())
-        return saved
+        return if (existing != null) {
+            log.info("Found existing composition: ID = {}", existing.id.asString())
+            existing
+        } else {
+            val newComposition = IsComposition(
+                id = IsCompositionId(UUID.randomUUID().toString()),
+                text = text,
+                createDate = LocalDateTime.now()
+            )
+
+            compositionRepository.save(newComposition)
+
+            log.info("Created new composition: ID = {}", newComposition.id.asString())
+            newComposition
+        }
     }
 }

@@ -1,10 +1,10 @@
-package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors
+package net.otuskotlin.ingredientscan.scanner.services.kafka.streams
 
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.*
-import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION
 import net.otuskotlin.ingredientscan.core.common.mappers.apiContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
+import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
@@ -12,51 +12,42 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Service
 
 @Service
-class CompositionValidateProcessor() {
+class CompositionValidateProcessor(private val contextRepository: InMemoryContextRepository) {
 
     private val log = LoggerFactory.getLogger(CompositionValidateProcessor::class.java)
-
 
     fun processCompositionValidation(
         @Payload json: String,
         @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
     ): String {
         log.info("=== Composition Validate started ===\nkey: {}", key)
-
+        val context = apiContextDeserialize(json)
         return try {
-            val context = apiContextDeserialize(json)
 
             log.info("Received context:\n" +
-                    "  command: {}\n" +
-                    "  text: {}",
+                    " command: {}\n" +
+                    " text: {}",
                 context.command,
                 context.compositionRequest.text.take(50) + "..."
             )
 
-            val isDuplicate = checkForDuplicate(context.compositionRequest.text)
+            // Валидируем текст состава
+            val validationErrors = validateCompositionText(context.compositionRequest.text)
 
-            if (isDuplicate) {
-                log.error("Composition is duplicate - already exists in database")
-                context.errors.add(
-                    IsError(
-                        code = "COMPOSITION_DUPLICATE",
-                        group = "VALIDATION",
-                        field = "composition.text",
-                        message = "Composition with this text already exists"
-                    )
-                )
+            if (validationErrors.isNotEmpty()) {
+                log.error("Composition validation failed")
+                context.errors.addAll(validationErrors)
                 context.state = IsState.FAILING
-            } else {
-                log.debug("Composition is unique - proceeding to save")
-                val composition = parseComposition(context.compositionRequest.text)
-                context.compositionRequest = composition
 
-                context.command = IsCommand.COMPOSITION_CREATE_MANUAL
+            } else {
+                log.info("Composition validation passed - proceeding to save")
+                // Нормализуем текст (убираем лишние пробелы)
+                context.compositionRequest.text = normalizeText(context.compositionRequest.text)
                 context.state = IsState.RUNNING
             }
 
             log.info("=== Composition Validate completed ===\nState: {}", context.state.name)
-
+            contextRepository.save(context.id.asString(), context)
             commonContextSerialize(context)
 
         } catch (e: Exception) {
@@ -72,27 +63,60 @@ class CompositionValidateProcessor() {
                 )
                 state = IsState.FAILING
             }
+            contextRepository.save(context.id.asString(), context)
             commonContextSerialize(errorContext)
         }
     }
 
-    private fun checkForDuplicate(text: String): Boolean {
-        log.debug("STUB: Checking for duplicate compositions in database")
+    private fun validateCompositionText(text: String): List<IsError> {
+        val errors = mutableListOf<IsError>()
 
-        // STUB: Проверяем по простому правилу (для примера)
-        // В реальном приложении здесь будет запрос в БД
-        val isDuplicate = false // Пока всегда возвращаем false
+        log.info("Validating composition text: length = {}", text.length)
 
-        log.info("STUB: Duplicate check result: {}", isDuplicate)
-        return isDuplicate
+        // Проверка: Текст не пустой
+        if (text.isBlank()) {
+            log.error("Validation failed: text is empty")
+            errors.add(
+                IsError(
+                    code = "EMPTY_TEXT",
+                    group = "VALIDATION",
+                    field = "composition.text",
+                    message = "Composition text cannot be empty"
+                )
+            )
+            return errors
+        }
+
+        // Проверка: Минимальная длина
+        if (text.length < 3) {
+            log.error("Validation failed: text too short (length = {})", text.length)
+            errors.add(
+                IsError(
+                    code = "TEXT_TOO_SHORT",
+                    group = "VALIDATION",
+                    field = "composition.text",
+                    message = "Composition text is too short (minimum 3 characters)"
+                )
+            )
+        }
+
+        // Проверка: Максимальная длина
+        if (text.length > 10_000) {
+            log.error("Validation failed: text too long (length = {})", text.length)
+            errors.add(
+                IsError(
+                    code = "TEXT_TOO_LONG",
+                    group = "VALIDATION",
+                    field = "composition.text",
+                    message = "Composition text exceeds maximum length (10000 characters)"
+                )
+            )
+        }
+
+        log.info("Validation result: errors = {}", errors.size)
+        return errors
     }
 
-    private fun parseComposition(text: String): IsComposition {
-        log.debug("STUB: Parsing composition text")
-        // STUB: Сохранение (в реальном приложении здесь repository.save())
-        val saved = STUB_COMPOSITION
+    private fun normalizeText(text: String): String = text.replace("\\s+".toRegex(), " ").trim()
 
-        log.info("STUB: Composition saved with ID: {}", saved.id.asString())
-        return saved
-    }
 }
