@@ -32,15 +32,12 @@ class AnalysisMapperTest {
         assertEquals(IsCommand.ANALYSIS_GET, context.command)
     }
 
-    // -----------------------------
-
     @Test
     fun toTransportAnalysisGet() {
-        // 1. Создание контекста с данными ответа и ошибками
         val context = IsContext(
             requestId = IsRequestId("req-1234"),
             command = IsCommand.ANALYSIS_GET,
-            analysisResponse = STUB_ANALYSIS, // Наш ответный объект
+            analysisResponse = STUB_ANALYSIS,
             errors = mutableListOf(
                 IsError(
                     code = "data-err",
@@ -49,13 +46,10 @@ class AnalysisMapperTest {
                     message = "Invalid analysis ID",
                 )
             ),
-            state = IsState.FINISHING, // Маппится в ResponseResult.SUCCESS
+            state = IsState.FINISHING,
         )
 
-        // 2. Вызов функции маппинга
-        val response = context.toTransportAnalysisGet() as AnalysisGetResponse
-
-        // 3. Проверки
+        val response = context.toTransportAnalysisGet()
 
         // Проверка метаданных ответа
         assertEquals(ResponseResult.SUCCESS, response.result)

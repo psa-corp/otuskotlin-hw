@@ -5,6 +5,7 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComponent
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComponentFilter
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContextId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
@@ -35,6 +36,7 @@ data class IsContext(
     var scanRequest: IsScan = IsScan(),
     var filterRequest: IsComponentFilter = IsComponentFilter(),
     var compositionIdRequest: IsCompositionId = IsCompositionId.NONE,
+    var contextIdRequest: IsContextId = IsContextId.NONE,
 
     // Response data
     var analysisResponse: IsAnalysis = IsAnalysis(),
@@ -42,4 +44,5 @@ data class IsContext(
     var componentResponse: IsComponent = IsComponent(),
     var componentsResponse: MutableList<IsComponent> = mutableListOf(),
     var scanResponse: IsScan = IsScan(),
+    var compositionContextResponse: IsCompositionContext = IsCompositionContext(),
 )

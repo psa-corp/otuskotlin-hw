@@ -22,7 +22,7 @@ private val TEST_ANALYSIS = Analysis(
     createDate = OffsetDateTime.parse("2025-11-28T10:00:00Z"),
     description = "Высокий риск. Продукт содержит критические компоненты.",
     rating = 1.2,
-    color = Analysis.Color.DARK_RED,
+    color = Color.DARK_RED,
     problematicComponent = listOf(TEST_COMPONENT),
     safeComponent = emptyList(),
 )

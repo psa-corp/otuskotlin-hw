@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class ManualFlowConfigurer(
+open class ManualFlowConfigurer(
     private val validateProcessor: CompositionValidateProcessor,
     private val saveProcessor: CompositionSaveProcessor
 ) : TopologyConfigurer {

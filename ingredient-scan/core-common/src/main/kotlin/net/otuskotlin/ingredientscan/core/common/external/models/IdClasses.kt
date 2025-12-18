@@ -17,9 +17,8 @@ value class IsCompositionId(private val id: String) {
 @JvmInline
 value class IsContextId(private val id: String) {
     fun asString() = id
-    companion object { val NONE = IsCompositionId("") }
+    companion object { val NONE = IsContextId("") }
 }
-
 
 @JvmInline
 value class IsComponentId(private val id: String) {

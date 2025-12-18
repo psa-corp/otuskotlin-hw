@@ -6,20 +6,11 @@ enum class IsCommand {
     COMPOSITION_CREATE_MANUAL,
     COMPOSITION_CREATE_PHOTOS,
     COMPOSITION_GET,
+    COMPOSITION_CONTEXT_GET,
     // Analysis operations
     ANALYSIS_GET,
     ANALYSIS_REGENERATE,
-    // Component operations
-    COMPONENT_GET,
-    COMPONENT_SEARCH,
-    // Scan operations
-    SCAN_GET,
-    // File operations
     DOWNLOAD_FILE,
-    UPLOADER_UPLOAD,
-    // System operations
-    INIT,
-    FINISH
 }
 
 enum class IsState {
