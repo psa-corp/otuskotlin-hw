@@ -78,39 +78,39 @@ fun IsContext.fromTransport(request: DownloadFileRequest) {
 
 // --- Helpers ---
 
-private fun ScanManualDto.toInternal(): IsScan = IsScan(
+fun ScanManualDto.toInternal(): IsScan = IsScan(
     id = this.id.toScanId(),
     text = this.text ?: "",
     type = this.type.toInternal()
 )
 
-private fun ScanPhotosDto.toInternal(photos : MutableList<String>): IsScan = IsScan(
+fun ScanPhotosDto.toInternal(photos : MutableList<String>): IsScan = IsScan(
     id = this.id.toScanId(),
     files = photos,
     type = this.type.toInternal()
 )
 
-private fun String?.toScanId() = this?.let { IsScanId(it) } ?: IsScanId.NONE
+fun String?.toScanId() = this?.let { IsScanId(it) } ?: IsScanId.NONE
 
-private fun RequestDebug?.transportToWorkMode(): IsWorkMode = when (this?.mode) {
+fun RequestDebug?.transportToWorkMode(): IsWorkMode = when (this?.mode) {
     DebugMode.PROD -> IsWorkMode.PROD
     DebugMode.TEST -> IsWorkMode.TEST
     DebugMode.STUB -> IsWorkMode.STUB
     null -> IsWorkMode.PROD
 }
 
-private fun RequestDebug?.transportToStubCase(): IsStubs = when (this?.stub) {
+fun RequestDebug?.transportToStubCase(): IsStubs = when (this?.stub) {
     RequestDebugStub.SUCCESS -> IsStubs.SUCCESS
     RequestDebugStub.NOT_FOUND -> IsStubs.NOT_FOUND
     RequestDebugStub.BAD_ID -> IsStubs.BAD_ID
     else -> IsStubs.NONE
 }
 
-private fun ScanType?.toInternal(): IsScanType = when (this) {
+fun ScanType?.toInternal(): IsScanType = when (this) {
     ScanType.MANUAL -> IsScanType.MANUAL
     ScanType.PHOTO -> IsScanType.PHOTO
     null -> IsScanType.NONE
 }
 
 
-private fun String?.toAnalysisId() = this?.let { IsAnalysisId(it) } ?: IsAnalysisId.NONE
+fun String?.toAnalysisId() = this?.let { IsAnalysisId(it) } ?: IsAnalysisId.NONE

@@ -39,8 +39,8 @@ class CompositionApiWiremockTest : BaseWiremockTest() {
 
         val responseBody: CompositionCreateByManualResponse = readResponse(response)
         assertThat(responseBody.result).isEqualTo(ResponseResult.SUCCESS)
-        assertThat(responseBody.compositionId).isNotEmpty()
-        assertThat(responseBody.compositionId).isNotBlank()
+        assertThat(responseBody.contextId).isNotEmpty()
+        assertThat(responseBody.contextId).isNotBlank()
     }
 
     @Test
@@ -113,8 +113,8 @@ class CompositionApiWiremockTest : BaseWiremockTest() {
 
             val responseBody: CompositionCreateByPhotosResponse = readResponse(response)
             assertThat(responseBody.result).isEqualTo(ResponseResult.SUCCESS)
-            assertThat(responseBody.compositionId).isNotEmpty()
-            assertThat(responseBody.compositionId).isNotBlank()
+            assertThat(responseBody.contextId).isNotEmpty()
+            assertThat(responseBody.contextId).isNotBlank()
         } finally {
             // Cleanup
             testFile.delete()

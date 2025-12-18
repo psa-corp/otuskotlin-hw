@@ -125,7 +125,7 @@ fun IsComponent.toTransport(): Component = Component(
 
 // --- Enum Mappers ---
 
-private fun IsColor.toTransport(): Color? = when (this) {
+fun IsColor.toTransport(): Color? = when (this) {
     IsColor.DARK_RED -> Color.DARK_RED
     IsColor.RED -> Color.RED
     IsColor.ORANGE -> Color.ORANGE
@@ -137,7 +137,7 @@ private fun IsColor.toTransport(): Color? = when (this) {
     IsColor.NONE -> null
 }
 
-private fun IsRiskLevel.toTransport(): RiskLevel? = when (this) {
+fun IsRiskLevel.toTransport(): RiskLevel? = when (this) {
     IsRiskLevel.CRITICAL -> RiskLevel.CRITICAL
     IsRiskLevel.HIGH -> RiskLevel.HIGH
     IsRiskLevel.MEDIUM -> RiskLevel.MEDIUM
@@ -146,13 +146,13 @@ private fun IsRiskLevel.toTransport(): RiskLevel? = when (this) {
     IsRiskLevel.NONE -> null
 }
 
-private fun IsState.toResult(): ResponseResult = when (this) {
+fun IsState.toResult(): ResponseResult = when (this) {
     IsState.RUNNING, IsState.FINISHING -> ResponseResult.SUCCESS
     IsState.FAILING -> ResponseResult.ERROR
     IsState.NONE -> ResponseResult.ERROR
 }
 
-private fun IsState.toTransport(): State? = when (this) {
+fun IsState.toTransport(): State? = when (this) {
     IsState.RUNNING -> State.RUNNING
     IsState.FINISHING -> State.FINISHING
     IsState.FAILING -> State.FAILING
@@ -161,12 +161,12 @@ private fun IsState.toTransport(): State? = when (this) {
 
 // --- Error Mappers ---
 
-private fun List<IsError>.toTransportErrors(): List<Error>? = this
+fun List<IsError>.toTransportErrors(): List<Error>? = this
     .map { it.toTransport() }
     .toList()
     .takeIf { it.isNotEmpty() }
 
-private fun IsError.toTransport() = Error(
+fun IsError.toTransport() = Error(
     code = code.takeIf { it.isNotBlank() },
     group = group.takeIf { it.isNotBlank() },
     field = field.takeIf { it.isNotBlank() },

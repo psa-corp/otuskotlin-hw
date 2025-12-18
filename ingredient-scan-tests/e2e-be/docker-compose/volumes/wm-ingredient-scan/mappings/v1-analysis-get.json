@@ -23,7 +23,7 @@
         "createDate": "{{now}}",
         "compositionId": "composition_123",
         "rating": 3.2,
-        "color": "light_yellow",
+        "color": "LIGHT_YELLOW",
         "problematicComponent": [],
         "safeComponent": [],
         "description": "Анализ выполнен"

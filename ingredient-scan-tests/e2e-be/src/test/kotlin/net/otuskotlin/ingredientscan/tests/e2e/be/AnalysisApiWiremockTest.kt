@@ -3,6 +3,8 @@ package net.otuskotlin.ingredientscan.tests.e2e.be
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.otuskotlin.ingredientscan.api.v1.external.models.*
+import net.otuskotlin.ingredientscan.core.common.external.models.IsColor
+import net.otuskotlin.ingredientscan.mappers.v1.toTransport
 import net.otuskotlin.ingredientscan.tests.e2e.be.base.BaseWiremockTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -37,11 +39,10 @@ class AnalysisApiWiremockTest : BaseWiremockTest() {
         assertThat(responseBody.result).isEqualTo(ResponseResult.SUCCESS)
         assertThat(responseBody.analysis).isNotNull
         assertThat(responseBody.analysis?.rating).isBetween(1.0, 5.0)
-        assertThat(responseBody.analysis?.color?.toString()?.lowercase()).isIn(
-            "dark_red", "red", "orange", "yellow",
-            "light_yellow", "light_green", "green", "dark_green"
-        )
 
+
+        assertThat(responseBody.analysis?.color).isEqualTo(IsColor.LIGHT_YELLOW.toTransport())
+        assertThat(responseBody.analysis?.compositionId).isEqualTo("composition_123")
         assertThat(responseBody.analysis?.problematicComponent).isNotNull
         assertThat(responseBody.analysis?.safeComponent).isNotNull
     }
