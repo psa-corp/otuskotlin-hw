@@ -9,6 +9,7 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComponent
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsContextId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.core.common.external.models.IsRiskLevel
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
@@ -49,14 +50,14 @@ fun IsContext.toTransportCompositionCreateManual() = CompositionCreateByManualRe
     responseType = "compositionCreateByManual",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
-    compositionId = compositionResponse.id.takeIf { it != IsCompositionId.NONE }?.asString()
+    contextId = compositionResponse.id.takeIf { it != IsContextId.NONE }?.asString()
 )
 
 fun IsContext.toTransportCompositionCreatePhotos() = CompositionCreateByPhotosResponse(
     responseType = "compositionCreateByPhotos",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
-    compositionId = compositionResponse.id.takeIf { it != IsCompositionId.NONE }?.asString()
+    contextId = compositionResponse.id.takeIf { it != IsContextId.NONE }?.asString()
 )
 
 fun IsContext.toTransportCompositionGet() = CompositionGetResponse(

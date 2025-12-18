@@ -385,18 +385,18 @@ components:
         - $ref: '#/components/schemas/IResponse'
         - type: object
           properties:
-            compositionId:
+            contextId:
               type: string
-              example: "composition_123"
+              example: "context_123"
 
     CompositionCreateByPhotosResponse:
       allOf:
         - $ref: '#/components/schemas/IResponse'
         - type: object
           properties:
-            compositionId:
+            contextId:
               type: string
-              example: "composition_123"
+              example: "context_123"
 
     CompositionGetResponse:
       allOf:
