@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: ingredient-scan-scan
   docker:
     compose:
       enabled: false
@@ -17,6 +19,12 @@ spring:
     multipart:
       max-file-size: 1MB
       max-request-size: 5MB
+  kafka:
+    bootstrap-servers: localhost:9092
+    streams:
+      auto-startup: false
+      application-id: ingredient-scan-test
+
 app:
   upload:
     max-files: 3

@@ -59,10 +59,10 @@ kotlin {
 	}
 }
 
-//tasks.withType<Test> {
-//	useJUnitPlatform()
-//	jvmArgs = listOf("-XX:+EnableDynamicAgentLoading")
-//}
+tasks.withType<Test> {
+	useJUnitPlatform()
+	jvmArgs = listOf("-XX:+EnableDynamicAgentLoading")
+}
 
 jib {
 	from {
