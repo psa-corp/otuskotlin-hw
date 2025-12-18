@@ -2,8 +2,10 @@ package net.otuskotlin.ingredientscan.scanner.services.biz
 
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.*
-import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION
 import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
+import net.otuskotlin.ingredientscan.mappers.v1.toCompositionContext
+import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryCompositionRepository
+import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
@@ -18,8 +20,10 @@ import org.springframework.stereotype.Service
  * 4. Финальный процессор сохраняет в БД
  */
 @Service
-class BizService(
-    private val kafkaTemplate: KafkaTemplate<String, String>
+open class BizService(
+    private val kafkaTemplate: KafkaTemplate<String, String>,
+    private val compositionRepository: InMemoryCompositionRepository,
+    private val contextRepository: InMemoryContextRepository
 ) {
 
     private val log = LoggerFactory.getLogger(BizService::class.java)
@@ -99,7 +103,7 @@ class BizService(
         context.command = IsCommand.COMPOSITION_CREATE_PHOTOS
         context.state = IsState.RUNNING
 
-        log.debug("Sending context to Kafka topic for OCR: {}", OCR_RECOGNITION_TOPIC)
+        log.info("Sending context to Kafka topic for OCR: {}", OCR_RECOGNITION_TOPIC)
 
         // Сериализуем контекст и отправляем в Kafka Streams для OCR
         val contextJson = commonContextSerialize(context)
@@ -123,7 +127,7 @@ class BizService(
         // Поиск состава по ID
         context.compositionResponse = findComposition(context.compositionIdRequest)
 
-        if (context.compositionRequest.isEmpty()) {
+        if (context.compositionResponse.isEmpty()) {
             context.state = IsState.FAILING
             context.errors.add(
                 IsError(
@@ -138,10 +142,46 @@ class BizService(
         return context
     }
 
+    fun compositionContextGet(context: IsContext): IsContext {
+        log.info(
+            "=== COMPOSITION_CONTEXT_GET started ===\n" +
+                    "requestId: {}\n" +
+                    "contextIdRequest: {}",
+            context.requestId.asString(),
+            context.contextIdRequest.asString()
+        )
+        // Поиск состава по ID
+        context.compositionContextResponse = findCompositionContext(context.contextIdRequest)
+
+        if (context.compositionContextResponse.isEmpty()) {
+            context.state = IsState.FAILING
+            context.errors.add(
+                IsError(
+                    code = "CONTEXT_NOT_FOUND",
+                    group = "REPOSITORY",
+                    field = "database",
+                    message = "Context not found: ${context.contextIdRequest.asString()}"
+                )
+            )
+        }
+        context.state = IsState.FINISHING
+        return context
+    }
+
     private fun findComposition(id: IsCompositionId): IsComposition {
-        // STUB DATA
-        var c: IsComposition = STUB_COMPOSITION
-        c.id = id
-        return c
+        var composition = compositionRepository.findById(id.asString())
+        log.info("Find Composition: id:{}, composition:{}",id, composition)
+        return composition?: IsComposition.NONE
+    }
+
+    private fun findCompositionContext(id: IsContextId): IsCompositionContext {
+        var context = contextRepository.findById(id.asString())
+        log.info("Find Composition: id:{}, composition:{}",id, context)
+
+        if (context == null) {
+            return IsCompositionContext.NONE
+        }
+
+        return context.toCompositionContext()
     }
 }

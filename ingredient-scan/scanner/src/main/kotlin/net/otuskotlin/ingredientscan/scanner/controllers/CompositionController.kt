@@ -1,6 +1,8 @@
 package net.otuskotlin.ingredientscan.scanner.controllers
 
 import net.otuskotlin.ingredientscan.api.v1.external.api.CompositionApi
+import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionContextGetRequest
+import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionContextGetResponse
 import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionCreateByManualRequest
 import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionCreateByManualResponse
 import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionCreateByPhotosRequest
@@ -13,6 +15,7 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
+import net.otuskotlin.ingredientscan.mappers.v1.toTransportCompositionContextGet
 import net.otuskotlin.ingredientscan.mappers.v1.toTransportCompositionCreateManual
 import net.otuskotlin.ingredientscan.mappers.v1.toTransportCompositionCreatePhotos
 import net.otuskotlin.ingredientscan.mappers.v1.toTransportCompositionGet
@@ -108,8 +111,75 @@ open class CompositionController(private val s3CloudService: S3CloudService,
 
     override fun compositionGet(compositionGetRequest: CompositionGetRequest): ResponseEntity<CompositionGetResponse> {
         val context = IsContext()
-        context.fromTransport(compositionGetRequest)
-        bizService.compositionGet(context)
-        return ResponseEntity.ok(context.toTransportCompositionGet())
+        return try {
+            context.fromTransport(compositionGetRequest)
+
+            log.info(
+                "Context created:\n" +
+                        "  requestId: {}\n" +
+                        "  command: {}\n" +
+                        "  compositionId: {}",
+                context.requestId.asString(),
+                context.command,
+                context.compositionIdRequest
+            )
+
+            bizService.compositionGet(context)
+            // Финальный результат придёт асинхронно через WebSocket/polling
+            ResponseEntity.ok(context.toTransportCompositionGet())
+
+        } catch (e: Exception) {
+            log.error("Error in compositionGet", e)
+            context.command = IsCommand.COMPOSITION_GET
+            context.compositionResponse.id = IsCompositionId.NONE
+            context.state = IsState.FAILING
+            context.errors.add(
+                IsError(
+                    code = "CONTROLLER_ERROR",
+                    group = "COMPOSITION_GET",
+                    field = "controller",
+                    message = "Error processing request: ${e.message}"
+                )
+            )
+
+            ResponseEntity.badRequest().body(context.toTransportCompositionGet())
+        }
     }
+
+    override fun compositionContextGet(compositionContextGetRequest: CompositionContextGetRequest): ResponseEntity<CompositionContextGetResponse> {
+        val context = IsContext()
+        return try {
+            context.fromTransport(compositionContextGetRequest)
+
+            log.info(
+                "Context created:\n" +
+                        "  requestId: {}\n" +
+                        "  command: {}\n" +
+                        "  search contextId: {}",
+                context.requestId.asString(),
+                context.command,
+                context.contextIdRequest
+            )
+
+            bizService.compositionContextGet(context)
+            // Финальный результат придёт асинхронно через WebSocket/polling
+            ResponseEntity.ok(context.toTransportCompositionContextGet())
+
+        } catch (e: Exception) {
+            log.error("Error in compositionContextGet", e)
+            context.command = IsCommand.COMPOSITION_GET
+            context.state = IsState.FAILING
+            context.errors.add(
+                IsError(
+                    code = "CONTROLLER_ERROR",
+                    group = "COMPOSITION_CONTEXT_GET",
+                    field = "controller",
+                    message = "Error processing request: ${e.message}"
+                )
+            )
+
+            ResponseEntity.badRequest().body(context.toTransportCompositionContextGet())
+        }
+    }
+
 }

@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class PhotoFlowConfigurer(
+open class PhotoFlowConfigurer(
     private val ocrProcessor: OcrRecognitionProcessor,
     private val validateProcessor: CompositionValidateProcessor,
     private val saveProcessor: CompositionSaveProcessor

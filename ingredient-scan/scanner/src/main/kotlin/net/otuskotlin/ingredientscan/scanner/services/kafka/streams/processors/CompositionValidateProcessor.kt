@@ -12,7 +12,7 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Service
 
 @Service
-class CompositionValidateProcessor(private val contextRepository: InMemoryContextRepository) {
+open class CompositionValidateProcessor(private val contextRepository: InMemoryContextRepository) {
 
     private val log = LoggerFactory.getLogger(CompositionValidateProcessor::class.java)
 

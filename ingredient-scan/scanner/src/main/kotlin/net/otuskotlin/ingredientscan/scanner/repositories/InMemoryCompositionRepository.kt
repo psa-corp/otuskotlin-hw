@@ -10,7 +10,7 @@ import java.time.Duration
 
 // Имитируем Elasticsearch
 @Repository
-class InMemoryCompositionRepository {
+open class InMemoryCompositionRepository {
     private val log = LoggerFactory.getLogger(InMemoryCompositionRepository::class.java)
     private val store: Cache<String, IsComposition> = Caffeine.newBuilder()
         .maximumSize(20_000)

@@ -13,7 +13,7 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Service
 
 @Service
-class OcrRecognitionProcessor(private val contextRepository: InMemoryContextRepository) {
+open class OcrRecognitionProcessor(private val contextRepository: InMemoryContextRepository) {
 
     private val log = LoggerFactory.getLogger(OcrRecognitionProcessor::class.java)
 

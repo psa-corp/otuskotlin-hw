@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
-class CompositionSaveProcessor(
+open class CompositionSaveProcessor(
     private val compositionRepository: InMemoryCompositionRepository,
     private val contextRepository: InMemoryContextRepository
 ) {

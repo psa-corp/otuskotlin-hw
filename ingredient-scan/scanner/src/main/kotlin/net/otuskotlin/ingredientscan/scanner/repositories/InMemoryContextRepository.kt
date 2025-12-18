@@ -9,7 +9,7 @@ import java.time.Duration
 
 // Имитируем RocksDB
 @Repository
-class InMemoryContextRepository {
+open class InMemoryContextRepository {
 
     private val log = LoggerFactory.getLogger(InMemoryContextRepository::class.java)
 
@@ -24,8 +24,8 @@ class InMemoryContextRepository {
         return context
     }
 
-    fun findByKey(key: String): IsContext? {
-        return contextCache.getIfPresent(key)
+    fun findById(id: String): IsContext? {
+        return contextCache.getIfPresent(id)
     }
 
     fun delete(key: String) {
