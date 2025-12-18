@@ -41,6 +41,8 @@ spring:
 
 
   kafka:
+    streams:
+      auto-startup: false
     bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
