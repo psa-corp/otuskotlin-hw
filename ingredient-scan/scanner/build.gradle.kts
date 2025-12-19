@@ -67,18 +67,42 @@ tasks.withType<Test> {
 jib {
 	from {
 		image = "eclipse-temurin:${libs.versions.jreImage.get()}"
+		platforms {
+			platform {
+				architecture = "amd64"
+				os = "linux"
+			}
+		}
 	}
+
 	to {
 		image = "darthchain/ingredient-scan-scan"
 		tags = setOf("latest", version.toString())
+
 		auth {
 			username = ""
 			password = ""
 		}
-
 	}
+
 	container {
 		ports = listOf("8080")
 		creationTime = "USE_CURRENT_TIMESTAMP"
+
+		environment = mapOf(
+			"SPRING_PROFILES_ACTIVE" to "prod",
+			"SPRING_BOOT_DOCKER_COMPOSE_ENABLED" to "false",
+			"JAVA_TOOL_OPTIONS" to "-XX:+UseG1GC -XX:MaxRAMPercentage=75.0"
+		)
+
+		labels = mapOf(
+			"maintainer" to "Pasha",
+			"version" to version.toString(),
+			"environment" to "production"
+		)
+
+		user = "nobody"
 	}
+
+	containerizingMode = "packaged"
 }

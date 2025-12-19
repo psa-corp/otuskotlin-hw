@@ -1,0 +1,77 @@
+spring:
+  application:
+    name: ingredient-scan-scan
+  mandatory-file-encoding: UTF-8
+  main:
+    banner-mode: off
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: NON_NULL
+
+  cloud:
+    aws:
+      credentials:
+        access-key: minioadmin
+        secret-key: minioadminpassword
+      region:
+        static: us-east-1
+      endpoint: http://minio:9000  # ← Docker hostname
+
+      s3:
+        path-style-access-enabled: true
+        bucket:
+          name: photos
+
+  docker:
+    compose:
+      enabled: false
+
+  kafka:
+    streams:
+      auto-startup: false
+    bootstrap-servers: kafka:9093
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ingredient-scanner-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+
+server:
+  port: 8080
+  servlet:
+    context-path: /v1
+  shutdown: graceful
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: WARN
+    org.springframework.boot: INFO
+    org.springframework.boot.autoconfigure: WARN
+    net.otuskotlin.ingredientscan: INFO
+    org.apache.kafka: WARN
+
+app:
+  upload:
+    max-files: 5
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
