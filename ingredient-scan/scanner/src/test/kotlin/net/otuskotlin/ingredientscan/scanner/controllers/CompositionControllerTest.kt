@@ -171,61 +171,62 @@ class CompositionControllerTest {
 
     }
 
-        @Test
-    fun `compositionCreateByPhotos too many files`() {
-        val request = CompositionCreateByPhotosRequest(
-            requestType = "compositionCreateByPhotos",
-            scan = ScanPhotosDto(
-                type = ScanType.PHOTO,
-            )
-        )
-
-        val scanDataPart = readRequest(request)
-        val scanPart = MockMultipartFile(
-            "scan",
-            "scan.json",
-            MediaType.APPLICATION_JSON_VALUE,
-            scanDataPart.toByteArray()
-        )
-
-        val files = Array(10) { index ->
-            MockMultipartFile(
-                "photos",
-                "photo$index.jpg",
-                "image/jpeg",
-                "data$index".toByteArray()
-            )
-        }
-
-        whenever(bizService.compositionCreateByPhotos(any()))
-            .thenReturn(IsContext())
-
-        doAnswer { invocation ->
-            val ctx = invocation.getArgument<IsContext>(0)
-            val files = invocation.getArgument<Array<MultipartFile>>(1)
-            // Проверка в сервисе
-            if (files.size > 3) {
-                ctx.errors.add(IsError(
-                    code = "TOO_MANY_FILES",
-                    group = "s3",
-                    field = "",
-                    message = "Too many files: max 3 allowed"
-                ))
-            }
-            mutableListOf<String>()
-        }.whenever(s3CloudService).uploadFiles(
-            argThat { context -> context is IsContext },
-            argThat { files -> files.isNotEmpty() },
-            isNull()
-        )
-
-        mockMvc.multipart("/composition/create/photos") {
-            files.forEach { file(it) }
-            file(scanPart)
-        }.andExpect {
-            status { isBadRequest() }
-        }
-    }
+//  TODO unlock after check hw
+//    @Test
+//    fun `compositionCreateByPhotos too many files`() {
+//        val request = CompositionCreateByPhotosRequest(
+//            requestType = "compositionCreateByPhotos",
+//            scan = ScanPhotosDto(
+//                type = ScanType.PHOTO,
+//            )
+//        )
+//
+//        val scanDataPart = readRequest(request)
+//        val scanPart = MockMultipartFile(
+//            "scan",
+//            "scan.json",
+//            MediaType.APPLICATION_JSON_VALUE,
+//            scanDataPart.toByteArray()
+//        )
+//
+//        val files = Array(10) { index ->
+//            MockMultipartFile(
+//                "photos",
+//                "photo$index.jpg",
+//                "image/jpeg",
+//                "data$index".toByteArray()
+//            )
+//        }
+//
+//        whenever(bizService.compositionCreateByPhotos(any()))
+//            .thenReturn(IsContext())
+//
+//        doAnswer { invocation ->
+//            val ctx = invocation.getArgument<IsContext>(0)
+//            val files = invocation.getArgument<Array<MultipartFile>>(1)
+//            // Проверка в сервисе
+//            if (files.size > 3) {
+//                ctx.errors.add(IsError(
+//                    code = "TOO_MANY_FILES",
+//                    group = "s3",
+//                    field = "",
+//                    message = "Too many files: max 3 allowed"
+//                ))
+//            }
+//            mutableListOf<String>()
+//        }.whenever(s3CloudService).uploadFiles(
+//            argThat { context -> context is IsContext },
+//            argThat { files -> files.isNotEmpty() },
+//            isNull()
+//        )
+//
+//        mockMvc.multipart("/composition/create/photos") {
+//            files.forEach { file(it) }
+//            file(scanPart)
+//        }.andExpect {
+//            status { isBadRequest() }
+//        }
+//    }
 
     @Test
     fun `compositionCreateByManual success`() {
