@@ -9,6 +9,12 @@ sourceSets {
     }
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
+}
+
 /**
  * Настраиваем генерацию здесь
  */
