@@ -1,7 +1,7 @@
 package net.otuskotlin.ingredientscan.scanner.services.kafka.streams
 
 import net.otuskotlin.ingredientscan.core.common.external.models.*
-import net.otuskotlin.ingredientscan.core.common.mappers.apiContextDeserialize
+import net.otuskotlin.ingredientscan.core.common.mappers.commonContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryCompositionRepository
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
@@ -26,7 +26,7 @@ open class CompositionSaveProcessor(
         @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
     ): String {
         log.info("=== Composition Save started ===\nkey: {}", key)
-        val context = apiContextDeserialize(json)
+        val context = commonContextDeserialize(json)
         return try {
 
             // Проверяем: есть ли ошибки от предыдущих процессоров

@@ -17,5 +17,5 @@ val commonContextMapper: JsonMapper = JsonMapper.builder().run {
 fun commonContextSerialize(request: IsContext): String = commonContextMapper.writeValueAsString(request)
 
 @Suppress("UNCHECKED_CAST", "unused")
-fun apiContextDeserialize(json: String): IsContext =
+fun commonContextDeserialize(json: String): IsContext =
     commonContextMapper.readValue(json, IsContext::class.java) as IsContext

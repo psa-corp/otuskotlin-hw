@@ -13,7 +13,7 @@ import org.springframework.kafka.annotation.EnableKafkaStreams
 @ConditionalOnProperty(
 name = ["spring.kafka.streams.auto-startup"],
 havingValue = "true",
-matchIfMissing = true
+//matchIfMissing = true
 )
 open class KafkaStreamsConfig(
     private val topologyConfigurers: List<TopologyConfigurer>
@@ -33,19 +33,9 @@ open class KafkaStreamsConfig(
 
     @Bean
     open fun buildCompositionTopology(streamsBuilder: StreamsBuilder): Topology {
-        log.info("═══════════════════════════════════════════════════════════════════════════════")
-        log.info("Building Composition Kafka Streams Topology")
-        log.info("Found {} topology configurers", topologyConfigurers.size)
-        log.info("═══════════════════════════════════════════════════════════════════════════════")
-
         topologyConfigurers.forEach { configurer ->
             configurer.configure(streamsBuilder)
         }
-
-        log.info("═══════════════════════════════════════════════════════════════════════════════")
-        log.info("Composition Kafka Streams Topology built successfully")
-        log.info("═══════════════════════════════════════════════════════════════════════════════")
-
         return streamsBuilder.build()
     }
 }
