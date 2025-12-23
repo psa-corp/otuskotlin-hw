@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: ingredient-scan-tests
+
+  mandatory-file-encoding: UTF-8
+
+  main:
+#    banner-mode: off
+    web-application-type: none
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: NON_NULL
+
+  docker:
+    compose:
+      enabled: true
+      file: docker-compose/docker-compose-test.yml
+      lifecycle-management: start_and_stop  # Запускает и ОСТАНАВЛИВАЕТ!
+      skip:
+        in-tests: false
+      # Добавляем настройки остановки
+      stop:
+        command: down  # Полная остановка с удалением контейнеров
+        timeout: 30s
+      wait:
+        enabled: false
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ingredient-scanner-test-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+
+logging:
+  level:
+    root: DEBUG
+    net.otuskotlin: DEBUG
+    org.springframework.boot.docker.compose: DEBUG
+    org.springframework.boot.docker.compose.service.connection: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

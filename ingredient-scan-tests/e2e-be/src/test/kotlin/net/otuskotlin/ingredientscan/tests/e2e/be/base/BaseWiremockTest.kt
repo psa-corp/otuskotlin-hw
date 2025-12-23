@@ -8,6 +8,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.slf4j.LoggerFactory
@@ -69,7 +70,7 @@ open class BaseWiremockTest {
         path: String,
         body: String,
         contentType: String = "application/json"
-    ): okhttp3.Response {
+    ): Response {
         val mediaType = contentType.toMediaType()
 
         return client.newCall(
@@ -80,7 +81,7 @@ open class BaseWiremockTest {
         ).execute()
     }
 
-    protected inline fun <reified T : IResponse> readResponse(response: okhttp3.Response): T {
+    protected inline fun <reified T : IResponse> readResponse(response: Response): T {
         val responseBodyText = response.body?.string()
             ?: throw IllegalStateException("Response body is null")
 
