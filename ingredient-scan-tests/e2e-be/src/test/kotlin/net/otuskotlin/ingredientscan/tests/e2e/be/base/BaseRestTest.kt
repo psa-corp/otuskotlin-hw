@@ -1,27 +1,21 @@
 package net.otuskotlin.ingredientscan.tests.e2e.be.base
 
-import net.otuskotlin.ingredientscan.tests.e2e.be.TestApplication
 import net.otuskotlin.ingredientscan.api.v1.external.apiV1ExternalRequestSerialize
 import net.otuskotlin.ingredientscan.api.v1.external.apiV1ExternalResponseDeserialize
 import net.otuskotlin.ingredientscan.api.v1.external.models.IRequest
-import net.otuskotlin.ingredientscan.api.v1.external.models.IResponse
+import net.otuskotlin.ingredientscan.tests.e2e.be.TestApplication
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.LoggerFactory
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.TestPropertySource
 import java.io.File
 import java.time.Duration
-import java.util.concurrent.TimeUnit
-import kotlin.code
 
-//import net.otuskotlin.ingredientscan.tests.e2e.be.DockerComposeEnvironment
 
 @SpringBootTest(
     classes = [TestApplication::class],
@@ -49,37 +43,19 @@ open class BaseRestTest {
         protected const val APP_HOST = "localhost"
 
 
-        @JvmStatic
-        @AfterAll
-        fun cleanupDocker() {
-            println("🧹 Очистка Docker контейнеров после тестов...")
-            try {
-                val process = ProcessBuilder()
-                    .command("docker", "compose", "-f", "docker-compose/docker-compose-test.yml", "down", "-v")
-                    .inheritIO()
-                    .start()
-
-                val exitCode = process.waitFor(30, TimeUnit.SECONDS)
-                if (exitCode) {
-                    println("✅ Docker контейнеры остановлены")
-                }
-            } catch (e: Exception) {
-                println("❌ Ошибка при очистке Docker: ${e.message}")
-            }
-        }
     }
 
     @BeforeEach
     fun waitForApplication() {
-        println("══════════════════════════════════════════════════════════════")
-        println("🚀 Docker Compose будет запущен Spring Boot автоматически")
-        println("📄 Файл docker-compose/docker-compose-test.yml существует? ${File("docker-compose/docker-compose-test.yml").exists()}")
-        println("⏳ Ожидание запуска приложения (максимум 180 секунд)...")
+        log.debug("══════════════════════════════════════════════════════════════")
+        log.debug("🚀 Docker Compose будет запущен Spring Boot автоматически")
+        log.debug("📄 Файл docker-compose/docker-compose-test.yml существует? ${File("docker-compose/docker-compose-test.yml").exists()}")
+        log.debug("⏳ Ожидание запуска приложения (максимум 180 секунд)...")
 
         waitForAppReady(180)
 
-        println("✅ Application is ready for testing!")
-        println("══════════════════════════════════════════════════════════════")
+        log.debug("✅ Application is ready for testing!")
+        log.debug("══════════════════════════════════════════════════════════════")
     }
 
     private fun waitForAppReady(timeoutSeconds: Int) {
@@ -89,7 +65,7 @@ open class BaseRestTest {
         while (true) {
             attempt++
             val healthUrl = "http://$APP_HOST:$APP_PORT/v1/actuator/health"
-            println("🔍 Health check attempt #$attempt: $healthUrl")
+            log.debug("🔍 Health check attempt #$attempt: $healthUrl")
 
             try {
                 val response = client.newCall(
@@ -106,7 +82,7 @@ open class BaseRestTest {
                 }
                 response.close()
             } catch (e: Exception) {
-                println("❌ Health check failed: ${e.message}")
+                log.debug("❌ Health check failed: ${e.message}")
             }
 
             if (System.currentTimeMillis() - startTime > timeoutSeconds * 1000L) {
