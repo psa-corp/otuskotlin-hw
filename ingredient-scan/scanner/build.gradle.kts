@@ -51,6 +51,8 @@ dependencies {
 	testImplementation(libs.assertk)
 	testImplementation(libs.mockito.kotlin)
 
+	testImplementation(libs.spring.kafka.test)
+	testImplementation(libs.kafka.streams.test)
 }
 
 kotlin {
@@ -61,7 +63,7 @@ kotlin {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
-	jvmArgs = listOf("-XX:+EnableDynamicAgentLoading")
+//	jvmArgs = listOf("-XX:+EnableDynamicAgentLoading")
 }
 
 jib {

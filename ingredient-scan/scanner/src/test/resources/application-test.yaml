@@ -1,42 +1,38 @@
 spring:
   application:
-    name: ingredient-scan-scan
+    name: scanner-test
+
   docker:
     compose:
       enabled: false
+
   cloud:
     aws:
-      credentials:
-        access-key: test
-        secret-key: test
       region:
         static: us-east-1
+      credentials:
+        access-key: test-key
+        secret-key: test-secret
       s3:
+        endpoint: http://localhost:9090
         path-style-access-enabled: true
-        bucket:
-          name: test-bucket
-  servlet:
-    multipart:
-      max-file-size: 1MB
-      max-request-size: 5MB
+
+  # KAFKA - полностью отключаем для тестов
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers:
     streams:
       auto-startup: false
-      application-id: ingredient-scan-test
+
+    producer: {}
+    consumer: {}
+
+  main:
+    web-application-type: none
 
 app:
   upload:
     max-files: 3
 
-server:
-  servlet:
-    context-path: /v1
-
 logging:
   level:
-    net.otuskotlin: DEBUG
-    org.springframework.web: DEBUG
-    root: INFO
-    org.springframework.web.servlet.mvc.method.annotation: DEBUG
-    org.springframework.test.web.servlet: DEBUG
+    root: DEBUG

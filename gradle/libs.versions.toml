@@ -17,6 +17,7 @@ springdoc = "2.8.13"
 
 spring-kafka = "3.3.10"
 kafka-streams = "3.8.0"
+spring-kafka-test = "3.3.10"
 
 # Тестовые зависимости
 junit = "5.10.2"
@@ -68,7 +69,8 @@ spring-kafka = { module = "org.springframework.kafka:spring-kafka", version.ref 
 
 # Kafka Streams
 kafka-streams = { module = "org.apache.kafka:kafka-streams", version.ref = "kafka-streams" }
-
+spring-kafka-test = { module = "org.springframework.kafka:spring-kafka-test", version.ref = "spring-kafka-test" }
+kafka-streams-test = { module = "org.apache.kafka:kafka-streams-test-utils", version.ref = "kafka-streams" }
 # Сериализация
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
