@@ -40,7 +40,7 @@ dependencies {
 	testImplementation(libs.spring.boot.starter.test)
 
 	testImplementation(libs.bundles.testcontainers)
-	testImplementation(libs.testcontainers.minio)
+//	testImplementation(libs.testcontainers.minio)
 	testImplementation(libs.okhttp)
 
 	testImplementation(libs.jackson.databind)
