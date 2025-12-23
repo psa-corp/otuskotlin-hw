@@ -11,45 +11,41 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 
-@WebMvcTest(
-    value = [AnalysisController::class]
-)
+@WebMvcTest(AnalysisController::class)
 class AnalysisControllerTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
     @Test
-    fun `analysisGet success`() {
+    fun `analysisGet returns successful response`() {
+        // Arrange
         val request = AnalysisGetRequest(
             requestType = "analysisGet",
             analysisId = "analysis-test-123"
         )
+        val requestBody = serializeRequest(request)
 
-        val requestBody = readRequest(request)
-
+        // Act & Assert
         mockMvc.post("/analysis/get") {
             contentType = MediaType.APPLICATION_JSON
             content = requestBody
-        }
-        .andExpect {
+        }.andExpect {
             status { isOk() }
             content { contentType(MediaType.APPLICATION_JSON) }
         }
     }
 
-
     @Test
-    fun `analysisGet returns stub`() {
-
+    fun `analysisGet returns stub response for any ID`() {
+        // Arrange
         val request = AnalysisGetRequest(
             requestType = "analysisGet",
             analysisId = "any-id"
         )
+        val requestBody = serializeRequest(request)
 
-        val requestBody = readRequest(request)
-
-
+        // Act & Assert
         mockMvc.post("/analysis/get") {
             contentType = MediaType.APPLICATION_JSON
             content = requestBody
@@ -59,14 +55,15 @@ class AnalysisControllerTest {
     }
 
     @Test
-    fun `analysisRegenerate success`() {
-
+    fun `analysisRegenerate returns successful response`() {
+        // Arrange
         val request = AnalysisRegenerateRequest(
             requestType = "analysisRegenerate",
             analysisId = "analysis-test-123"
         )
+        val requestBody = serializeRequest(request)
 
-        val requestBody = readRequest(request)
+        // Act & Assert
         mockMvc.post("/analysis/regenerate") {
             contentType = MediaType.APPLICATION_JSON
             content = requestBody
@@ -76,7 +73,7 @@ class AnalysisControllerTest {
         }
     }
 
-    fun readRequest(request: IRequest): String {
+    private fun serializeRequest(request: IRequest): String {
         return apiV1ExternalRequestSerialize(request)
     }
 }

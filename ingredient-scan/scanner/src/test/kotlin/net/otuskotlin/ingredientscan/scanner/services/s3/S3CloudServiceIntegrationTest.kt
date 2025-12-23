@@ -6,7 +6,6 @@ import io.awspring.cloud.s3.S3Template
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.*
@@ -24,7 +23,6 @@ import software.amazon.awssdk.services.s3.model.HeadObjectRequest
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse
 import software.amazon.awssdk.services.s3.model.S3Exception
 import java.io.IOException
-import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -49,7 +47,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `uploadFile success`() {
+    fun `uploadFile successfully uploads file and returns filename`() {
         // Arrange
         val mockFile = MockMultipartFile("test.jpg", "test.jpg", "image/jpeg", "content".toByteArray())
 
@@ -66,7 +64,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `uploadFile when file already exists`() {
+    fun `uploadFile returns null and error when file already exists`() {
         // Arrange
         val mockFile = MockMultipartFile("test.jpg", "test.jpg", "image/jpeg", "content".toByteArray())
 
@@ -82,7 +80,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `uploadFiles success`() {
+    fun `uploadFiles successfully uploads multiple files`() {
         // Arrange
         val files: Array<MultipartFile> = arrayOf(
             MockMultipartFile("1.jpg", "1.jpg", "image/jpeg", "data1".toByteArray()),
@@ -102,7 +100,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `uploadFiles when too many files`() {
+    fun `uploadFiles returns empty list and error when too many files`() {
         // Arrange
         val tooManyFiles: Array<MultipartFile> = Array(6) {
             MockMultipartFile("file$it.jpg", "file$it.jpg", "image/jpeg", "data$it".toByteArray())
@@ -118,7 +116,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `uploadFiles when no files`() {
+    fun `uploadFiles returns empty list and error when no files`() {
         // Arrange
         val emptyFiles = arrayOf<MultipartFile>()
 
@@ -132,7 +130,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `fileExists returns true`() {
+    fun `fileExists returns true when file exists in storage`() {
         // Arrange
         val fileName = "test.jpg"
         `when`(s3Template.objectExists(eq(bucketName), eq(fileName))).thenReturn(true)
@@ -145,7 +143,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `fileExists returns false`() {
+    fun `fileExists returns false when file does not exist in storage`() {
         // Arrange
         val fileName = "nonexistent.jpg"
         `when`(s3Template.objectExists(eq(bucketName), eq(fileName))).thenReturn(false)
@@ -158,7 +156,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `downloadFileAsResource success`() {
+    fun `downloadFileAsResource returns resource when file exists`() {
         // Arrange
         val fileName = "test.jpg"
         val mockS3Resource = mock(S3Resource::class.java)
@@ -175,7 +173,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `downloadFileAsResource when file not found`() {
+    fun `downloadFileAsResource returns null and error when file not found`() {
         // Arrange
         val fileName = "nonexistent.jpg"
         `when`(s3Template.objectExists(eq(bucketName), eq(fileName))).thenReturn(false)
@@ -190,7 +188,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `deleteFile success`() {
+    fun `deleteFile returns true when file successfully deleted`() {
         // Arrange
         val fileName = "delete.jpg"
 
@@ -207,7 +205,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `deleteFile when file not found`() {
+    fun `deleteFile returns false and error when file not found`() {
         // Arrange
         val fileName = "missing.jpg"
         `when`(s3Template.objectExists(eq(bucketName), eq(fileName))).thenReturn(false)
@@ -222,7 +220,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `deleteFile when storage error`() {
+    fun `deleteFile returns false and error when storage error occurs`() {
         // Arrange
         val fileName = "test.jpg"
 
@@ -240,7 +238,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `uploadFile with prefix`() {
+    fun `uploadFile with prefix returns filename containing prefix`() {
         // Arrange
         val mockFile = MockMultipartFile("photo.jpg", "photo.jpg", "image/jpeg", "data".toByteArray())
 
@@ -258,13 +256,11 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `uploadFile when storage error`() {
+    fun `uploadFile returns null and error when storage error occurs`() {
         // Arrange
         val mockFile = MockMultipartFile("test.jpg", "test.jpg", "image/jpeg", "content".toByteArray())
 
         `when`(s3Template.objectExists(eq(bucketName), anyString())).thenReturn(false)
-
-        // Используем doAnswer для имитации IOException
         doAnswer { _ ->
             throw IOException("Storage error")
         }.`when`(s3Template).upload(
@@ -284,7 +280,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    fun `getObjectMetadata success`() {
+    fun `getObjectMetadata returns metadata when file exists`() {
         // Arrange
         val fileName = "test.jpg"
         val expectedMetadata = HeadObjectResponse.builder()
@@ -304,8 +300,7 @@ class S3CloudServiceUnitTest {
     }
 
     @Test
-    @DisplayName("get object metadata when storage error")
-    fun getObjectMetadataWhenStorageError() {
+    fun `getObjectMetadata returns null and error when storage error occurs`() {
         // Arrange
         val fileName = "test.jpg"
 

@@ -1,7 +1,6 @@
 package net.otuskotlin.ingredientscan.scanner.controllers
 
 import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
@@ -24,8 +23,8 @@ class DownloadControllerTest {
     private lateinit var s3Service: S3CloudService
 
     @Test
-    @DisplayName("Download file success")
-    fun downloadFileSuccess() {
+    fun `download file returns successful response with correct content type`() {
+        // Arrange
         val fileContent = "test file content"
         val mockResource = ByteArrayResource(fileContent.toByteArray())
         val mockMetadata = HeadObjectResponse.builder()
@@ -36,6 +35,7 @@ class DownloadControllerTest {
         whenever(s3Service.downloadFileAsResource(any(), any())).thenReturn(mockResource)
         whenever(s3Service.getObjectMetadata(any(), any())).thenReturn(mockMetadata)
 
+        // Act & Assert
         mockMvc.get("/download/file/test.jpg")
             .andExpect {
                 status { isOk() }
@@ -44,11 +44,12 @@ class DownloadControllerTest {
     }
 
     @Test
-    @DisplayName("Download file not found")
-    fun downloadFileNotFound() {
+    fun `download file returns not found when file does not exist`() {
+        // Arrange
         whenever(s3Service.downloadFileAsResource(any(), any())).thenReturn(null)
         whenever(s3Service.getObjectMetadata(any(), any())).thenReturn(null)
 
+        // Act & Assert
         mockMvc.get("/download/file/missing.jpg")
             .andExpect {
                 status { isNotFound() }
@@ -57,8 +58,8 @@ class DownloadControllerTest {
     }
 
     @Test
-    @DisplayName("Download file with special characters")
-    fun downloadFileWithSpecialCharacters() {
+    fun `download file with special characters in filename returns successful response`() {
+        // Arrange
         val fileName = "test file (1).jpg"
         val fileContent = "content"
         val mockResource = ByteArrayResource(fileContent.toByteArray())
@@ -70,6 +71,7 @@ class DownloadControllerTest {
         whenever(s3Service.downloadFileAsResource(any(), any())).thenReturn(mockResource)
         whenever(s3Service.getObjectMetadata(any(), any())).thenReturn(mockMetadata)
 
+        // Act & Assert
         mockMvc.get("/download/file/$fileName")
             .andExpect {
                 status { isOk() }

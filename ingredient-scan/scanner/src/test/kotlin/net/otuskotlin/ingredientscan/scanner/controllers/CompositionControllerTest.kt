@@ -7,11 +7,7 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.scanner.services.biz.BizService
 import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.isNull
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
@@ -22,7 +18,7 @@ import org.springframework.test.web.servlet.multipart
 import org.springframework.test.web.servlet.post
 import org.springframework.web.multipart.MultipartFile
 
-@WebMvcTest(value = [CompositionController::class])
+@WebMvcTest(CompositionController::class)
 class CompositionControllerTest {
 
     @Autowired
@@ -35,37 +31,24 @@ class CompositionControllerTest {
     private lateinit var bizService: BizService
 
     @Test
-    fun `compositionCreateByPhotos single photo success`() {
+    fun `compositionCreateByPhotos with single photo returns successful response`() {
+        // Arrange
         val request = CompositionCreateByPhotosRequest(
             requestType = "compositionCreateByPhotos",
-            scan = ScanPhotosDto(
-                type = ScanType.PHOTO,
-            )
+            scan = ScanPhotosDto(type = ScanType.PHOTO)
         )
-
-        val scanDataPart = readRequest(request)
-        val scanPart = MockMultipartFile(
-            "scan",
-            "scan.json",
-            MediaType.APPLICATION_JSON_VALUE,
-            scanDataPart.toByteArray()
-        )
-
-        val mockFile = MockMultipartFile(
-            "photos",
-            "photo1.jpg",
-            "image/jpeg",
-            "photo data".toByteArray()
-        )
+        val scanDataPart = serializeRequest(request)
+        val scanPart = createJsonMultipartFile("scan", "scan.json", scanDataPart)
+        val photoPart = createImageMultipartFile("photos", "photo1.jpg", "photo data")
 
         whenever(s3CloudService.uploadFiles(any(), any(), any()))
             .thenReturn(mutableListOf("photo1.jpg"))
-
         whenever(bizService.compositionCreateByPhotos(any()))
             .thenReturn(IsContext())
 
+        // Act & Assert
         mockMvc.multipart("/composition/create/photos") {
-            file(mockFile)
+            file(photoPart)
             file(scanPart)
         }.andExpect {
             status { isOk() }
@@ -74,44 +57,26 @@ class CompositionControllerTest {
     }
 
     @Test
-    fun `compositionCreateByPhotos multiple photos success`() {
+    fun `compositionCreateByPhotos with multiple photos returns successful response`() {
+        // Arrange
         val request = CompositionCreateByPhotosRequest(
             requestType = "compositionCreateByPhotos",
-            scan = ScanPhotosDto(
-                type = ScanType.PHOTO,
-            )
+            scan = ScanPhotosDto(type = ScanType.PHOTO)
         )
-
-        val scanDataPart = readRequest(request)
-        val scanPart = MockMultipartFile(
-            "scan",
-            "scan.json",
-            MediaType.APPLICATION_JSON_VALUE,
-            scanDataPart.toByteArray()
-        )
-
-        val file1 = MockMultipartFile(
-            "photos",
-            "photo1.jpg",
-            "image/jpeg",
-            "photo1 data".toByteArray()
-        )
-        val file2 = MockMultipartFile(
-            "photos",
-            "photo2.jpg",
-            "image/jpeg",
-            "photo2 data".toByteArray()
-        )
+        val scanDataPart = serializeRequest(request)
+        val scanPart = createJsonMultipartFile("scan", "scan.json", scanDataPart)
+        val photo1 = createImageMultipartFile("photos", "photo1.jpg", "photo1 data")
+        val photo2 = createImageMultipartFile("photos", "photo2.jpg", "photo2 data")
 
         whenever(s3CloudService.uploadFiles(any(), any(), any()))
             .thenReturn(mutableListOf("photo1.jpg", "photo2.jpg"))
-
         whenever(bizService.compositionCreateByPhotos(any()))
             .thenReturn(IsContext())
 
+        // Act & Assert
         mockMvc.multipart("/composition/create/photos") {
-            file(file1)
-            file(file2)
+            file(photo1)
+            file(photo2)
             file(scanPart)
         }.andExpect {
             status { isOk() }
@@ -119,34 +84,23 @@ class CompositionControllerTest {
     }
 
     @Test
-    fun `compositionCreateByPhotos no files`() {
-
+    fun `compositionCreateByPhotos with no files returns bad request`() {
+        // Arrange
         val request = CompositionCreateByPhotosRequest(
             requestType = "compositionCreateByPhotos",
-            scan = ScanPhotosDto(
-                type = ScanType.PHOTO,
-            )
+            scan = ScanPhotosDto(type = ScanType.PHOTO)
         )
-
-        val scanDataPart = readRequest(request)
-        val scanPart = MockMultipartFile(
-            "scan",
-            "scan.json",
-            MediaType.APPLICATION_JSON_VALUE,
-            scanDataPart.toByteArray()
-        )
-
-        val files = mutableListOf<MockMultipartFile>()
+        val scanDataPart = serializeRequest(request)
+        val scanPart = createJsonMultipartFile("scan", "scan.json", scanDataPart)
 
         whenever(bizService.compositionCreateByPhotos(any()))
             .thenReturn(IsContext())
 
         doAnswer { invocation ->
-            val ctx = invocation.getArgument<IsContext>(0)
+            val context = invocation.getArgument<IsContext>(0)
             val files = invocation.getArgument<Array<MultipartFile>>(1)
-            // Проверка в сервисе
             if (files.isEmpty()) {
-                ctx.errors.add(
+                context.errors.add(
                     IsError(
                         code = "NO_FILES",
                         group = "s3",
@@ -162,74 +116,17 @@ class CompositionControllerTest {
             isNull()
         )
 
+        // Act & Assert
         mockMvc.multipart("/composition/create/photos") {
-            files.forEach { file(it) }
             file(scanPart)
         }.andExpect {
             status { isBadRequest() }
         }
-
     }
 
-//  TODO unlock after check hw
-//    @Test
-//    fun `compositionCreateByPhotos too many files`() {
-//        val request = CompositionCreateByPhotosRequest(
-//            requestType = "compositionCreateByPhotos",
-//            scan = ScanPhotosDto(
-//                type = ScanType.PHOTO,
-//            )
-//        )
-//
-//        val scanDataPart = readRequest(request)
-//        val scanPart = MockMultipartFile(
-//            "scan",
-//            "scan.json",
-//            MediaType.APPLICATION_JSON_VALUE,
-//            scanDataPart.toByteArray()
-//        )
-//
-//        val files = Array(10) { index ->
-//            MockMultipartFile(
-//                "photos",
-//                "photo$index.jpg",
-//                "image/jpeg",
-//                "data$index".toByteArray()
-//            )
-//        }
-//
-//        whenever(bizService.compositionCreateByPhotos(any()))
-//            .thenReturn(IsContext())
-//
-//        doAnswer { invocation ->
-//            val ctx = invocation.getArgument<IsContext>(0)
-//            val files = invocation.getArgument<Array<MultipartFile>>(1)
-//            // Проверка в сервисе
-//            if (files.size > 3) {
-//                ctx.errors.add(IsError(
-//                    code = "TOO_MANY_FILES",
-//                    group = "s3",
-//                    field = "",
-//                    message = "Too many files: max 3 allowed"
-//                ))
-//            }
-//            mutableListOf<String>()
-//        }.whenever(s3CloudService).uploadFiles(
-//            argThat { context -> context is IsContext },
-//            argThat { files -> files.isNotEmpty() },
-//            isNull()
-//        )
-//
-//        mockMvc.multipart("/composition/create/photos") {
-//            files.forEach { file(it) }
-//            file(scanPart)
-//        }.andExpect {
-//            status { isBadRequest() }
-//        }
-//    }
-
     @Test
-    fun `compositionCreateByManual success`() {
+    fun `compositionCreateByManual returns successful response`() {
+        // Arrange
         val request = CompositionCreateByManualRequest(
             requestType = "compositionCreateByManual",
             scan = ScanManualDto(
@@ -237,12 +134,12 @@ class CompositionControllerTest {
                 text = "молоко, сахар, консервант E202"
             )
         )
-
-        val requestBody = readRequest(request)
+        val requestBody = serializeRequest(request)
 
         whenever(bizService.compositionCreateByManual(any()))
             .thenReturn(IsContext())
 
+        // Act & Assert
         mockMvc.post("/composition/create/manual") {
             contentType = MediaType.APPLICATION_JSON
             content = requestBody
@@ -253,17 +150,18 @@ class CompositionControllerTest {
     }
 
     @Test
-    fun `compositionGet success`() {
+    fun `compositionGet returns successful response`() {
+        // Arrange
         val request = CompositionGetRequest(
             requestType = "compositionGet",
             compositionId = "composition-123"
         )
-
-        val requestBody = readRequest(request)
+        val requestBody = serializeRequest(request)
 
         whenever(bizService.compositionGet(any()))
             .thenReturn(IsContext())
 
+        // Act & Assert
         mockMvc.post("/composition/get") {
             contentType = MediaType.APPLICATION_JSON
             content = requestBody
@@ -274,17 +172,18 @@ class CompositionControllerTest {
     }
 
     @Test
-    fun `compositionContextGet success`() {
+    fun `compositionContextGet returns successful response`() {
+        // Arrange
         val request = CompositionContextGetRequest(
             requestType = "compositionContextGet",
             contextId = "context-123"
         )
-
-        val requestBody = readRequest(request)
+        val requestBody = serializeRequest(request)
 
         whenever(bizService.compositionContextGet(any()))
             .thenReturn(IsContext())
 
+        // Act & Assert
         mockMvc.post("/composition/context/get") {
             contentType = MediaType.APPLICATION_JSON
             content = requestBody
@@ -294,7 +193,15 @@ class CompositionControllerTest {
         }
     }
 
-    private fun readRequest(request: IRequest): String {
+    private fun serializeRequest(request: IRequest): String {
         return apiV1ExternalRequestSerialize(request)
+    }
+
+    private fun createJsonMultipartFile(name: String, filename: String, content: String): MockMultipartFile {
+        return MockMultipartFile(name, filename, MediaType.APPLICATION_JSON_VALUE, content.toByteArray())
+    }
+
+    private fun createImageMultipartFile(name: String, filename: String, data: String): MockMultipartFile {
+        return MockMultipartFile(name, filename, "image/jpeg", data.toByteArray())
     }
 }
