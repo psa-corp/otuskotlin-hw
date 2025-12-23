@@ -19,7 +19,7 @@ open class InMemoryCompositionRepository {
 
     private val textIndex = ConcurrentHashMap<String, String>()
 
-    fun save(composition: IsComposition): IsComposition {
+    open fun save(composition: IsComposition): IsComposition {
         val id = composition.id.asString()
         val text = composition.text.trim()
 
@@ -30,11 +30,11 @@ open class InMemoryCompositionRepository {
         return composition
     }
 
-    fun findById(id: String): IsComposition? {
+    open fun findById(id: String): IsComposition? {
         return store.getIfPresent(id)
     }
 
-    fun findByText(text: String): IsComposition? {
+    open fun findByText(text: String): IsComposition? {
         val cleanText = text.trim()
 
         val id = textIndex[cleanText] ?: return null
@@ -47,5 +47,10 @@ open class InMemoryCompositionRepository {
         }
 
         return composition
+    }
+
+    open fun clear() {
+        store.cleanUp()
+        textIndex.clear()
     }
 }

@@ -45,7 +45,7 @@ open class BizService(
         )
 
         // Проверка: текст состава должен быть заполнен
-        if (context.compositionRequest.text.isEmpty()) {
+        if (context.compositionRequest.text.isBlank()) {
             context.errors.add(
                 IsError(
                     code = "COMPOSITION_TEXT_EMPTY",
@@ -137,6 +137,7 @@ open class BizService(
                     message = "Composition not found: ${context.compositionIdRequest.asString()}"
                 )
             )
+            return context
         }
         context.state = IsState.FINISHING
         return context
@@ -163,6 +164,7 @@ open class BizService(
                     message = "Context not found: ${context.contextIdRequest.asString()}"
                 )
             )
+            return context
         }
         context.state = IsState.FINISHING
         return context

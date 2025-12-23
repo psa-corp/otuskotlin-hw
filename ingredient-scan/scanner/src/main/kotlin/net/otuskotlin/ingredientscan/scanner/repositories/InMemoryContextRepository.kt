@@ -13,22 +13,27 @@ open class InMemoryContextRepository {
 
     private val log = LoggerFactory.getLogger(InMemoryContextRepository::class.java)
 
-    private val contextCache: Cache<String, IsContext> = Caffeine.newBuilder()
+    private val store: Cache<String, IsContext> = Caffeine.newBuilder()
         .maximumSize(50_000)
         .expireAfterAccess(Duration.ofMinutes(30))
         .build()
 
-    fun save(key: String, context: IsContext): IsContext {
-        contextCache.put(key, context)
+    open fun save(key: String, context: IsContext): IsContext {
+        store.put(key, context)
         log.info("Context saved/updated for key: $key (State: ${context.state})")
         return context
     }
 
-    fun findById(id: String): IsContext? {
-        return contextCache.getIfPresent(id)
+    open fun findById(id: String): IsContext? {
+        return store.getIfPresent(id)
     }
 
-    fun delete(key: String) {
-        contextCache.invalidate(key)
+    open fun delete(key: String) {
+        store.invalidate(key)
     }
+
+    open fun clear() {
+        store.cleanUp()
+    }
+
 }
