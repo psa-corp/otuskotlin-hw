@@ -36,6 +36,7 @@ open class CompositionController(private val s3CloudService: S3CloudService,
     override fun compositionCreateByManual(compositionCreateByManualRequest: CompositionCreateByManualRequest): ResponseEntity<CompositionCreateByManualResponse> {
         val context = IsContext()
         context.compositionContextResponse = STUB_COMPOSITION_CONTEXT_FINISHING
+        context.state = IsState.FINISHING
         return ResponseEntity.ok(context.toTransportCompositionCreateManual())
 
 //  TODO unlock after check hw
@@ -80,7 +81,12 @@ open class CompositionController(private val s3CloudService: S3CloudService,
     ): ResponseEntity<CompositionCreateByPhotosResponse> {
 
         val context = IsContext()
+
+
+        val photoUrls = s3CloudService.uploadFiles(context, photos, null)
+
         context.compositionContextResponse = STUB_COMPOSITION_CONTEXT_FINISHING
+        context.state = IsState.FINISHING
         return ResponseEntity.ok(context.toTransportCompositionCreatePhotos())
 
 
@@ -124,6 +130,7 @@ open class CompositionController(private val s3CloudService: S3CloudService,
     override fun compositionGet(compositionGetRequest: CompositionGetRequest): ResponseEntity<CompositionGetResponse> {
         val context = IsContext()
         context.compositionResponse = STUB_COMPOSITION
+        context.state = IsState.FINISHING
         return ResponseEntity.ok(context.toTransportCompositionGet())
 
 //  TODO unlock after check hw
@@ -165,6 +172,7 @@ open class CompositionController(private val s3CloudService: S3CloudService,
     override fun compositionContextGet(compositionContextGetRequest: CompositionContextGetRequest): ResponseEntity<CompositionContextGetResponse> {
         val context = IsContext()
         context.compositionContextResponse = STUB_COMPOSITION_CONTEXT_FINISHING
+        context.state = IsState.FINISHING
         return ResponseEntity.ok(context.toTransportCompositionContextGet())
 
 //  TODO unlock after check hw

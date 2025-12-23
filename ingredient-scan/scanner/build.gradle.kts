@@ -40,7 +40,7 @@ dependencies {
 	testImplementation(libs.spring.boot.starter.test)
 
 	testImplementation(libs.bundles.testcontainers)
-//	testImplementation(libs.testcontainers.minio)
+	testImplementation(libs.testcontainers.minio)
 	testImplementation(libs.okhttp)
 
 	testImplementation(libs.jackson.databind)
@@ -79,10 +79,10 @@ jib {
 		image = "darthchain/ingredient-scan-scan"
 		tags = setOf("latest", version.toString())
 
-		auth {
-			username = ""
-			password = ""
-		}
+		 auth {
+		    username = "darthchain"
+		    password = "{Djorjik12}"
+		 }
 	}
 
 	container {
