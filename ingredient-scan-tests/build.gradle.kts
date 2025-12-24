@@ -28,6 +28,6 @@ tasks {
     }
 
     register("e2eTests") {
-        dependsOn(project(":e2e-be").tasks.getByName("check"))
+        dependsOn(project(":e2e-be").tasks.getByName("testAll"))
     }
 }

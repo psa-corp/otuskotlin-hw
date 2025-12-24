@@ -19,17 +19,7 @@ spring:
 
   docker:
     compose:
-      enabled: true
-      file: docker-compose/docker-compose-test.yml
-      lifecycle-management: start_and_stop  # Запускает и ОСТАНАВЛИВАЕТ!
-      skip:
-        in-tests: false
-      # Добавляем настройки остановки
-      stop:
-        command: down  # Полная остановка с удалением контейнеров
-        timeout: 30s
-      wait:
-        enabled: false
+      enabled: false
 
   kafka:
     bootstrap-servers: localhost:9092

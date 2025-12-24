@@ -24,8 +24,8 @@ import java.time.Duration
 @TestPropertySource(
     locations = ["classpath:application-test.yaml"],
     properties = [
-        "spring.docker.compose.enabled=true",
-        "spring.docker.compose.skip.in-tests=false"
+        "spring.docker.compose.enabled=false",
+        "spring.docker.compose.skip.in-tests=true"
     ]
 )
 open class BaseRestTest {
@@ -43,54 +43,6 @@ open class BaseRestTest {
         protected const val APP_HOST = "localhost"
 
 
-    }
-
-    @BeforeEach
-    fun waitForApplication() {
-        log.debug("══════════════════════════════════════════════════════════════")
-        log.debug("🚀 Docker Compose будет запущен Spring Boot автоматически")
-        log.debug("📄 Файл docker-compose/docker-compose-test.yml существует? ${File("docker-compose/docker-compose-test.yml").exists()}")
-        log.debug("⏳ Ожидание запуска приложения (максимум 180 секунд)...")
-
-        waitForAppReady(180)
-
-        log.debug("✅ Application is ready for testing!")
-        log.debug("══════════════════════════════════════════════════════════════")
-    }
-
-    private fun waitForAppReady(timeoutSeconds: Int) {
-        val startTime = System.currentTimeMillis()
-        var attempt = 0
-
-        while (true) {
-            attempt++
-            val healthUrl = "http://$APP_HOST:$APP_PORT/v1/actuator/health"
-            log.debug("🔍 Health check attempt #$attempt: $healthUrl")
-
-            try {
-                val response = client.newCall(
-                    Request.Builder()
-                        .url(healthUrl)
-                        .get()
-                        .build()
-                ).execute()
-
-                if (response.code == 200) {
-                    println("✅ Health check PASSED!")
-                    response.close()
-                    return
-                }
-                response.close()
-            } catch (e: Exception) {
-                log.debug("❌ Health check failed: ${e.message}")
-            }
-
-            if (System.currentTimeMillis() - startTime > timeoutSeconds * 1000L) {
-                throw IllegalStateException("App not started within $timeoutSeconds seconds")
-            }
-
-            Thread.sleep(2000)
-        }
     }
 
     protected fun getBaseUrl(): String = "http://$APP_HOST:$APP_PORT"

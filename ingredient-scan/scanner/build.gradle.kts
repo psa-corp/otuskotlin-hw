@@ -101,7 +101,7 @@ jib {
 		)
 
 		labels = mapOf(
-			"maintainer" to "Pasha",
+			"maintainer" to "psa",
 			"version" to version.toString(),
 			"environment" to "production"
 		)
