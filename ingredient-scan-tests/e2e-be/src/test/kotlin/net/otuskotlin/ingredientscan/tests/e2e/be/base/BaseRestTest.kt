@@ -9,13 +9,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import org.junit.jupiter.api.BeforeEach
 import org.slf4j.LoggerFactory
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.TestPropertySource
-import java.io.File
 import java.time.Duration
-
 
 @SpringBootTest(
     classes = [TestApplication::class],
@@ -29,6 +26,7 @@ import java.time.Duration
     ]
 )
 open class BaseRestTest {
+
     protected val client: OkHttpClient = OkHttpClient.Builder()
         .callTimeout(Duration.ofSeconds(30))
         .connectTimeout(Duration.ofSeconds(30))
@@ -36,21 +34,18 @@ open class BaseRestTest {
         .writeTimeout(Duration.ofSeconds(30))
         .build()
 
-    companion object {
-        private val log by lazy { LoggerFactory.getLogger(BaseRestTest::class.java) }
+    protected val log = LoggerFactory.getLogger(this::class.java)
 
+    companion object {
         protected const val APP_PORT = 8081
         protected const val APP_HOST = "localhost"
-
-
     }
 
     protected fun getBaseUrl(): String = "http://$APP_HOST:$APP_PORT"
 
     protected fun executeGet(path: String): Response {
         val url = "${getBaseUrl()}$path"
-        val log = LoggerFactory.getLogger(this::class.java)
-        log.debug("📤 GET Request: $url")
+        log.info("📤 Sending GET request to: $url")
 
         val request = Request.Builder()
             .url(url)
@@ -66,10 +61,8 @@ open class BaseRestTest {
         contentType: String = "application/json"
     ): Response {
         val url = "${getBaseUrl()}$path"
-        val log = LoggerFactory.getLogger(this::class.java)
-        log.debug("📤 POST Request: $url")
-        log.debug("   Content-Type: $contentType")
-        log.debug("   Body: $body")
+        log.info("📤 Sending POST request to: $url")
+        log.debug("Request body: $body")
 
         val mediaType = contentType.toMediaType()
         val request = Request.Builder()
@@ -81,11 +74,11 @@ open class BaseRestTest {
     }
 
     protected inline fun <reified T> readResponse(response: Response): T {
-        val log = LoggerFactory.getLogger(this::class.java)
         val responseBodyText = response.body?.string()
             ?: throw IllegalStateException("Response body is null")
 
-        log.debug("📥 Response (${response.code}): $responseBodyText")
+        log.info("📥 Received response with status: ${response.code}")
+        log.debug("Response body: $responseBodyText")
 
         return apiV1ExternalResponseDeserialize(responseBodyText)
     }

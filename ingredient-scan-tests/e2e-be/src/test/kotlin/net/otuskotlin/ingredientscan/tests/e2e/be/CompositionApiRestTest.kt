@@ -1,15 +1,6 @@
 package net.otuskotlin.ingredientscan.tests.e2e.be
 
-import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionCreateByManualRequest
-import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionCreateByManualResponse
-import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionCreateByPhotosRequest
-import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionCreateByPhotosResponse
-import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionGetRequest
-import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionGetResponse
-import net.otuskotlin.ingredientscan.api.v1.external.models.ResponseResult
-import net.otuskotlin.ingredientscan.api.v1.external.models.ScanManualDto
-import net.otuskotlin.ingredientscan.api.v1.external.models.ScanPhotosDto
-import net.otuskotlin.ingredientscan.api.v1.external.models.ScanType
+import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.tests.e2e.be.base.BaseRestTest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
@@ -17,21 +8,16 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
-import org.springframework.http.MediaType
-import org.springframework.mock.web.MockMultipartFile
 import java.io.File
 
-@DisplayName("REST API Tests - CompositionApi")
 class CompositionApiRestTest : BaseRestTest() {
 
-    private val log by lazy { LoggerFactory.getLogger(CompositionApiRestTest::class.java) }
-
     @Test
-    fun `T-001 - composition create manual - success`() {
-        // Given
+    fun `composition create manual returns successful response`() {
+        // Arrange
+        log.info("Starting composition create manual test")
+
         val request = CompositionCreateByManualRequest(
             requestType = "compositionCreateByManual",
             scan = ScanManualDto(
@@ -41,26 +27,34 @@ class CompositionApiRestTest : BaseRestTest() {
         )
 
         val requestBody = readRequest(request)
-        log.info("Request body: $requestBody")
+        log.info("Serialized request: $requestBody")
 
-        // When
+        // Act
+        log.info("Sending POST request to /v1/composition/create/manual")
         val response = executePost(
             path = "/v1/composition/create/manual",
             body = requestBody
         )
 
-        // Then
+        // Assert
+        log.info("Asserting response status is 200")
         Assertions.assertThat(response.code).isEqualTo(200)
 
         val responseBody: CompositionCreateByManualResponse = readResponse(response)
+
+        log.info("Asserting response contains success result")
         Assertions.assertThat(responseBody.result).isEqualTo(ResponseResult.SUCCESS)
         Assertions.assertThat(responseBody.contextId).isNotEmpty()
         Assertions.assertThat(responseBody.contextId).isNotBlank()
+
+        log.info("✅ Composition create manual test completed successfully")
     }
 
     @Test
-    fun `T-007 - composition get by id - success`() {
-        // Given
+    fun `composition get by id returns successful response`() {
+        // Arrange
+        log.info("Starting composition get by id test")
+
         val compositionId = "comp-test-456"
 
         val request = CompositionGetRequest(
@@ -69,28 +63,38 @@ class CompositionApiRestTest : BaseRestTest() {
         )
 
         val requestBody = readRequest(request)
-        log.info("Request body: $requestBody")
+        log.info("Serialized request: $requestBody")
 
+        // Act
+        log.info("Sending POST request to /v1/composition/get")
         val response = executePost(
             path = "/v1/composition/get",
             body = requestBody
         )
 
-        // Then
+        // Assert
+        log.info("Asserting response status is 200")
         Assertions.assertThat(response.code).isEqualTo(200)
 
         val responseBody: CompositionGetResponse = readResponse(response)
+
+        log.info("Asserting response contains success result and correct composition")
         Assertions.assertThat(responseBody.result).isEqualTo(ResponseResult.SUCCESS)
         Assertions.assertThat(responseBody.composition).isNotNull
         Assertions.assertThat(responseBody.composition?.id).isEqualTo(compositionId)
         Assertions.assertThat(responseBody.composition?.text).contains("молоко")
+
+        log.info("✅ Composition get by id test completed successfully")
     }
 
     @Test
-    fun `composition create photos - multipart upload - success`() {
-        // Создаём временный файл для теста
+    fun `composition create photos with multipart upload returns successful response`() {
+        // Arrange
+        log.info("Starting composition create photos test with multipart upload")
+
         val testFile = File.createTempFile("test_label", ".jpg")
-        testFile.writeBytes(ByteArray(1024)) // 1KB dummy file
+        testFile.writeBytes(ByteArray(1024))
+        log.info("Created temporary test file: ${testFile.name}")
 
         val request = CompositionCreateByPhotosRequest(
             requestType = "compositionCreateByPhotos",
@@ -100,17 +104,17 @@ class CompositionApiRestTest : BaseRestTest() {
         )
 
         val requestDataPart = readRequest(request)
-        log.info("Request body: $requestDataPart")
-
+        log.info("Serialized request data: $requestDataPart")
 
         try {
-            // Create multipart request
+            // Act
+            log.info("Building multipart request body")
             val requestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart(
                     "scan",
                     "scan.json",
-                    requestDataPart.toRequestBody("application/json".toMediaType())  // указываем Content-Type
+                    requestDataPart.toRequestBody("application/json".toMediaType())
                 )
                 .addFormDataPart(
                     "photos",
@@ -119,6 +123,7 @@ class CompositionApiRestTest : BaseRestTest() {
                 )
                 .build()
 
+            log.info("Sending multipart POST request to /v1/composition/create/photos")
             val request = Request.Builder()
                 .url("${getBaseUrl()}/v1/composition/create/photos")
                 .post(requestBody)
@@ -127,16 +132,21 @@ class CompositionApiRestTest : BaseRestTest() {
 
             val response = client.newCall(request).execute()
 
+            // Assert
+            log.info("Asserting response status is 200")
             Assertions.assertThat(response.code).isEqualTo(200)
 
             val responseBody: CompositionCreateByPhotosResponse = readResponse(response)
+
+            log.info("Asserting response contains success result")
             Assertions.assertThat(responseBody.result).isEqualTo(ResponseResult.SUCCESS)
             Assertions.assertThat(responseBody.contextId).isNotEmpty()
             Assertions.assertThat(responseBody.contextId).isNotBlank()
+
+            log.info("✅ Composition create photos test completed successfully")
         } finally {
-            // Cleanup
+            log.info("Cleaning up temporary test file")
             testFile.delete()
         }
     }
-
 }

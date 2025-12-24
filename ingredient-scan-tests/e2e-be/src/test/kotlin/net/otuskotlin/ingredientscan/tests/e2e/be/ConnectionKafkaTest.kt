@@ -1,37 +1,41 @@
 package net.otuskotlin.ingredientscan.tests.e2e.be
 
 import net.otuskotlin.ingredientscan.tests.e2e.be.base.BaseKafkaTest
-import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
 
-@DisplayName("Kafka Connection Tests")
 class ConnectionKafkaTest : BaseKafkaTest() {
 
     @Test
-    @DisplayName("✅ Проверка подключения к Kafka")
-    fun testKafkaConnection() {
+    fun `check kafka connection`() {
+        log.info("Starting Kafka connection check test")
         checkKafkaConnection()
+        log.info("✅ Kafka connection check test completed successfully")
     }
 
     @Test
-    @DisplayName("✅ Создание топика")
-    fun testCreateTopic() {
+    fun `create topic`() {
+        log.info("Starting create topic test")
         val testTopicName = "test-create-topic"
         createTopic(testTopicName)
-        log.info("✅ Тест пройден: топик успешно создан")
+        log.info("✅ Create topic test completed successfully")
     }
 
     @Test
-    @DisplayName("✅ Отправка и получение сообщения")
-    fun testSendAndReceiveMessage() {
+    fun `send and receive message`() {
+        log.info("Starting send and receive message test")
+
         val testTopic = "test-send-receive"
         val testKey = "key-1"
         val testMessage = "Hello, Kafka!"
 
         createTopic(testTopic)
+        log.info("Created topic: $testTopic")
+
+        log.info("Sending message to topic: $testTopic")
         sendMessage(topicName = testTopic, key = testKey, value = testMessage)
 
+        log.info("Consuming message from topic: $testTopic")
         val result = consumeMessage(topicName = testTopic)
 
         assertThat(result).isNotNull
@@ -39,23 +43,25 @@ class ConnectionKafkaTest : BaseKafkaTest() {
 
         assertThat(key).isEqualTo(testKey)
         assertThat(value).isEqualTo(testMessage)
-        log.info("✅ Тест пройден: сообщение успешно отправлено и получено")
+
+        log.info("✅ Send and receive message test completed successfully")
     }
 
     @Test
-    @DisplayName("✅ Несколько сообщений подряд")
-    fun testMultipleMessages() {
+    fun `send multiple messages`() {
+        log.info("Starting send multiple messages test")
+
         val testTopic = "test-multiple-messages"
         val messages = listOf("Message 1", "Message 2", "Message 3")
 
         createTopic(testTopic)
+        log.info("Created topic: $testTopic")
+
+        log.info("Sending ${messages.size} messages to topic")
         messages.forEach { msg ->
             sendMessage(topicName = testTopic, value = msg)
         }
 
-        log.info("📤 Отправлено ${messages.size} сообщений")
-
-        // ✅ Очищаем Consumer и переподписываемся
         consumer.unsubscribe()
         consumer.subscribe(listOf(testTopic))
 
@@ -64,57 +70,68 @@ class ConnectionKafkaTest : BaseKafkaTest() {
         var attempts = 0
         val maxAttempts = 10
 
-        // ✅ Собираем сообщения в цикле, пока не получим все 3
+        log.info("Consuming messages from topic")
         while (collectedCount < messages.size && attempts < maxAttempts) {
             val records = consumer.poll(java.time.Duration.ofMillis(2000))
             if (!records.isEmpty) {
                 records.forEach { record ->
                     receivedMessages.add(Pair(record.key(), record.value()))
                     collectedCount++
-                    log.info("✅ Получено сообщение #$collectedCount: ${record.value()}")
+                    log.debug("Received message #$collectedCount: ${record.value()}")
                 }
             }
             attempts++
         }
 
+        log.info("Asserting all messages were received")
         assertThat(receivedMessages).hasSize(messages.size)
         messages.forEachIndexed { index, expectedValue ->
             assertThat(receivedMessages[index].second).isEqualTo(expectedValue)
         }
 
-        log.info("✅ Тест пройден: получено ${receivedMessages.size} сообщений")
+        log.info("✅ Send multiple messages test completed successfully")
     }
+
     @Test
-    @DisplayName("✅ Отправка без ключа")
-    fun testSendMessageWithoutKey() {
+    fun `send message without key`() {
+        log.info("Starting send message without key test")
+
         val testTopic = "test-no-key"
         val testMessage = "Message without key"
 
         createTopic(testTopic)
+        log.info("Created topic: $testTopic")
+
+        log.info("Sending message without key")
         sendMessage(topicName = testTopic, key = null, value = testMessage)
 
         val result = consumeMessage(topicName = testTopic)
 
         assertThat(result).isNotNull
         assertThat(result!!.second).isEqualTo(testMessage)
-        log.info("✅ Тест пройден: сообщение без ключа успешно обработано")
+
+        log.info("✅ Send message without key test completed successfully")
     }
 
     @Test
-    @DisplayName("✅ Очистка топика")
-    fun testClearTopic() {
+    fun `clear topic`() {
+        log.info("Starting clear topic test")
+
         val testTopic = "test-clear-topic"
 
         createTopic(testTopic)
+        log.info("Created topic: $testTopic")
+
+        log.info("Sending test messages to topic")
         sendMessage(topicName = testTopic, value = "Message 1")
         sendMessage(topicName = testTopic, value = "Message 2")
-        log.info("📤 Отправлено 2 сообщения")
 
+        log.info("Clearing topic")
         clearTopic(testTopic)
 
         val result = consumeMessage(topicName = testTopic, timeoutMs = 1000)
-
         assertThat(result).isNull()
-        log.info("✅ Тест пройден: топик успешно очищен")
+
+        log.info("✅ Clear topic test completed successfully")
     }
 }

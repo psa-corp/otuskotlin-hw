@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit
     ]
 )
 abstract class BaseKafkaTest {
+
     protected val log = LoggerFactory.getLogger(this::class.java)
 
     protected lateinit var producer: KafkaProducer<String, String>
@@ -50,22 +51,22 @@ abstract class BaseKafkaTest {
     }
 
     protected fun initializeKafkaClients() {
-        log.info("🔌 Инициализируем Kafka клиентов: $KAFKA_BROKER")
+        log.info("🔌 Initializing Kafka clients: $KAFKA_BROKER")
         producer = KafkaProducer(createProducerProperties())
         consumer = KafkaConsumer(createConsumerProperties())
         adminClient = AdminClient.create(createAdminProperties())
-        log.info("✅ Kafka клиенты инициализированы")
+        log.info("✅ Kafka clients initialized")
     }
 
     @AfterEach
     fun cleanupKafkaClients() {
-        log.info("🧹 Закрываем Kafka клиентов")
+        log.info("🧹 Closing Kafka clients")
         try {
             if (this::producer.isInitialized) producer.close()
             if (this::consumer.isInitialized) consumer.close()
             if (this::adminClient.isInitialized) adminClient.close()
         } catch (e: Exception) {
-            log.warn("⚠️ Ошибка при закрытии Kafka клиентов", e)
+            log.warn("⚠️ Error closing Kafka clients", e)
         }
     }
 
@@ -74,22 +75,22 @@ abstract class BaseKafkaTest {
         partitions: Int = 1,
         replicationFactor: Short = 1
     ) {
-        log.info("📝 Создаем топик: $topicName")
+        log.info("📝 Creating topic: $topicName")
         try {
             try {
                 adminClient.deleteTopics(listOf(topicName)).all().get(10, TimeUnit.SECONDS)
-                log.info("🗑️ Старый топик удален: $topicName")
+                log.info("🗑️ Old topic deleted: $topicName")
                 Thread.sleep(500)
             } catch (e: Exception) {
-                log.debug("ℹ️ Топик не существовал")
+                log.debug("ℹ️ Topic did not exist")
             }
 
             val newTopic = NewTopic(topicName, partitions, replicationFactor)
             adminClient.createTopics(listOf(newTopic)).all().get(10, TimeUnit.SECONDS)
-            log.info("✅ Топик создан: $topicName")
+            log.info("✅ Topic created: $topicName")
             Thread.sleep(500)
         } catch (e: Exception) {
-            log.error("❌ Ошибка при создании топика: $topicName", e)
+            log.error("❌ Error creating topic: $topicName", e)
             throw RuntimeException("Failed to create topic: $topicName", e)
         }
     }
@@ -99,11 +100,11 @@ abstract class BaseKafkaTest {
         key: String? = null,
         value: String
     ): String {
-        log.info("📤 Отправляем сообщение в $topicName")
+        log.info("📤 Sending message to $topicName")
         log.debug("   Key: $key, Value: $value")
         val record = ProducerRecord(topicName, key, value)
         val metadata = producer.send(record).get(10, TimeUnit.SECONDS)
-        log.info("✅ Сообщение отправлено (offset=${metadata.offset()}, partition=${metadata.partition()})")
+        log.info("✅ Message sent (offset=${metadata.offset()}, partition=${metadata.partition()})")
         return metadata.offset().toString()
     }
 
@@ -111,36 +112,36 @@ abstract class BaseKafkaTest {
         topicName: String = TEST_TOPIC,
         timeoutMs: Long = 5000
     ): Pair<String?, String>? {
-        log.info("📥 Получаем сообщение из $topicName (timeout=${timeoutMs}ms)")
+        log.info("📥 Receiving message from $topicName (timeout=${timeoutMs}ms)")
         consumer.subscribe(listOf(topicName))
         val records = consumer.poll(java.time.Duration.ofMillis(timeoutMs))
         if (records.isEmpty) {
-            log.warn("⚠️ Нет сообщений в топике $topicName")
+            log.warn("⚠️ No messages in topic $topicName")
             return null
         }
 
         val record = records.first()
-        log.info("✅ Получено сообщение (key=${record.key()}, offset=${record.offset()})")
+        log.info("✅ Message received (key=${record.key()}, offset=${record.offset()})")
         log.debug("   Value: ${record.value()}")
         return Pair(record.key(), record.value())
     }
 
     protected fun checkKafkaConnection() {
-        log.info("🔍 Проверяем подключение к Kafka: $KAFKA_BROKER")
+        log.info("🔍 Checking Kafka connection: $KAFKA_BROKER")
         try {
             val nodes = adminClient.describeCluster().nodes().get(10, TimeUnit.SECONDS)
-            log.info("✅ Подключение успешно! Nodes: ${nodes.size}")
+            log.info("✅ Connection successful! Nodes: ${nodes.size}")
             nodes.forEach { node ->
                 log.debug("   - Node ${node.id()}: ${node.host()}:${node.port()}")
             }
         } catch (e: Exception) {
-            log.error("❌ Ошибка подключения к Kafka", e)
+            log.error("❌ Kafka connection error", e)
             throw RuntimeException("Failed to connect to Kafka at $KAFKA_BROKER", e)
         }
     }
 
     protected fun clearTopic(topicName: String = TEST_TOPIC) {
-        log.info("🧹 Очищаем топик: $topicName")
+        log.info("🧹 Clearing topic: $topicName")
         val cleanConsumer: KafkaConsumer<String, String> = KafkaConsumer(
             createConsumerProperties().apply {
                 put(ConsumerConfig.GROUP_ID_CONFIG, "${TEST_GROUP}-clean-${System.currentTimeMillis()}")
@@ -153,7 +154,7 @@ abstract class BaseKafkaTest {
                 val records = cleanConsumer.poll(java.time.Duration.ofMillis(100))
                 if (records.isEmpty) hasMore = false
             }
-            log.info("✅ Топик очищен: $topicName")
+            log.info("✅ Topic cleared: $topicName")
         } finally {
             cleanConsumer.close()
         }
@@ -166,9 +167,7 @@ abstract class BaseKafkaTest {
             put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java)
             put(ProducerConfig.ACKS_CONFIG, "all")
             put(ProducerConfig.RETRIES_CONFIG, 3)
-            // ✅ ИСПРАВЛЕНИЕ: delivery.timeout.ms должен быть >= linger.ms + request.timeout.ms
-            // linger.ms(5) + request.timeout.ms(30000) = 30005
-            put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 40000)  // ✅ Было: 10000
+            put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 40000)
             put(ProducerConfig.LINGER_MS_CONFIG, 5)
             put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000)
             put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true)

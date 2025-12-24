@@ -38,5 +38,13 @@ logging:
     net.otuskotlin: DEBUG
     org.springframework.boot.docker.compose: DEBUG
     org.springframework.boot.docker.compose.service.connection: DEBUG
+
+    org.apache.kafka: WARN
+    org.apache.kafka.common.config.AbstractConfig: ERROR
+    org.apache.kafka.clients: WARN
+
+    org.springframework: INFO
+
+    org.testcontainers: INFO
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
