@@ -1,79 +1,74 @@
 package net.otuskotlin.ingredientscan.scanner.controllers
 
-import net.otuskotlin.ingredientscan.api.v1.external.apiV1ExternalRequestSerialize
 import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisGetRequest
-import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisRegenerateRequest
-import net.otuskotlin.ingredientscan.api.v1.external.models.IRequest
+import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisGetResponse
+import net.otuskotlin.ingredientscan.api.v1.external.models.ResponseResult
+import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub.Companion.STUB_ANALYSIS
+import net.otuskotlin.ingredientscan.mappers.v1.toTransport
+import net.otuskotlin.ingredientscan.scanner.services.biz.BizService
+import net.otuskotlin.ingredientscan.scanner.utils.ControllerUtil.Companion.testStub
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.post
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebMvcTest(AnalysisController::class)
+import kotlinx.coroutines.test.runTest
+import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisRegenerateRequest
+import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisRegenerateResponse
+
+@WebFluxTest(AnalysisController::class)
 class AnalysisControllerTest {
 
     @Autowired
-    private lateinit var mockMvc: MockMvc
+    private lateinit var webTestClient: WebTestClient
+
+    @MockitoBean
+    private lateinit var bizService: BizService
 
     @Test
-    fun `analysisGet returns successful response`() {
+    fun `analysisGet returns successful response`() = runTest {
         // Arrange
         val request = AnalysisGetRequest(
             requestType = "analysisGet",
             analysisId = "analysis-test-123"
         )
-        val requestBody = serializeRequest(request)
 
-        // Act & Assert
-        mockMvc.post("/analysis/get") {
-            contentType = MediaType.APPLICATION_JSON
-            content = requestBody
-        }.andExpect {
-            status { isOk() }
-            content { contentType(MediaType.APPLICATION_JSON) }
-        }
-    }
-
-    @Test
-    fun `analysisGet returns stub response for any ID`() {
-        // Arrange
-        val request = AnalysisGetRequest(
-            requestType = "analysisGet",
-            analysisId = "any-id"
+        val response = AnalysisGetResponse(
+            responseType = "analysisGet",
+            result = ResponseResult.SUCCESS,
+            analysis = STUB_ANALYSIS.toTransport()
         )
-        val requestBody = serializeRequest(request)
+
+        whenever(bizService.execute(any()))
+            .thenReturn(response)
 
         // Act & Assert
-        mockMvc.post("/analysis/get") {
-            contentType = MediaType.APPLICATION_JSON
-            content = requestBody
-        }.andExpect {
-            status { isOk() }
-        }
+        testStub(webTestClient, request, "/analysis/get")
     }
 
+
     @Test
-    fun `analysisRegenerate returns successful response`() {
+    fun `analysisRegenerate returns successful response`() = runTest {
         // Arrange
         val request = AnalysisRegenerateRequest(
             requestType = "analysisRegenerate",
             analysisId = "analysis-test-123"
         )
-        val requestBody = serializeRequest(request)
+
+        val response = AnalysisRegenerateResponse(
+            responseType = "analysisRegenerate",
+            result = ResponseResult.SUCCESS,
+            analysis = STUB_ANALYSIS.toTransport()
+        )
+
+        whenever(bizService.execute(any()))
+            .thenReturn(response)
 
         // Act & Assert
-        mockMvc.post("/analysis/regenerate") {
-            contentType = MediaType.APPLICATION_JSON
-            content = requestBody
-        }.andExpect {
-            status { isOk() }
-            content { contentType(MediaType.APPLICATION_JSON) }
-        }
+        testStub(webTestClient, request, "/analysis/regenerate")
     }
 
-    private fun serializeRequest(request: IRequest): String {
-        return apiV1ExternalRequestSerialize(request)
-    }
 }

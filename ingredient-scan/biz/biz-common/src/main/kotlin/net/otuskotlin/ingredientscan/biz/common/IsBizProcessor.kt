@@ -17,9 +17,13 @@ class IsBizProcessor(settings: IsCorSettings) {
             IsCommand.COMPOSITION_GET -> context.compositionResponse = STUB_COMPOSITION
             IsCommand.COMPOSITION_CONTEXT_GET,
             IsCommand.COMPOSITION_CREATE_MANUAL,
-            IsCommand.COMPOSITION_CREATE_PHOTOS -> context.compositionContextResponse = STUB_COMPOSITION_CONTEXT_FINISHING
+            IsCommand.COMPOSITION_CREATE_PHOTOS -> {
+                context.compositionContextResponse = STUB_COMPOSITION_CONTEXT_FINISHING
+                context.id = STUB_COMPOSITION_CONTEXT_FINISHING.id
+            }
             else -> {}
         }
+
         context.state = IsState.FINISHING
     }
 }

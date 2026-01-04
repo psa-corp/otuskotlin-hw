@@ -19,15 +19,4 @@ open class CompositionController(private val bizService: BizService) : Compositi
     override suspend fun compositionContextGet(compositionContextGetRequest: CompositionContextGetRequest): CompositionContextGetResponse {
         return bizService.execute(compositionContextGetRequest) as CompositionContextGetResponse
     }
-
-    override suspend fun compositionCreateByPhotos(
-        photos: Array<MultipartFile>,
-        scan: CompositionCreateByPhotosRequest
-    ): CompositionCreateByPhotosResponse {
-        return bizService.execute(scan, photos) as CompositionCreateByPhotosResponse
-    }
-
-
-
-
 }

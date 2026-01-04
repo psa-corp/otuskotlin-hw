@@ -109,11 +109,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /composition/create/photos:
+  /media/composition/create/photos:
     post:
-      tags: [composition]
+      tags: [media]
       summary: Создание состава по фото
       operationId: compositionCreateByPhotos
+      x-use-response-entity: true
       requestBody:
         required: true
         content:

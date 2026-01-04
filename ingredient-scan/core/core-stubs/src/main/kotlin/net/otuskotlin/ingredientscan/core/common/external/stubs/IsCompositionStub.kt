@@ -12,10 +12,9 @@ class IsCompositionStub {
     companion object {
         val STUB_COMPOSITION: IsComposition = IsComposition(
             id = IsCompositionId("comp-test-456"),
-            createDate = LocalDateTime.now(),
+            createDate = LocalDateTime.of(2025, 12, 18, 12, 0, 0),
             text = "молоко, сахар, консервант E202",
         )
-
 
         val STUB_COMPOSITION_CONTEXT_FINISHING: IsCompositionContext = IsCompositionContext(
             id = IsContextId("context_5678"),

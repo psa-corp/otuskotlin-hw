@@ -77,16 +77,20 @@ fun IsContext.fromTransport(request: DownloadFileRequest) {
     stubCase = request.debug.transportToStubCase()
 }
 
-fun IsContext.fromTransport(request: IRequest) =
-    when (request) {
-        is AnalysisGetRequest -> fromTransport(request)
-        is AnalysisRegenerateRequest -> fromTransport(request)
-        is CompositionCreateByManualRequest -> fromTransport(request)
-        is CompositionContextGetRequest -> fromTransport(request)
-        is CompositionGetRequest -> fromTransport(request)
-        is DownloadFileRequest -> fromTransport(request)
-        else -> throw UnknownRequestClass(request.javaClass)
-    }
+fun IsContext.fromTransport(request: IRequest, photos: MutableList<String>) = when (request) {
+    is CompositionCreateByPhotosRequest -> fromTransport(request, photos)
+    else -> throw UnknownRequestClass(request.javaClass)
+}
+
+fun IsContext.fromTransport(request: IRequest) = when (request) {
+    is AnalysisGetRequest -> fromTransport(request)
+    is AnalysisRegenerateRequest -> fromTransport(request)
+    is CompositionCreateByManualRequest -> fromTransport(request)
+    is CompositionContextGetRequest -> fromTransport(request)
+    is CompositionGetRequest -> fromTransport(request)
+    is DownloadFileRequest -> fromTransport(request)
+    else -> throw UnknownRequestClass(request.javaClass)
+}
 
 // --- Helpers ---
 

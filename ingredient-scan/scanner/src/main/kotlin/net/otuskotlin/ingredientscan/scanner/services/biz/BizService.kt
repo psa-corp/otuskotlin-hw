@@ -51,22 +51,22 @@ open class BizService(
         const val COMPOSITION_SAVE_TOPIC = "composition-save-input"
     }
 
-    suspend fun execute(request: IRequest) : IResponse {
+    open suspend fun execute(request: IRequest) : IResponse {
         val context = IsContext()
         context.fromTransport(request)
         processor.exec(context)
         return context.toTransport()
     }
 
-    suspend fun execute(request: IRequest, photos: Array<MultipartFile>) : IResponse {
+    open suspend fun execute(request: IRequest, photos: Array<MultipartFile>) : IResponse {
         val context = IsContext()
-        context.fromTransport(request)
-        context.scanRequest.files = s3CloudService.uploadFiles(context, photos, null)
+        val names = s3CloudService.uploadFiles(context, photos, null)
+        context.fromTransport(request, names)
         processor.exec(context)
         return context.toTransport()
     }
 
-    suspend fun get(fileName: String) : ResponseEntity<Resource> {
+    open suspend fun get(fileName: String) : ResponseEntity<Resource> {
         val cleanedFileName = fileName.removePrefix("/")
         val context = IsContext()
         val metadata = s3CloudService.getObjectMetadata(context, cleanedFileName)

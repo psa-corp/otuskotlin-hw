@@ -20,6 +20,7 @@ dependencies {
 	implementation(projects.core.coreStubs)
 	implementation(projects.biz.bizCommon)
 
+	implementation(libs.spring.boot.starter.web)
 	implementation(libs.spring.boot.starter.webflux)
 	implementation(libs.spring.boot.starter.actuator)
 	implementation(libs.spring.boot.starter.validation)
@@ -41,6 +42,7 @@ dependencies {
 	implementation(libs.github.caffeine)
 
 	testImplementation(libs.spring.boot.starter.test)
+	testImplementation(libs.coroutines.test)
 	testImplementation(libs.coroutines.reactor)
 	testImplementation(libs.bundles.testcontainers)
 	testImplementation(libs.testcontainers.minio)
