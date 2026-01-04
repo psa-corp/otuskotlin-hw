@@ -205,6 +205,7 @@ paths:
       tags: [download]
       summary: Скачивание файла
       operationId: downloadFile
+      x-use-response-entity: true
       parameters:
         - name: fileName
           in: path

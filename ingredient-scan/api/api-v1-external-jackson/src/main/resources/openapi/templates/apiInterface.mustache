@@ -25,7 +25,7 @@ import io.swagger.annotations.AuthorizationScope
 {{/swagger1AnnotationLibrary}}
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 {{#useBeanValidation}}
 import org.springframework.validation.annotation.Validated
@@ -101,7 +101,7 @@ interface {{classname}} {
             produces = [{{#produces}}"{{{mediaType}}}"{{^-last}}, {{/-last}}{{/produces}}]{{/hasProduces}}{{#hasConsumes}},
             consumes = [{{#consumes}}"{{{mediaType}}}"{{^-last}}, {{/-last}}{{/consumes}}]{{/hasConsumes}}{{/singleContentTypes}}
     )
-    {{#reactive}}{{^isArray}}suspend {{/isArray}}{{#isArray}}{{^useFlowForArrayReturnType}}suspend {{/useFlowForArrayReturnType}}{{/isArray}}{{/reactive}}fun {{operationId}}({{#allParams}}{{>queryParams}}{{>pathParams}}{{>headerParams}}{{>cookieParams}}{{>bodyParams}}{{>formParams}}{{^-last}},{{/-last}}{{/allParams}}): {{>returnTypes}}{{^skipDefaultApiInterface}} {
+    {{#reactive}}{{^isArray}}suspend {{/isArray}}{{#isArray}}{{^useFlowForArrayReturnType}}suspend {{/useFlowForArrayReturnType}}{{/isArray}}{{/reactive}}fun {{operationId}}({{#allParams}}{{>queryParams}}{{>pathParams}}{{>headerParams}}{{>cookieParams}}{{>bodyParams}}{{>formParams}}{{^-last}},{{/-last}}{{/allParams}}): {{#vendorExtensions.x-use-response-entity}}ResponseEntity<{{>returnTypes}}>{{/vendorExtensions.x-use-response-entity}}{{^vendorExtensions.x-use-response-entity}}{{>returnTypes}}{{/vendorExtensions.x-use-response-entity}}{{^skipDefaultApiInterface}} {
         {{^isDelegate}}
         return {{>returnValue}}
         {{/isDelegate}}
