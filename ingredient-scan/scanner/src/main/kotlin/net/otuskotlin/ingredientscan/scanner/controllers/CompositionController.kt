@@ -10,13 +10,9 @@ import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionCreateByP
 import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionGetRequest
 import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionGetResponse
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION_CONTEXT_FINISHING
-import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
 import net.otuskotlin.ingredientscan.mappers.v1.toTransportCompositionContextGet
 import net.otuskotlin.ingredientscan.mappers.v1.toTransportCompositionCreateManual
 import net.otuskotlin.ingredientscan.mappers.v1.toTransportCompositionCreatePhotos
@@ -24,7 +20,6 @@ import net.otuskotlin.ingredientscan.mappers.v1.toTransportCompositionGet
 import net.otuskotlin.ingredientscan.scanner.services.biz.BizService
 import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
 import org.slf4j.LoggerFactory
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
@@ -33,180 +28,36 @@ open class CompositionController(private val s3CloudService: S3CloudService,
                                  private val bizService: BizService) : CompositionApi {
     private val log = LoggerFactory.getLogger(CompositionController::class.java)
 
-    override fun compositionCreateByManual(compositionCreateByManualRequest: CompositionCreateByManualRequest): ResponseEntity<CompositionCreateByManualResponse> {
+    override suspend fun compositionCreateByManual(compositionCreateByManualRequest: CompositionCreateByManualRequest): CompositionCreateByManualResponse {
         val context = IsContext()
         context.compositionContextResponse = STUB_COMPOSITION_CONTEXT_FINISHING
         context.state = IsState.FINISHING
-        return ResponseEntity.ok(context.toTransportCompositionCreateManual())
-
-//  TODO unlock after check hw
-//        return try {
-//            context.fromTransport(compositionCreateByManualRequest)
-//
-//            log.info(
-//                "Context created:\n" +
-//                        "  requestId: {}\n" +
-//                        "  command: {}\n" +
-//                        "  compositionText: {}",
-//                context.requestId.asString(),
-//                context.command,
-//                context.compositionRequest.text.take(50)
-//            )
-//
-//            bizService.compositionCreateByManual(context)
-//            // Финальный результат придёт асинхронно через WebSocket/polling
-//            ResponseEntity.ok(context.toTransportCompositionCreateManual())
-//
-//        } catch (e: Exception) {
-//            log.error("Error in compositionCreateByManual", e)
-//            context.command = IsCommand.COMPOSITION_CREATE_MANUAL
-//            context.compositionResponse.id = IsCompositionId.NONE
-//            context.state = IsState.FAILING
-//            context.errors.add(
-//                IsError(
-//                    code = "CONTROLLER_ERROR",
-//                    group = "COMPOSITION_CREATE_MANUAL",
-//                    field = "controller",
-//                    message = "Error processing request: ${e.message}"
-//                )
-//            )
-//
-//            ResponseEntity.badRequest().body(context.toTransportCompositionCreateManual())
-//        }
+        return context.toTransportCompositionCreateManual()
     }
 
-    override fun compositionCreateByPhotos(
+    override suspend fun compositionCreateByPhotos(
         photos: Array<MultipartFile>,
         scan: CompositionCreateByPhotosRequest
-    ): ResponseEntity<CompositionCreateByPhotosResponse> {
+    ): CompositionCreateByPhotosResponse {
 
         val context = IsContext()
-
-
         val photoUrls = s3CloudService.uploadFiles(context, photos, null)
-
         context.compositionContextResponse = STUB_COMPOSITION_CONTEXT_FINISHING
         context.state = IsState.FINISHING
-        return ResponseEntity.ok(context.toTransportCompositionCreatePhotos())
-
-
-//  TODO unlock after check hw
-//        return try {
-//            //Загружаем фото в S3 облако
-//            val photoUrls = s3CloudService.uploadFiles(context, photos, null)
-//
-//            if (context.errors.isNotEmpty()) {
-//                log.error("Error. Photos can't uploaded to S3:{}", context.errors)
-//                context.state = IsState.FAILING
-//                return ResponseEntity.badRequest().body(context.toTransportCompositionCreatePhotos())
-//            }
-//
-//            log.info("Photos uploaded to S3: {}", photoUrls.size)
-//            context.fromTransport(scan, photoUrls)
-//
-//            bizService.compositionCreateByPhotos(context)
-//            // Финальный результат придёт асинхронно через WebSocket/polling
-//            ResponseEntity.ok(context.toTransportCompositionCreatePhotos())
-//
-//        } catch (e: Exception) {
-//            log.error("Error in compositionCreateByPhotos", e)
-//
-//            context.command = IsCommand.COMPOSITION_CREATE_PHOTOS
-//            context.compositionResponse.id = IsCompositionId.NONE
-//            context.state = IsState.FAILING
-//            context.errors.add(
-//                    IsError(
-//                        code = "CONTROLLER_ERROR",
-//                        group = "COMPOSITION_CREATE_PHOTOS",
-//                        field = "controller",
-//                        message = "Error processing request: ${e.message}"
-//                    )
-//                )
-//
-//            ResponseEntity.badRequest().body(context.toTransportCompositionCreatePhotos())
-//        }
+        return context.toTransportCompositionCreatePhotos()
     }
 
-    override fun compositionGet(compositionGetRequest: CompositionGetRequest): ResponseEntity<CompositionGetResponse> {
+    override suspend fun compositionGet(compositionGetRequest: CompositionGetRequest): CompositionGetResponse {
         val context = IsContext()
         context.compositionResponse = STUB_COMPOSITION
         context.state = IsState.FINISHING
-        return ResponseEntity.ok(context.toTransportCompositionGet())
-
-//  TODO unlock after check hw
-//        return try {
-//            context.fromTransport(compositionGetRequest)
-//
-//            log.info(
-//                "Context created:\n" +
-//                        "  requestId: {}\n" +
-//                        "  command: {}\n" +
-//                        "  compositionId: {}",
-//                context.requestId.asString(),
-//                context.command,
-//                context.compositionIdRequest
-//            )
-//
-//            bizService.compositionGet(context)
-//            // Финальный результат придёт асинхронно через WebSocket/polling
-//            ResponseEntity.ok(context.toTransportCompositionGet())
-//
-//        } catch (e: Exception) {
-//            log.error("Error in compositionGet", e)
-//            context.command = IsCommand.COMPOSITION_GET
-//            context.compositionResponse.id = IsCompositionId.NONE
-//            context.state = IsState.FAILING
-//            context.errors.add(
-//                IsError(
-//                    code = "CONTROLLER_ERROR",
-//                    group = "COMPOSITION_GET",
-//                    field = "controller",
-//                    message = "Error processing request: ${e.message}"
-//                )
-//            )
-//
-//            ResponseEntity.badRequest().body(context.toTransportCompositionGet())
-//        }
+        return context.toTransportCompositionGet()
     }
 
-    override fun compositionContextGet(compositionContextGetRequest: CompositionContextGetRequest): ResponseEntity<CompositionContextGetResponse> {
+    override suspend fun compositionContextGet(compositionContextGetRequest: CompositionContextGetRequest): CompositionContextGetResponse {
         val context = IsContext()
         context.compositionContextResponse = STUB_COMPOSITION_CONTEXT_FINISHING
         context.state = IsState.FINISHING
-        return ResponseEntity.ok(context.toTransportCompositionContextGet())
-
-//  TODO unlock after check hw
-//        return try {
-//            context.fromTransport(compositionContextGetRequest)
-//
-//            log.info(
-//                "Context created:\n" +
-//                        "  requestId: {}\n" +
-//                        "  command: {}\n" +
-//                        "  search contextId: {}",
-//                context.requestId.asString(),
-//                context.command,
-//                context.contextIdRequest
-//            )
-//
-//            bizService.compositionContextGet(context)
-//            // Финальный результат придёт асинхронно через WebSocket/polling
-//            ResponseEntity.ok(context.toTransportCompositionContextGet())
-//
-//        } catch (e: Exception) {
-//            log.error("Error in compositionContextGet", e)
-//            context.command = IsCommand.COMPOSITION_GET
-//            context.state = IsState.FAILING
-//            context.errors.add(
-//                IsError(
-//                    code = "CONTROLLER_ERROR",
-//                    group = "COMPOSITION_CONTEXT_GET",
-//                    field = "controller",
-//                    message = "Error processing request: ${e.message}"
-//                )
-//            )
-//
-//            ResponseEntity.badRequest().body(context.toTransportCompositionContextGet())
-//        }
+        return context.toTransportCompositionContextGet()
     }
 }

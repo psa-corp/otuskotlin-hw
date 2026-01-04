@@ -18,10 +18,11 @@ dependencies {
 	implementation(projects.api.apiV1ExternalMappers)
 	implementation(projects.coreCommon)
 
-	implementation(libs.spring.boot.starter.web)
+	implementation(libs.spring.boot.starter.webflux)
 	implementation(libs.spring.boot.starter.actuator)
 	implementation(libs.spring.boot.starter.validation)
 	implementation(libs.spring.boot.docker.compose)
+	implementation(libs.coroutines.reactor)
 
 	implementation(libs.spring.kafka)
 	implementation(libs.kafka.streams)

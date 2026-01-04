@@ -16,19 +16,19 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 open class AnalysisController: AnalysisApi {
-    override fun analysisGet(analysisGetRequest: AnalysisGetRequest): ResponseEntity<AnalysisGetResponse> {
+    override suspend fun analysisGet(analysisGetRequest: AnalysisGetRequest): AnalysisGetResponse {
         val context = IsContext()
         context.fromTransport(analysisGetRequest)
         context.analysisResponse = STUB_ANALYSIS
         context.state = IsState.FINISHING
-        return ResponseEntity.ok(context.toTransportAnalysisGet())
+        return context.toTransportAnalysisGet()
     }
 
-    override fun analysisRegenerate(analysisRegenerateRequest: AnalysisRegenerateRequest): ResponseEntity<AnalysisRegenerateResponse> {
+    override suspend fun analysisRegenerate(analysisRegenerateRequest: AnalysisRegenerateRequest): AnalysisRegenerateResponse {
         val context = IsContext()
         context.fromTransport(analysisRegenerateRequest)
         context.analysisResponse = STUB_ANALYSIS
         context.state = IsState.FINISHING
-        return ResponseEntity.ok(context.toTransportAnalysisRegenerate())
+        return context.toTransportAnalysisRegenerate()
     }
 }

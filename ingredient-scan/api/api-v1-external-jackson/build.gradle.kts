@@ -22,6 +22,7 @@ openApiGenerate {
 
     //TODO: пусть вся генерация будет в одном месте.
     // Хорошо для совместимости, но плохо для миграции на другой framework
+    // в любом случае доработка будет минимальная
     val openapiGroup = "${rootProject.group}.api.v1.external"
     generatorName.set("kotlin-spring") // Это и есть активный генератор
     packageName.set(openapiGroup)
@@ -30,6 +31,8 @@ openApiGenerate {
     invokerPackage.set("$openapiGroup.invoker")
 
     inputSpec.set(rootProject.ext["spec-v1-external"] as String) // <-
+
+    templateDir.set(layout.projectDirectory.dir("src/main/resources/openapi/templates").asFile.absolutePath)
 
     /**
      * Здесь указываем, что нам нужны только модели, все остальное не нужно
@@ -55,12 +58,13 @@ openApiGenerate {
 
             "useSpringBoot3" to "true", // добавляем для Spring Boot 3
             "interfaceOnly" to "true",   // генерируем интерфейсы API
-            "reactive" to "false",
-            "serviceInterface" to "false",
+            "reactive" to "true",
+//            "serviceInterface" to "false",
+            "useCoroutines" to "true",
             "useTags" to "true",
             "delegatePattern" to "false",
             "skipDefaultInterface" to "true",
-            "useResponseEntityAlways" to "true"
+//            "useResponseEntityAlways" to "true"
         )
     )
 
@@ -78,13 +82,15 @@ openApiGenerate {
             "java.time.LocalDate" to "java.time.LocalDate"
         )
     )
-    library.set("spring-boot") // или "jvm-spring"
+    library.set("spring-boot")
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation(libs.spring.boot.starter.web)
+    implementation(libs.spring.boot.starter.webflux)
     implementation(libs.spring.boot.starter.validation)
+    implementation(libs.coroutines.reactor)
+
     implementation(libs.jackson.kotlin)
     implementation(libs.jackson.datatype)
     implementation(libs.swagger.core)
