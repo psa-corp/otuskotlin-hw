@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.core.common.external.stubs
+package net.otuskotlin.ingredientscan.core.common.external
 
 enum class IsStubs {
     NONE,

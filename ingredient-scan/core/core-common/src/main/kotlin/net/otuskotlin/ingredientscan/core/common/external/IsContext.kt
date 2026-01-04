@@ -13,7 +13,7 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsRequestId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsScan
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
-import net.otuskotlin.ingredientscan.core.common.external.stubs.IsStubs
+import net.otuskotlin.ingredientscan.core.common.external.IsStubs
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 
