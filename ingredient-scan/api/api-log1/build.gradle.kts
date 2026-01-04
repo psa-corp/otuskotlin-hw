@@ -48,9 +48,8 @@ openApiGenerate {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation(project(":core-common"))
+    implementation(projects.core.coreCommon)
 
-//    implementation(project(":api-log1"))
     implementation(libs.jackson.kotlin)
     implementation(libs.jackson.datatype)
 

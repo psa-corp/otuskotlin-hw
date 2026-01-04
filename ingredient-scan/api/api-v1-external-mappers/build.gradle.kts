@@ -9,6 +9,7 @@ dependencies {
     implementation(kotlin("stdlib"))
 //    implementation(libs.kotlinx.datetime)
     implementation(projects.api.apiV1ExternalJackson)
-    implementation(projects.coreCommon)
+    implementation(projects.core.coreCommon)
+    implementation(projects.core.coreStubs)
     testImplementation(kotlin("test-junit"))
 }

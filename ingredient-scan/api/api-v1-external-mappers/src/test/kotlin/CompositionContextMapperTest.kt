@@ -2,7 +2,7 @@ import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION
-import net.otuskotlin.ingredientscan.core.common.external.stubs.IsStubs
+import net.otuskotlin.ingredientscan.core.common.external.IsStubs
 import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
 import net.otuskotlin.ingredientscan.mappers.v1.toTransport
 import net.otuskotlin.ingredientscan.mappers.v1.toTransportCompositionContextGet

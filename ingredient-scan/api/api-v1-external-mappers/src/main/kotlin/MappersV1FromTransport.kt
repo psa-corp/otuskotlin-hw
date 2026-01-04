@@ -10,7 +10,8 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsScan
 import net.otuskotlin.ingredientscan.core.common.external.models.IsScanId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsScanType
 import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
-import net.otuskotlin.ingredientscan.core.common.external.stubs.IsStubs
+import net.otuskotlin.ingredientscan.core.common.external.IsStubs
+import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownRequestClass
 
 
 // --- Analysis Mappers ---
@@ -75,6 +76,17 @@ fun IsContext.fromTransport(request: DownloadFileRequest) {
     workMode = request.debug.transportToWorkMode()
     stubCase = request.debug.transportToStubCase()
 }
+
+fun IsContext.fromTransport(request: IRequest) =
+    when (request) {
+        is AnalysisGetRequest -> fromTransport(request)
+        is AnalysisRegenerateRequest -> fromTransport(request)
+        is CompositionCreateByManualRequest -> fromTransport(request)
+        is CompositionContextGetRequest -> fromTransport(request)
+        is CompositionGetRequest -> fromTransport(request)
+        is DownloadFileRequest -> fromTransport(request)
+        else -> throw UnknownRequestClass(request.javaClass)
+    }
 
 // --- Helpers ---
 

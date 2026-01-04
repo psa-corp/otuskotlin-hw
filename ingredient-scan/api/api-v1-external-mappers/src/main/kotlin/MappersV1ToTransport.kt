@@ -15,7 +15,9 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsContextId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.core.common.external.models.IsRiskLevel
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
+import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub.Companion.STUB_ANALYSIS
 import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownIsCommand
+import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownRequestClass
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -72,6 +74,18 @@ fun IsContext.toTransportCompositionGet() = CompositionGetResponse(
     errors = errors.toTransportErrors(),
     composition = compositionResponse.toTransport()
 )
+
+fun IsContext.toTransport() =
+    when (command) {
+        IsCommand.ANALYSIS_GET -> toTransportAnalysisGet()
+        IsCommand.ANALYSIS_REGENERATE -> toTransportAnalysisRegenerate()
+        IsCommand.COMPOSITION_CONTEXT_GET -> toTransportCompositionContextGet()
+        IsCommand.COMPOSITION_CREATE_MANUAL -> toTransportCompositionCreateManual()
+        IsCommand.COMPOSITION_CREATE_PHOTOS -> toTransportCompositionCreatePhotos()
+        IsCommand.COMPOSITION_GET -> toTransportCompositionGet()
+        IsCommand.DOWNLOAD_FILE -> toTransportDownloadFile()
+        else -> throw UnknownIsCommand(command)
+    }
 
 // --- File/Error Responses ---
 
