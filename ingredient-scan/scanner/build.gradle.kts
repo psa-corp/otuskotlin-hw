@@ -16,7 +16,9 @@ dependencies {
 	implementation(projects.api.apiLog1)
 	implementation(projects.api.apiV1ExternalJackson)
 	implementation(projects.api.apiV1ExternalMappers)
-	implementation(projects.coreCommon)
+	implementation(projects.core.coreCommon)
+	implementation(projects.core.coreStubs)
+	implementation(projects.biz.bizCommon)
 
 	implementation(libs.spring.boot.starter.webflux)
 	implementation(libs.spring.boot.starter.actuator)
@@ -39,7 +41,7 @@ dependencies {
 	implementation(libs.github.caffeine)
 
 	testImplementation(libs.spring.boot.starter.test)
-
+	testImplementation(libs.coroutines.reactor)
 	testImplementation(libs.bundles.testcontainers)
 	testImplementation(libs.testcontainers.minio)
 	testImplementation(libs.okhttp)
@@ -54,6 +56,7 @@ dependencies {
 
 	testImplementation(libs.spring.kafka.test)
 	testImplementation(libs.kafka.streams.test)
+	testImplementation("io.projectreactor:reactor-test:3.8.1")
 }
 
 kotlin {

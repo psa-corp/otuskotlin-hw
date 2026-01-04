@@ -1,14 +1,27 @@
 package net.otuskotlin.ingredientscan.scanner.services.biz
 
+import net.otuskotlin.ingredientscan.api.v1.external.models.IRequest
+import net.otuskotlin.ingredientscan.api.v1.external.models.IResponse
+import net.otuskotlin.ingredientscan.biz.common.IsBizProcessor
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.IsCorSettings
 import net.otuskotlin.ingredientscan.core.common.external.models.*
 import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
+import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
 import net.otuskotlin.ingredientscan.mappers.v1.toCompositionContext
+import net.otuskotlin.ingredientscan.mappers.v1.toDownloadFileErrorResponse
+import net.otuskotlin.ingredientscan.mappers.v1.toTransport
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryCompositionRepository
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
+import net.otuskotlin.ingredientscan.scanner.services.s3.JsonErrorResource
+import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
 import org.slf4j.LoggerFactory
+import org.springframework.core.io.Resource
+import org.springframework.http.*
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
+import java.nio.charset.StandardCharsets
 
 /**
  * Бизнес-логика для обработки команд IsContext
@@ -23,9 +36,12 @@ import org.springframework.stereotype.Service
 open class BizService(
     private val kafkaTemplate: KafkaTemplate<String, String>,
     private val compositionRepository: InMemoryCompositionRepository,
-    private val contextRepository: InMemoryContextRepository
+    private val contextRepository: InMemoryContextRepository,
+    private val s3CloudService: S3CloudService,
 ) {
 
+    private val settings: IsCorSettings = IsCorSettings()
+    private val processor: IsBizProcessor = IsBizProcessor(settings)
     private val log = LoggerFactory.getLogger(BizService::class.java)
 
     companion object {
@@ -33,6 +49,58 @@ open class BizService(
         const val OCR_RECOGNITION_TOPIC = "ocr-recognition-input"
         const val COMPOSITION_VALIDATE_TOPIC = "composition-validate-input"
         const val COMPOSITION_SAVE_TOPIC = "composition-save-input"
+    }
+
+    suspend fun execute(request: IRequest) : IResponse {
+        val context = IsContext()
+        context.fromTransport(request)
+        processor.exec(context)
+        return context.toTransport()
+    }
+
+    suspend fun execute(request: IRequest, photos: Array<MultipartFile>) : IResponse {
+        val context = IsContext()
+        context.fromTransport(request)
+        context.scanRequest.files = s3CloudService.uploadFiles(context, photos, null)
+        processor.exec(context)
+        return context.toTransport()
+    }
+
+    suspend fun get(fileName: String) : ResponseEntity<Resource> {
+        val cleanedFileName = fileName.removePrefix("/")
+        val context = IsContext()
+        val metadata = s3CloudService.getObjectMetadata(context, cleanedFileName)
+        val resource = s3CloudService.downloadFileAsResource(context, cleanedFileName)
+
+        if (context.errors.isEmpty() && metadata != null && resource != null) {
+            val fileNameForHeader = cleanedFileName.substringAfterLast("/")
+
+            val contentDisposition = ContentDisposition.inline()
+                .filename(fileNameForHeader, StandardCharsets.UTF_8)
+                .build()
+
+            return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, metadata.contentType())
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+                .body(resource)
+        }
+
+        if (context.errors.isEmpty()) {
+            context.errors.add(IsError(code = "FILE_NOT_FOUND", group = "s3", field = "", message = "File not found: $cleanedFileName"))
+        }
+
+        val errorResponse = context.toDownloadFileErrorResponse()
+        val jsonResource = JsonErrorResource(errorResponse)
+
+        val status = when (context.errors.firstOrNull()?.code) {
+            "FILE_NOT_FOUND" -> HttpStatus.NOT_FOUND
+            "STORE_NOT_FOUND" -> HttpStatus.NOT_FOUND
+            else -> HttpStatus.INTERNAL_SERVER_ERROR
+        }
+
+        return ResponseEntity.status(status)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(jsonResource)
     }
 
     fun compositionCreateByManual(context: IsContext): IsContext {
