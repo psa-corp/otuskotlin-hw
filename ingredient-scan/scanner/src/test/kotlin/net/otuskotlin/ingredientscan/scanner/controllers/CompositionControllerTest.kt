@@ -52,7 +52,6 @@ class CompositionControllerTest {
         testStub(webTestClient, request, "/composition/create/manual")
     }
 
-
     @Test
     fun `compositionGet returns successful response`() = runTest {
         // Arrange
@@ -74,10 +73,8 @@ class CompositionControllerTest {
         testStub(webTestClient, request, "/composition/get")
     }
 
-
     @Test
     fun `compositionContextGet returns successful response`() = runTest {
-
         // Arrange
         val request = CompositionContextGetRequest(
             requestType = "compositionContextGet",
@@ -92,9 +89,7 @@ class CompositionControllerTest {
         whenever(bizService.execute(any()))
             .thenReturn(response)
 
-
         // Act & Assert
         testStub(webTestClient, request, "/composition/context/get")
     }
-
 }

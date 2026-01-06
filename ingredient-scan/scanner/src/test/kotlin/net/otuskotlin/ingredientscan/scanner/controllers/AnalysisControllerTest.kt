@@ -49,7 +49,6 @@ class AnalysisControllerTest {
         testStub(webTestClient, request, "/analysis/get")
     }
 
-
     @Test
     fun `analysisRegenerate returns successful response`() = runTest {
         // Arrange

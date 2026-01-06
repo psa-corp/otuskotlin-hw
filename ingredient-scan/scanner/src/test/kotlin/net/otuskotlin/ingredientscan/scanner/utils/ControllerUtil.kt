@@ -15,6 +15,7 @@ import org.springframework.http.client.MultipartBodyBuilder
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
+import org.springframework.web.reactive.function.client.WebClient
 import kotlin.streams.toList
 
 open class ControllerUtil {
@@ -45,10 +46,10 @@ open class ControllerUtil {
             return context
         }
 
-        fun testStub(client: WebTestClient, request: IRequest, path: String) {
+        fun testStub(client: WebTestClient, request: IRequest, url: String) {
             val response = createStubContext(request, null).toTransport()
             client.post()
-                .uri(path)
+                .uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(serializeRequest(request)))
                 .exchange()
@@ -58,39 +59,25 @@ open class ControllerUtil {
                 .isEqualTo(response)
         }
 
-        fun testMultipartStub(
-            client: WebTestClient,
-            request: IRequest,
-            path: String,
-            photos: List<MockMultipartFile> = emptyList()
-        ) {
-            val uploadedFiles = photos.map { it.originalFilename }.toMutableList()
-            val response = createStubContext(request, uploadedFiles).toTransport()
-
-            val bodyBuilder = MultipartBodyBuilder()
-
-            bodyBuilder.part("scan", serializeRequest(request))
-                .contentType(MediaType.APPLICATION_JSON)
-
-            photos.forEach { file ->
-                val bytes = file.bytes
-                val fileContentType = file.contentType?.let { MediaType.parseMediaType(it) }
-                    ?: MediaType.IMAGE_JPEG
-
-                bodyBuilder.part("photos", bytes)
-                    .filename(file.originalFilename)
-                    .contentType(fileContentType)
-            }
-
-            client.post()
-                .uri(path)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+        fun testDownload(client: WebTestClient, url: String, fileName: String, negative: Boolean) {
+            val exchange: WebTestClient.ResponseSpec = client.get()
+                .uri(url, fileName)
+                .accept(MediaType.APPLICATION_OCTET_STREAM)
                 .exchange()
-                .expectStatus().isOk
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(response.javaClass)
-                .isEqualTo(response)
+
+            if (negative) {
+                exchange
+                    .expectStatus().isNotFound()
+                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
+
+            } else {
+                exchange
+                    .expectStatus().isOk()
+                    .expectHeader().contentType("image/jpeg")
+                    .expectBody()
+                    .returnResult()
+            }
         }
+
     }
 }

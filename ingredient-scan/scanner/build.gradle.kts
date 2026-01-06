@@ -20,7 +20,7 @@ dependencies {
 	implementation(projects.core.coreStubs)
 	implementation(projects.biz.bizCommon)
 
-	implementation(libs.spring.boot.starter.web)
+//	implementation(libs.spring.boot.starter.web)
 	implementation(libs.spring.boot.starter.webflux)
 	implementation(libs.spring.boot.starter.actuator)
 	implementation(libs.spring.boot.starter.validation)
@@ -42,6 +42,7 @@ dependencies {
 	implementation(libs.github.caffeine)
 
 	testImplementation(libs.spring.boot.starter.test)
+	testImplementation(libs.spring.boot.starter.webflux)
 	testImplementation(libs.coroutines.test)
 	testImplementation(libs.coroutines.reactor)
 	testImplementation(libs.bundles.testcontainers)
@@ -59,6 +60,7 @@ dependencies {
 	testImplementation(libs.spring.kafka.test)
 	testImplementation(libs.kafka.streams.test)
 	testImplementation("io.projectreactor:reactor-test:3.8.1")
+	testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 }
 
 kotlin {
