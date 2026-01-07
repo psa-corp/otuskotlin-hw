@@ -126,13 +126,17 @@ class S3CloudService(
                 }
             }
             .onErrorResume { ex ->
-                context.errors.add(
-                    createError(
-                        "STORE_NOT_FOUND",
-                        "Storage not found or unavailable: $fileName"
+                if (ex is IllegalStateException) {
+                    Mono.error(ex)
+                } else {
+                    context.errors.add(
+                        createError(
+                            "STORE_NOT_FOUND",
+                            "Storage not found or unavailable: $fileName"
+                        )
                     )
-                )
-                Mono.error(ex)
+                    Mono.error(ex)
+                }
             }
     }
 
