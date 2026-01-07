@@ -13,6 +13,20 @@ enum class IsCommand {
     DOWNLOAD_FILE,
 }
 
+enum class IsSubCommand {
+    NONE,
+    // Composition operations
+    COMPOSITION_CREATE,
+    OCR_RECOGNITION,
+    COMPOSITION_VALIDATE,
+    COMPOSITION_SAVE,
+    COMPOSITION_OUTPUT,
+    // Analysis operations
+    ANALYSIS_CREATE,
+    ANALYSIS_REGENERATE,
+    ANALYSIS_OUTPUT
+}
+
 enum class IsState {
     NONE,
     RUNNING,

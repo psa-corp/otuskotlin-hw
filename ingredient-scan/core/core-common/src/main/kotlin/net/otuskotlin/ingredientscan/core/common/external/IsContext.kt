@@ -14,12 +14,14 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsScan
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
 import net.otuskotlin.ingredientscan.core.common.external.IsStubs
+import net.otuskotlin.ingredientscan.core.common.external.models.IsSubCommand
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 
 data class IsContext(
     var id: IsContextId = IsContextId("context_${randomUUID()}"),
     var command: IsCommand = IsCommand.NONE,
+    var subCommand: IsSubCommand = IsSubCommand.NONE,
     var state: IsState = IsState.NONE,
     val errors: MutableList<IsError> = mutableListOf(),
 

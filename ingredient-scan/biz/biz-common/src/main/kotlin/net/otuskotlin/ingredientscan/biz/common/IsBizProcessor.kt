@@ -9,7 +9,7 @@ import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStu
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION_CONTEXT_FINISHING
 
 
-class IsBizProcessor(settings: IsCorSettings) {
+class IsBizProcessor(private val settings: IsCorSettings) {
     suspend fun exec(context: IsContext) {
         when (context.command){
             IsCommand.ANALYSIS_GET,
@@ -25,5 +25,6 @@ class IsBizProcessor(settings: IsCorSettings) {
         }
 
         context.state = IsState.FINISHING
+        settings.contextRepository?.save(context)
     }
 }
