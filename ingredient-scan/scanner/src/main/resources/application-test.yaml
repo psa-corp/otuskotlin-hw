@@ -1,11 +1,9 @@
 spring:
   application:
     name: ingredient-scan-scan
-#  lifecycle:
-#    timeout-per-shutdown-phase: "3m"
   mandatory-file-encoding: UTF-8
-  main:
-    banner-mode: off
+#  main:
+#    banner-mode: off
   webflux:
     multipart:
       max-in-memory-size: 256KB
@@ -13,8 +11,7 @@ spring:
   jackson:
     property-naming-strategy: SNAKE_CASE
     default-property-inclusion: NON_NULL
-#    deserialization:
-#      accept-single-value-as-array: true
+
   cloud:
     aws:
       credentials:
@@ -22,28 +19,22 @@ spring:
         secret-key: minioadminpassword
       region:
         static: us-east-1
-      endpoint: http://localhost:9000
+      endpoint: http://minio:9000  # ← Docker hostname
+
       s3:
-        # Ключевой параметр для MinIO
-        endpoint: http://localhost:9000
+        endpoint: http://minio:9000
         path-style-access-enabled: true
         bucket:
-          name: photos # Имя вашего бакета в MinIO
+          name: photos
+
   docker:
     compose:
-      enabled: true
-      file: file:${user.dir}/deploy/docker-compose-dev.yml
-      wait:
-        enabled: true
-        timeout: 180s
-      lifecycle-management: start-and-stop
-#      lifecycle-management: start-only
-
+      enabled: false
 
   kafka:
     streams:
       auto-startup: false
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9093
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -54,9 +45,21 @@ spring:
       auto-offset-reset: earliest
 
 server:
-  port: 8081
+  port: 8080
 #  shutdown: graceful
 
+logging:
+  level:
+    root: INFO
+    org.springframework.web: WARN
+    org.springframework.boot: INFO
+    org.springframework.boot.autoconfigure: WARN
+    net.otuskotlin.ingredientscan: INFO
+    org.apache.kafka: WARN
+
+app:
+  upload:
+    max-files: 5
 
 management:
   endpoints:
@@ -72,23 +75,3 @@ management:
       enabled: true
     readinessState:
       enabled: true
-
-logging:
-  level:
-    # Для отслеживания запросов
-    org.springframework.web: DEBUG
-    org.springframework.web.servlet: DEBUG
-
-    # Для отслеживания регистрации контроллеров
-    org.springframework.boot.autoconfigure: DEBUG
-    org.springframework.context.annotation.ClassPathBeanDefinitionScanner: DEBUG
-
-    # Ваши пакеты
-    net.otuskotlin.ingredientscan: DEBUG
-
-    # Spring MVC
-    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
-
-    org.springframework.boot.docker.compose: DEBUG
-
-    io.awspring.cloud: DEBUG

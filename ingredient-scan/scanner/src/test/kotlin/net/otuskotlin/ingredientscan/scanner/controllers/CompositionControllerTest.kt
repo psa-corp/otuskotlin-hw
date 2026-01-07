@@ -49,7 +49,7 @@ class CompositionControllerTest {
             .thenReturn(response)
 
         // Act & Assert
-        testStub(webTestClient, request, "/composition/create/manual")
+        testStub(webTestClient, request, "/v1/composition/create/manual")
     }
 
     @Test
@@ -70,7 +70,7 @@ class CompositionControllerTest {
             .thenReturn(response)
 
         // Act & Assert
-        testStub(webTestClient, request, "/composition/get")
+        testStub(webTestClient, request, "/v1/composition/get")
     }
 
     @Test
@@ -90,6 +90,6 @@ class CompositionControllerTest {
             .thenReturn(response)
 
         // Act & Assert
-        testStub(webTestClient, request, "/composition/context/get")
+        testStub(webTestClient, request, "/v1/composition/context/get")
     }
 }

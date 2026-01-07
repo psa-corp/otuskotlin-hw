@@ -6,7 +6,7 @@ import net.otuskotlin.ingredientscan.scanner.services.biz.BizService
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-open class CompositionController(private val bizService: BizService) : CompositionApi {
+open class CompositionController(private val bizService: BizService): V1BaseController(), CompositionApi {
     override suspend fun compositionCreateByManual(compositionCreateByManualRequest: CompositionCreateByManualRequest): CompositionCreateByManualResponse {
         return bizService.execute(compositionCreateByManualRequest) as CompositionCreateByManualResponse
     }

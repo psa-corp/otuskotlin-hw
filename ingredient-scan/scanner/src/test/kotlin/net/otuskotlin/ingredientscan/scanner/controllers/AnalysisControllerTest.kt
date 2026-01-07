@@ -46,7 +46,7 @@ class AnalysisControllerTest {
             .thenReturn(response)
 
         // Act & Assert
-        testStub(webTestClient, request, "/analysis/get")
+        testStub(webTestClient, request, "/v1/analysis/get")
     }
 
     @Test
@@ -67,7 +67,7 @@ class AnalysisControllerTest {
             .thenReturn(response)
 
         // Act & Assert
-        testStub(webTestClient, request, "/analysis/regenerate")
+        testStub(webTestClient, request, "/v1/analysis/regenerate")
     }
 
 }

@@ -12,11 +12,10 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 
 @RestController
-@RequestMapping("/media")
 @Validated
-open class MediaController(private val bizService: BizService) {
+open class MediaController(private val bizService: BizService): V1BaseController() {
 
-    @PostMapping(value = ["/composition/create/photos"], produces = ["application/json"], consumes = ["multipart/form-data"])
+    @PostMapping(value = ["/media/composition/create/photos"], produces = ["application/json"], consumes = ["multipart/form-data"])
      suspend fun compositionCreateByPhotos(
         @RequestPart("photos") photos: Flux<FilePart>,
         @RequestPart("scan") scan: CompositionCreateByPhotosRequest

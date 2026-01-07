@@ -63,7 +63,7 @@ class DownloadControllerTest {
         )
 
         // Act & Assert
-        testDownload(webTestClient, "/download/file/{fileName}", fileName, false)
+        testDownload(webTestClient, "/v1/download/file/{fileName}", fileName, false)
     }
 
     @Test
@@ -91,7 +91,7 @@ class DownloadControllerTest {
         )
 
         // Act & Assert
-        testDownload(webTestClient, "/download/file/{fileName}", fileName, true)
+        testDownload(webTestClient, "/v1/download/file/{fileName}", fileName, true)
     }
 
     @Test
@@ -112,6 +112,6 @@ class DownloadControllerTest {
         )
 
         // Act & Assert
-        testDownload(webTestClient, "/download/file/{fileName}", fileName, false)
+        testDownload(webTestClient, "/v1/download/file/{fileName}", fileName, false)
     }
 }

@@ -55,7 +55,7 @@ class MediaControllerTest {
 
         // Отправка запроса и проверка ответа
         webTestClient.post()
-            .uri("/media/composition/create/photos")
+            .uri("/v1/media/composition/create/photos")
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .body(BodyInserters.fromMultipartData(builder.build()))
             .exchange()

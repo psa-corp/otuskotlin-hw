@@ -9,7 +9,7 @@ import net.otuskotlin.ingredientscan.scanner.services.biz.BizService
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-open class AnalysisController(private val bizService: BizService): AnalysisApi {
+open class AnalysisController(private val bizService: BizService): V1BaseController(), AnalysisApi {
     override suspend fun analysisGet(analysisGetRequest: AnalysisGetRequest): AnalysisGetResponse {
          return bizService.execute(analysisGetRequest) as AnalysisGetResponse
     }
