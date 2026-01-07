@@ -64,8 +64,8 @@ services:
 
   # ========== TEST APPLICATION ==========
   ingredient-scan-app:
-    image: darthchain/ingredient-scan-scan:latest
-    container_name: ingredient-scan-app-test
+    image: darthchain/ingredient-scan-scan-hw:latest
+    container_name: ingredient-scan-app-test-hw
     pull_policy: always
     environment:
       # SPRING PROFILE - используем PROD

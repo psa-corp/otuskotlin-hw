@@ -92,7 +92,7 @@ jib {
 	}
 
 	to {
-		image = "darthchain/ingredient-scan-scan"
+		image = "darthchain/ingredient-scan-scan-hw"
 		tags = setOf("latest", version.toString())
 
 		 auth {
