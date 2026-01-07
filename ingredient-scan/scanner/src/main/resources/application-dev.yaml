@@ -23,9 +23,9 @@ spring:
       region:
         static: us-east-1
       endpoint: http://localhost:9000
-
       s3:
         # Ключевой параметр для MinIO
+        endpoint: http://localhost:9000
         path-style-access-enabled: true
         bucket:
           name: photos # Имя вашего бакета в MinIO
