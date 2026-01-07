@@ -26,8 +26,8 @@ spring:
     producer: {}
     consumer: {}
 
-  main:
-    web-application-type: none
+#  main:
+#    web-application-type: reactive
 
 app:
   upload:
