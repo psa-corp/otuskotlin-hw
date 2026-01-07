@@ -4,7 +4,6 @@ import net.otuskotlin.ingredientscan.api.v1.external.api.CompositionApi
 import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.scanner.services.biz.BizService
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.multipart.MultipartFile
 
 @RestController
 open class CompositionController(private val bizService: BizService) : CompositionApi {

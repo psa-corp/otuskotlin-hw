@@ -47,7 +47,7 @@ open class CompositionValidateProcessor(private val contextRepository: InMemoryC
             }
 
             log.info("=== Composition Validate completed ===\nState: {}", context.state.name)
-            contextRepository.save(context.id.asString(), context)
+            contextRepository.save(context)
             commonContextSerialize(context)
 
         } catch (e: Exception) {
@@ -63,7 +63,7 @@ open class CompositionValidateProcessor(private val contextRepository: InMemoryC
                 )
                 state = IsState.FAILING
             }
-            contextRepository.save(context.id.asString(), context)
+            contextRepository.save(context)
             commonContextSerialize(errorContext)
         }
     }

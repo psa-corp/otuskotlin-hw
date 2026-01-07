@@ -35,7 +35,7 @@ open class CompositionSaveProcessor(
                     context.errors.map { "${it.code}: ${it.message}" }.joinToString("\n")
                 )
                 context.state = IsState.FAILING
-                contextRepository.save(context.id.asString(), context)
+                contextRepository.save(context)
                 return commonContextSerialize(context)
             }
 
@@ -58,7 +58,7 @@ open class CompositionSaveProcessor(
             context.state = IsState.FINISHING
 
             log.info("=== Composition Save completed successfully ===")
-            contextRepository.save(context.id.asString(), context)
+            contextRepository.save(context)
             commonContextSerialize(context)
 
         } catch (e: Exception) {
@@ -74,7 +74,7 @@ open class CompositionSaveProcessor(
                 )
                 state = IsState.FAILING
             }
-            contextRepository.save(context.id.asString(), context)
+            contextRepository.save(context)
             commonContextSerialize(errorContext)
         }
     }

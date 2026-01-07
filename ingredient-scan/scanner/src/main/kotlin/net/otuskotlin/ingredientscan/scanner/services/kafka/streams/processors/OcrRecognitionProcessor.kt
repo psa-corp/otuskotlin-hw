@@ -45,7 +45,7 @@ open class OcrRecognitionProcessor(private val contextRepository: InMemoryContex
 
             log.info("=== OCR Recognition completed ===\nRecognized text: {}", recognizedText)
 
-            contextRepository.save(context.id.asString(), context)
+            contextRepository.save(context)
             commonContextSerialize(context)
 
         } catch (e: Exception) {
@@ -61,7 +61,7 @@ open class OcrRecognitionProcessor(private val contextRepository: InMemoryContex
                 )
                 state = IsState.FAILING
             }
-            contextRepository.save(context.id.asString(), context)
+            contextRepository.save(context)
             commonContextSerialize(errorContext)
         }
     }

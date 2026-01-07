@@ -23,7 +23,7 @@ class BizKafkaSender(private val kafkaTemplate: KafkaTemplate<String, String>) :
         log.info("Sending context to Kafka topic: {}", COMPOSITION_CREATE_TOPIC)
         topicByCommand(context.subCommand)?.let {topic ->
             val contextJson = commonContextSerialize(context)
-            kafkaTemplate.send(topic, context.requestId.asString(), contextJson)
+            kafkaTemplate.send(topic, context.id.asString(), contextJson)
         }
     }
 
