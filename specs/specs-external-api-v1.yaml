@@ -114,7 +114,6 @@ paths:
       tags: [media]
       summary: Создание состава по фото
       operationId: compositionCreateByPhotos
-      x-use-response-entity: true
       requestBody:
         required: true
         content:
@@ -125,10 +124,11 @@ paths:
               properties:
                 photos:
                   type: array
+                  description: Фотографии состава
                   items:
                     type: string
                     format: binary
-                  description: Фотографии состава
+                    x-content-type: application/octet-stream
                 scan:
                   $ref: '#/components/schemas/CompositionCreateByPhotosRequest' # Используем Request Wrapper
       responses:

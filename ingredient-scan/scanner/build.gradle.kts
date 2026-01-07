@@ -37,6 +37,8 @@ dependencies {
 	implementation(libs.jackson.datatype)
 
 	implementation(libs.software.amazon)
+	implementation(libs.software.amazon.client)
+
 	implementation(libs.swagger.core)
 
 	implementation(libs.github.caffeine)

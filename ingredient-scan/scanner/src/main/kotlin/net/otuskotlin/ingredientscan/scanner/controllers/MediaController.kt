@@ -1,23 +1,27 @@
 package net.otuskotlin.ingredientscan.scanner.controllers
 
-import net.otuskotlin.ingredientscan.api.v1.external.api.MediaApi
-import net.otuskotlin.ingredientscan.api.v1.external.models.*
+import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionCreateByPhotosRequest
+import net.otuskotlin.ingredientscan.api.v1.external.models.CompositionCreateByPhotosResponse
 import net.otuskotlin.ingredientscan.scanner.services.biz.BizService
-import org.springframework.http.ResponseEntity
+import org.springframework.http.codec.multipart.FilePart
+import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.multipart.MultipartFile
+import reactor.core.publisher.Flux
 
 @RestController
-open class MediaController(private val bizService: BizService) : MediaApi {
+@RequestMapping("/media")
+@Validated
+open class MediaController(private val bizService: BizService) {
 
-    override suspend fun compositionCreateByPhotos(
-        photos: Array<MultipartFile>,
-        scan: CompositionCreateByPhotosRequest
-    ): ResponseEntity<CompositionCreateByPhotosResponse> {
-        val resp = bizService.execute(scan, photos) as CompositionCreateByPhotosResponse
-        if(resp.errors.isNullOrEmpty()) {
-            ResponseEntity.ok(resp)
-        }
-        return ResponseEntity.badRequest().body(resp)
+    @PostMapping(value = ["/composition/create/photos"], produces = ["application/json"], consumes = ["multipart/form-data"])
+     suspend fun compositionCreateByPhotos(
+        @RequestPart("photos") photos: Flux<FilePart>,
+        @RequestPart("scan") scan: CompositionCreateByPhotosRequest
+    ): CompositionCreateByPhotosResponse {
+        return bizService.execute(scan, photos)
+            .let { it as CompositionCreateByPhotosResponse }  // попробую такой вариант
     }
 }

@@ -24,13 +24,13 @@ openApiGenerate {
     // Хорошо для совместимости, но плохо для миграции на другой framework
     // в любом случае доработка будет минимальная
     val openapiGroup = "${rootProject.group}.api.v1.external"
-    generatorName.set("kotlin-spring") // Это и есть активный генератор
+    generatorName.set("kotlin-spring")
     packageName.set(openapiGroup)
     apiPackage.set("$openapiGroup.api")
     modelPackage.set("$openapiGroup.models")
     invokerPackage.set("$openapiGroup.invoker")
 
-    inputSpec.set(rootProject.ext["spec-v1-external"] as String) // <-
+    inputSpec.set(rootProject.ext["spec-v1-external"] as String)
 
     templateDir.set(layout.projectDirectory.dir("src/main/resources/openapi/templates").asFile.absolutePath)
 
@@ -51,20 +51,19 @@ openApiGenerate {
      */
     configOptions.set(
         mapOf(
+            "library" to "spring-boot",
             "dateLibrary" to "java8",
             "enumPropertyNaming" to "UPPERCASE",
             "serializationLibrary" to "jackson",
             "collectionType" to "list",
 
-            "useSpringBoot3" to "true", // добавляем для Spring Boot 3
-            "interfaceOnly" to "true",   // генерируем интерфейсы API
+            "useSpringBoot3" to "true",
+            "interfaceOnly" to "true",
             "reactive" to "true",
-//            "serviceInterface" to "false",
             "useCoroutines" to "true",
             "useTags" to "true",
             "delegatePattern" to "false",
             "skipDefaultInterface" to "true",
-//            "useResponseEntityAlways" to "true"
         )
     )
 

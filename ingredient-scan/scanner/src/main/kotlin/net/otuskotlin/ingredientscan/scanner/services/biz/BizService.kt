@@ -1,5 +1,6 @@
 package net.otuskotlin.ingredientscan.scanner.services.biz
 
+import kotlinx.coroutines.reactor.awaitSingle
 import net.otuskotlin.ingredientscan.api.v1.external.models.IRequest
 import net.otuskotlin.ingredientscan.api.v1.external.models.IResponse
 import net.otuskotlin.ingredientscan.biz.common.IsBizProcessor
@@ -18,9 +19,11 @@ import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.*
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import reactor.core.publisher.Flux
 import java.nio.charset.StandardCharsets
 
 /**
@@ -58,10 +61,11 @@ open class BizService(
         return context.toTransport()
     }
 
-    open suspend fun execute(request: IRequest, photos: Array<MultipartFile>) : IResponse {
+    open suspend fun execute(request: IRequest, photos: Flux<FilePart>) : IResponse {
         val context = IsContext()
         val names = s3CloudService.uploadFiles(context, photos, null)
-        context.fromTransport(request, names)
+            .awaitSingle()
+        context.fromTransport(request, names.toMutableList())
         processor.exec(context)
         return context.toTransport()
     }

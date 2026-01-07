@@ -4,10 +4,10 @@ spring:
   mandatory-file-encoding: UTF-8
   main:
     banner-mode: off
-  servlet:
+  webflux:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 20MB
+      max-in-memory-size: 256KB
+      max-disk-usage-per-part: 1GB
   jackson:
     property-naming-strategy: SNAKE_CASE
     default-property-inclusion: NON_NULL

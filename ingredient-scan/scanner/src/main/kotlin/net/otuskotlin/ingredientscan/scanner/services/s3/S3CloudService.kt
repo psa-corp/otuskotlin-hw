@@ -1,6 +1,5 @@
 package net.otuskotlin.ingredientscan.scanner.services.s3
 
-import io.awspring.cloud.s3.ObjectMetadata
 import io.awspring.cloud.s3.S3Template
 import jakarta.annotation.PostConstruct
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
@@ -8,23 +7,24 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
+import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
-import org.springframework.web.multipart.MultipartFile
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+import software.amazon.awssdk.core.async.AsyncRequestBody
+import software.amazon.awssdk.services.s3.S3AsyncClient
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.CreateBucketRequest
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
-import software.amazon.awssdk.services.s3.model.HeadBucketRequest
-import software.amazon.awssdk.services.s3.model.HeadObjectRequest
-import software.amazon.awssdk.services.s3.model.HeadObjectResponse
-import software.amazon.awssdk.services.s3.model.S3Exception
-import java.io.IOException
-import java.util.UUID
+import software.amazon.awssdk.services.s3.model.*
+import java.nio.ByteBuffer
+import java.util.*
 
 
 @Service
 class S3CloudService(
     private val s3Template: S3Template,
+    private val s3AsyncClient: S3AsyncClient,
     private val s3Client: S3Client,
     @Value("\${spring.cloud.aws.s3.bucket.name:photos}")
     private val bucketName: String,
@@ -58,53 +58,82 @@ class S3CloudService(
         }
     }
 
-    fun uploadFiles(context: IsContext, files: Array<MultipartFile>, prefix: String?): MutableList<String> {
-        val result = mutableListOf<String>()
+    fun uploadFiles(context: IsContext, files: Flux<FilePart>, prefix: String?): Mono<List<String>> {
 
-        log.info("!!!!!!!!!!! files:{}, files size:{}", files, files.size)
-        log.info("!!!!!!!!!!! maxFiles:{}", maxFiles)
+        return files
+            .index()
+            .flatMap { tuple ->
+                val index = tuple.t1
+                val file = tuple.t2
 
-        if (files.isEmpty()) {
-            context.errors.add(createError("NO_FILES", "No files provided"))
-            return result
-        }
+                if (index >= maxFiles) {
+                    context.errors.add(
+                        createError(
+                            "TOO_MANY_FILES",
+                            "Too many files: max $maxFiles allowed"
+                        )
+                    )
+                    return@flatMap Mono.error(IllegalArgumentException("Too many files"))
+                }
 
-        if (files.size > maxFiles) {
-            context.errors.add(createError("TOO_MANY_FILES", "Too many files: max $maxFiles allowed"))
-            return result
-        }
-
-        for (file in files) {
-            val fileName = uploadFile(context, file, prefix)
-            if (fileName == null) {
-                break
+                uploadFile(context, file, prefix)
             }
-            result.add(fileName)
-        }
-
-        return result
+            .switchIfEmpty(
+                Mono.defer {
+                    context.errors.add(
+                        createError("NO_FILES", "No files provided")
+                    )
+                    Mono.error(IllegalArgumentException("No files"))
+                }
+            )
+            .collectList()
     }
 
-    fun uploadFile(context: IsContext, file: MultipartFile, prefix: String?): String? {
-        val finalPrefix = if (StringUtils.hasLength(prefix)) "$prefix/" else ""
-        val fileName = finalPrefix + UUID.randomUUID() + "_" + file.originalFilename
+    fun uploadFile(context: IsContext, file: FilePart, prefix: String?): Mono<String> {
+        val finalPrefix = if (StringUtils.hasText(prefix)) "$prefix/" else ""
+        val fileName = finalPrefix + UUID.randomUUID() + "_" + file.filename()
 
-        if (fileExists(fileName)) {
-            context.errors.add(createError("FILE_EXISTS", "File already exists: $fileName"))
-            return null
-        }
+        return Mono.fromCallable { fileExists(fileName) }
+            .flatMap { exists ->
+                if (exists) {
+                    context.errors.add(
+                        createError("FILE_EXISTS", "File already exists: $fileName")
+                    )
+                    Mono.error(IllegalStateException("File exists"))
+                } else {
 
-        val metadata = ObjectMetadata.builder()
-            .contentType(file.contentType)
-            .build()
+                    val request = PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(fileName)
+                        .contentType(file.headers().contentType?.toString())
+                        .build()
 
-        try {
-            s3Template.upload(bucketName, fileName, file.inputStream, metadata)
-            return fileName
-        } catch (e: IOException) {
-            context.errors.add(createError("STORE_NOT_FOUND", "Storage not found or unavailable: $fileName"))
-            return null
-        }
+                    val body = AsyncRequestBody.fromPublisher(
+                        file.content().map { buffer ->
+                            try {
+                                val bytes = ByteArray(buffer.readableByteCount())
+                                buffer.read(bytes)
+                                ByteBuffer.wrap(bytes)
+                            } finally {
+                                DataBufferUtils.release(buffer)
+                            }
+                        }
+                    )
+
+                    Mono.fromFuture(
+                        s3AsyncClient.putObject(request, body)
+                    ).thenReturn(fileName)
+                }
+            }
+            .onErrorResume { ex ->
+                context.errors.add(
+                    createError(
+                        "STORE_NOT_FOUND",
+                        "Storage not found or unavailable: $fileName"
+                    )
+                )
+                Mono.error(ex)
+            }
     }
 
     fun getObjectMetadata(context: IsContext, fileName: String): HeadObjectResponse? {
