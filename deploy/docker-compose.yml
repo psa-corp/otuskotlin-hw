@@ -206,7 +206,7 @@ services:
 
   ingredient-scan-app:
     image: darthchain/ingredient-scan-scan-hw:latest
-    container_name: ingredient-scan-app-hw
+    container_name: ingredient-scan-app
     pull_policy: always
 
     environment:

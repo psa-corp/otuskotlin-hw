@@ -65,11 +65,11 @@ services:
   # ========== TEST APPLICATION ==========
   ingredient-scan-app:
     image: darthchain/ingredient-scan-scan-hw:latest
-    container_name: ingredient-scan-app-test-hw
+    container_name: ingredient-scan-app-test
     pull_policy: always
     environment:
       # SPRING PROFILE - используем PROD
-      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_PROFILES_ACTIVE=test
       # ОТКЛЮЧАЕМ DOCKER COMPOSE SUPPORT ДЛЯ КОНТЕЙНЕРА!
       - SPRING_BOOT_DOCKER_COMPOSE_ENABLED=false
       # MINIO - minio:9000

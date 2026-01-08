@@ -31,6 +31,7 @@ rootProject.name = "ingredient-scan-tests"
 includeBuild("../ingredient-scan") {
     dependencySubstitution {
         substitute(module("net.otuskotlin.ingredientscan:core-common")).using(project(":core-common"))
+        substitute(module("net.otuskotlin.ingredientscan:core-stubs")).using(project(":core-stubs"))
         substitute(module("net.otuskotlin.ingredientscan:api-v1-external-jackson")).using(project(":api-v1-external-jackson"))
         substitute(module("net.otuskotlin.ingredientscan:api-v1-external-mappers")).using(project(":api-v1-external-mappers"))
     }

@@ -17,10 +17,11 @@ dependencies {
     testImplementation(kotlin("stdlib"))
 
     testImplementation(libs.spring.boot.starter.test)
-    testImplementation(libs.spring.boot.starter.web)
+    testImplementation(libs.spring.boot.starter.webflux)
     testImplementation(libs.spring.boot.docker.compose)
 
     testImplementation("net.otuskotlin.ingredientscan:core-common")
+    testImplementation("net.otuskotlin.ingredientscan:core-stubs")
     testImplementation("net.otuskotlin.ingredientscan:api-v1-external-jackson")
     testImplementation("net.otuskotlin.ingredientscan:api-v1-external-mappers")
 
@@ -100,7 +101,7 @@ tasks {
             while (attempts < maxAttempts) {
                 try {
                     // Проверяем здоровье приложения
-                    val healthUrl = "http://localhost:8081/v1/actuator/health"
+                    val healthUrl = "http://localhost:8081/actuator/health"
                     val process = ProcessBuilder("curl", "-f", healthUrl)
                         .redirectErrorStream(true)
                         .start()
