@@ -1,3 +1,6 @@
+# Envoy Proxy Configuration
+# Для Ingredient Scan - Production
+
 admin:
   access_log_path: /tmp/admin_access.log
   address:
@@ -14,76 +17,141 @@ static_resources:
           port_value: 8080
       filter_chains:
         - filters:
-          - name: envoy.filters.network.http_connection_manager
-            typed_config:
-              "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
-              stat_prefix: ingress_http
-              route_config:
-                name: local_route
-                virtual_hosts:
-                  - name: ingredient_scan_service
-                    domains: [ "*" ]
-                    routes:
-                      # Public endpoints (no auth required) - возможно они не нужны
-                      - match: { prefix: "/health" }
-                        route: { cluster: ingredient-scan-app }
-                      - match: { prefix: "/v1/analysis/" }
-                        route: { cluster: ingredient-scan-app }
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: ingress_http
 
-                      # Protected endpoints (JWT required)
-                      - match: { prefix: "/v1/scan/" }
-                        route: { cluster: ingredient-scan-app }
-                      - match: { prefix: "/v1/composition/" }
-                        route: { cluster: ingredient-scan-app }
-                      - match: { prefix: "/v1/components/" }
-                        route: { cluster: ingredient-scan-app }
-                      # Endpoint to S3 - пока S3 нет, исследую вопрос
-                      - match: { prefix: "/v1/upload/" }
-                        route: { cluster: ingredient-scan-app }
+                access_log:
+                  - name: envoy.access_loggers.stdout
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.data.accesslog.v3.StdoutAccessLog
 
-                      # Keycloak endpoints
-                      - match: { prefix: "/admin/" }
-                        route: { cluster: keycloak }
-                      - match: { prefix: "/realms/" }
-                        route: { cluster: keycloak }
-                      - match: { prefix: "/resources/" }
-                        route: { cluster: keycloak }
-              http_filters:
-                - name: envoy.filters.http.jwt_authn
-                  typed_config:
-                    "@type": type.googleapis.com/envoy.extensions.filters.http.jwt_authn.v3.JwtAuthentication
-                    providers:
-                      keycloak_provider:
-                        issuer: "http://localhost:8080/realms/ingredient-scan"
-                        remote_jwks:
-                          http_uri:
-                            uri: http://keycloak:8080/realms/ingredient-scan/protocol/openid-connect/certs
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: ingredient_scan_service
+                      domains: ["*"]
+                      routes:
+
+                        # ========== PUBLIC ENDPOINTS (без JWT) ==========
+
+                        # Health check - для мониторинга
+                        - match: { prefix: "/v1/actuator/health" }
+                          route:
+                            cluster: ingredient-scan-app
+                            timeout: 10s
+
+                        - match: { prefix: "/v1/actuator/info" }
+                          route:
+                            cluster: ingredient-scan-app
+                            timeout: 10s
+
+                        # Download files - публичный
+                        - match: { prefix: "/v1/download/file/" }
+                          route:
+                            cluster: ingredient-scan-app
+                            timeout: 30s
+
+                        # ========== PROTECTED ENDPOINTS (требуют JWT) ==========
+
+                        # Analysis regenerate - все операции (GET, POST, PUT, DELETE)
+                        - match: { prefix: "/v1/analysis/" }
+                          route:
+                            cluster: ingredient-scan-app
+                            timeout: 60s
+
+                        # Composition - все операции (GET, POST, PUT, DELETE)
+                        - match: { prefix: "/v1/composition/" }
+                          route:
+                            cluster: ingredient-scan-app
+                            timeout: 60s
+
+                        # ========== KEYCLOAK ENDPOINTS ==========
+
+                        - match: { prefix: "/admin/" }
+                          route:
                             cluster: keycloak
-                            timeout: 5s
-                          cache_duration:
-                            seconds: 300
-                        # Пробрасываем JWT в заголовок запроса
-                        forward: true
-                        forward_payload_header: x-jwt-payload
-                    rules:
-                      - match: { prefix: "/v1/scan/" }
-                        requires: { provider_name: keycloak_provider }
-                      - match: { prefix: "/v1/composition/" }
-                        requires: { provider_name: keycloak_provider }
-                      - match: { prefix: "/v1/components/" }
-                        requires: { provider_name: keycloak_provider }
-                        # Endpoint to S3 - пока S3 нет, исследую вопрос
-                      - match: { prefix: "/v1/upload/" }
-                        requires: { provider_name: keycloak_provider }
-                - name: envoy.filters.http.router
-                  typed_config:
-                    "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+                            timeout: 30s
+
+                        - match: { prefix: "/realms/" }
+                          route:
+                            cluster: keycloak
+                            timeout: 30s
+
+                        - match: { prefix: "/resources/" }
+                          route:
+                            cluster: keycloak
+                            timeout: 30s
+
+                        # Catch-all 404
+                        - match: { prefix: "/" }
+                          direct_response:
+                            status: 404
+                            body:
+                              inline_string: "404 Not Found"
+
+                http_filters:
+
+                  # ========== JWT Authentication Filter ==========
+                  - name: envoy.filters.http.jwt_authn
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.jwt_authn.v3.JwtAuthentication
+
+                      providers:
+                        keycloak_provider:
+                          issuer: "http://keycloak:8080/realms/ingredient-scan"
+                          remote_jwks:
+                            http_uri:
+                              uri: "http://keycloak:8080/realms/ingredient-scan/protocol/openid-connect/certs"
+                              cluster: keycloak
+                              timeout: 5s
+                            cache_duration:
+                              seconds: 300
+
+                          forward: true
+                          forward_payload_header: "x-jwt-payload"
+
+                      # JWT требуется только для защищенных endpoint'ов
+                      rules:
+
+                        # PROTECTED: Analysis требует JWT
+                        - match: { prefix: "/v1/analysis/" }
+                          requires:
+                            provider_name: "keycloak_provider"
+
+                        # PROTECTED: Composition требует JWT
+                        - match: { prefix: "/v1/composition/" }
+                          requires:
+                            provider_name: "keycloak_provider"
+
+                        # PUBLIC: Эти endpoint'ы не требуют JWT
+                        - match: { prefix: "/v1/actuator/" }
+                          allow_missing_or_failed: true
+
+                        - match: { prefix: "/v1/download/" }
+                          allow_missing_or_failed: true
+
+                        - match: { prefix: "/admin/" }
+                          allow_missing_or_failed: true
+
+                        - match: { prefix: "/realms/" }
+                          allow_missing_or_failed: true
+
+                  # ========== HTTP Router Filter ==========
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
   clusters:
+
+    # ========== ingredient-scan-app cluster ==========
     - name: ingredient-scan-app
-      connect_timeout: 30s
       type: LOGICAL_DNS
       dns_lookup_family: V4_ONLY
       lb_policy: ROUND_ROBIN
+      connect_timeout: 30s
+
       load_assignment:
         cluster_name: ingredient-scan-app
         endpoints:
@@ -94,10 +162,21 @@ static_resources:
                       address: ingredient-scan-app
                       port_value: 8080
 
+      health_checks:
+        - timeout: 10s
+          interval: 10s
+          unhealthy_threshold: 3
+          healthy_threshold: 2
+          http_health_check:
+            path: /v1/actuator/health
+
+    # ========== Keycloak cluster ==========
     - name: keycloak
-      connect_timeout: 0.25s
       type: LOGICAL_DNS
+      dns_lookup_family: V4_ONLY
       lb_policy: ROUND_ROBIN
+      connect_timeout: 10s
+
       load_assignment:
         cluster_name: keycloak
         endpoints:
@@ -107,3 +186,11 @@ static_resources:
                     socket_address:
                       address: keycloak
                       port_value: 8080
+
+      health_checks:
+        - timeout: 5s
+          interval: 10s
+          unhealthy_threshold: 2
+          healthy_threshold: 2
+          http_health_check:
+            path: /realms/ingredient-scan/.well-known/openid-configuration

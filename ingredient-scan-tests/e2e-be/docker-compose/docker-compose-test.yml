@@ -1,0 +1,98 @@
+# Test Docker Compose - Minimal версия для тестов
+# Запускается автоматически через Spring Boot Docker Compose Support
+
+name: ingredient-scanner-test
+
+services:
+  # ========== STORAGE (S3) ==========
+  minio:
+    image: minio/minio:latest
+    container_name: minio_test
+    ports:
+      - "9000:9000"  # S3 API
+      - "9001:9001"  # Web Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadminpassword
+      MINIO_DEFAULT_BUCKETS: photos
+    volumes:
+      - ./volumes/minio_data_test:/data
+    command: server /data --console-address :9001
+    restart: unless-stopped
+
+  # ========== MESSAGE BROKER (Kafka) ==========
+  zookeeper:
+    image: zookeeper:3.8
+    container_name: zookeeper_test
+    ports:
+      - "2182:2181"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2181
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: "*"
+    volumes:
+      - zookeeper_data_test:/var/lib/zookeeper/data
+      - zookeeper_datalog_test:/var/lib/zookeeper/datalog
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka_test
+    ports:
+      - "9092:9092"  # External listener (от хоста)
+      - "9093:9093"  # Internal listener (в Docker сети)
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # Настройка листенеров
+      KAFKA_LISTENERS: INTERNAL://:9093,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      # Дополнительные настройки
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_LOG4J_ROOT_LOGLEVEL: WARN
+      KAFKA_BROKER_ID: 1
+    depends_on:
+      - zookeeper
+    volumes:
+      - kafka_data_test:/var/lib/kafka/data
+    restart: unless-stopped
+
+  # ========== TEST APPLICATION ==========
+  ingredient-scan-app:
+    image: darthchain/ingredient-scan-scan-hw:latest
+    container_name: ingredient-scan-app-test
+    pull_policy: always
+    environment:
+      # SPRING PROFILE - используем PROD
+      - SPRING_PROFILES_ACTIVE=test
+      # ОТКЛЮЧАЕМ DOCKER COMPOSE SUPPORT ДЛЯ КОНТЕЙНЕРА!
+      - SPRING_BOOT_DOCKER_COMPOSE_ENABLED=false
+      # MINIO - minio:9000
+      - SPRING_CLOUD_AWS_CREDENTIALS_ACCESS_KEY=minioadmin
+      - SPRING_CLOUD_AWS_CREDENTIALS_SECRET_KEY=minioadminpassword
+      - SPRING_CLOUD_AWS_REGION_STATIC=us-east-1
+      - SPRING_CLOUD_AWS_ENDPOINT=http://minio:9000
+      - SPRING_CLOUD_AWS_S3_BUCKET_NAME=photos
+      # KAFKA - kafka:9093
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9093
+    ports:
+      - "8081:8080"
+    depends_on:
+      - kafka
+      - minio
+    restart: unless-stopped
+
+volumes:
+  zookeeper_data_test:
+  zookeeper_datalog_test:
+  kafka_data_test:
+
+networks:
+  default:
+    name: ingredient-scan-test-network
+    driver: bridge

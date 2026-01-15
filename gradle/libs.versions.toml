@@ -11,20 +11,43 @@ jreImage = "21-jdk-alpine"
 kotlinx-serialization = "1.8.1"
 openapi-generator = "7.15.0"
 jackson = "2.20.1"
+# apiDocs
+swagger = "2.2.41"
+springdoc = "2.8.13"
+
+spring-kafka = "3.3.10"
+kafka-streams = "3.8.0"
+spring-kafka-test = "3.3.10"
+kafka-clients = "4.1.1"
 
 # Тестовые зависимости
-junit = "5.14.0"
-platform-launcher = "1.14.1"
-testcontainers = "1.19.7"
+junit = "5.10.2"
+junit-platform = "1.10.2"
+testcontainers = "1.21.3"
 okhttp = "5.3.2"
 slf4j = "2.0.17"
 assertj = "3.27.6"
 assertk = "0.28.1"
 fluentd-logger = "0.3.4"
-logback = "1.4.14"
+logback = "1.5.20"
 logstash-logback-encoder = "7.4"
 logback-json-classic = "0.1.5"
 logback-jackson = "0.1.5"
+#janino = "3.1.12"
+mockito = "5.17.0"
+mockito-kotlin = "5.2.1"
+reactor-test = "3.8.1"
+mockk = "1.13.12"
+
+logback-access = "2.0.7"
+
+#S3
+awssdk = "2.38.7"
+awspring = "3.3.1"
+
+
+coroutines = "1.10.2"
+caffeine = "3.2.2"
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -43,10 +66,31 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 # Spring Boot
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "spring-boot" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "spring-boot" }
+spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "spring-boot" }
+spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux", version.ref = "spring-boot" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test", version.ref = "spring-boot" }
+spring-boot-docker-compose = { module = "org.springframework.boot:spring-boot-docker-compose", version.ref = "spring-boot" }
+spring-boot-testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers", version.ref = "spring-boot" }
+# Spring Kafka
+spring-kafka = { module = "org.springframework.kafka:spring-kafka", version.ref = "spring-kafka" }
+
+# Kafka Streams
+kafka-streams = { module = "org.apache.kafka:kafka-streams", version.ref = "kafka-streams" }
+spring-kafka-test = { module = "org.springframework.kafka:spring-kafka-test", version.ref = "spring-kafka-test" }
+kafka-streams-test = { module = "org.apache.kafka:kafka-streams-test-utils", version.ref = "kafka-streams" }
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "kafka-clients" }
 
 # Сериализация
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+
+# Coroutines
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactor", version.ref = "coroutines" }
+coroutines-reactive = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactive", version.ref = "coroutines" }
+
+
 
 # Jackson
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
@@ -58,14 +102,18 @@ junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
-junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "platform-launcher" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
+junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit-platform" }
 
 # Testcontainers
 testcontainers-core = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
 testcontainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
-
+testcontainers-minio = { module = "org.testcontainers:minio", version.ref = "testcontainers" }
+testcontainers-docker-compose = { module = "org.testcontainers:docker-compose", version.ref = "testcontainers" }
 # HTTP CLIENT
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+
+#janino = { module = "org.codehaus.janino:janino", version.ref = "janino" }
 
 # Логирование
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
@@ -75,17 +123,34 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
 logback-json-classic = { module = "ch.qos.logback.contrib:logback-json-classic", version.ref = "logback-json-classic" }
 logback-jackson = { module = "ch.qos.logback.contrib:logback-jackson", version.ref = "logback-jackson" }
+logback-access-tomcat = { module = "ch.qos.logback.access:logback-access-tomcat", version.ref = "logback-access" }
 
 # ASSERTION LIBRARIES
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
+
+projectreactor-reactor-test = { module = "io.projectreactor:reactor-test", version.ref = "reactor-test" }
+mockk-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+
+
+swagger-core = { module = "io.swagger.core.v3:swagger-annotations", version.ref = "swagger" }
+springdoc-openapi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+
+#s3
+spring-cloud-aws = { module = "io.awspring.cloud:spring-cloud-aws-starter-s3", version.ref = "awspring" }
+software-amazon = { module = "software.amazon.awssdk:s3", version.ref = "awssdk" }
+software-amazon-client = { module = "software.amazon.awssdk:netty-nio-client", version.ref = "awssdk" }
+
+
+github-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+
 
 [bundles]
-
-
 testcontainers = [
     "testcontainers-core",
-    "testcontainers-junit"
+    "testcontainers-junit",
 ]
 
 fluent-logging = [

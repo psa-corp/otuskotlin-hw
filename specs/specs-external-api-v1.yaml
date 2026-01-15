@@ -22,6 +22,7 @@ paths:
       summary: Получение анализа состава по ID
       operationId: analysisGet
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -52,6 +53,7 @@ paths:
       summary: Перегенерация анализа состава
       operationId: analysisRegenerate
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -107,9 +109,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /composition/create/photos:
+  /media/composition/create/photos:
     post:
-      tags: [composition]
+      tags: [media]
       summary: Создание состава по фото
       operationId: compositionCreateByPhotos
       requestBody:
@@ -118,13 +120,15 @@ paths:
           multipart/form-data:
             schema:
               type: object
+              required: [photos, scan]
               properties:
                 photos:
                   type: array
+                  description: Фотографии состава
                   items:
                     type: string
                     format: binary
-                  description: Фотографии состава
+                    x-content-type: application/octet-stream
                 scan:
                   $ref: '#/components/schemas/CompositionCreateByPhotosRequest' # Используем Request Wrapper
       responses:
@@ -147,19 +151,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /composition/get/{id}:
+  /composition/get:
     post:
       tags: [composition]
       summary: Получение состава по ID
       operationId: compositionGet
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID состава
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -178,11 +176,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /download/file/{fileName}:
+  /composition/context/get:
     post:
+      tags: [composition]
+      summary: Получение контекста состава по ID
+      operationId: compositionContextGet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompositionContextGetRequest'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompositionContextGetResponse'
+        '404':
+          description: Контекст состава не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /download/file/{fileName}:
+    get:
       tags: [download]
       summary: Скачивание файла
       operationId: downloadFile
+      x-use-response-entity: true
       parameters:
         - name: fileName
           in: path
@@ -190,11 +214,6 @@ paths:
           schema:
             type: string
           description: Имя файла
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DownloadFileRequest'
       responses:
         '200':
           description: Успешный ответ
@@ -269,6 +288,7 @@ components:
           compositionCreateByPhotos: '#/components/schemas/CompositionCreateByPhotosRequest'
           compositionGet: '#/components/schemas/CompositionGetRequest'
           downloadFile: '#/components/schemas/DownloadFileRequest'
+          compositionContextGet: '#/components/schemas/CompositionContextGetRequest'
 
     IResponse:
       type: object
@@ -292,6 +312,7 @@ components:
           compositionCreateByManual: '#/components/schemas/CompositionCreateByManualResponse'
           compositionCreateByPhotos: '#/components/schemas/CompositionCreateByPhotosResponse'
           compositionGet: '#/components/schemas/CompositionGetResponse'
+          compositionContextGet: '#/components/schemas/CompositionContextGetResponse'
           error: '#/components/schemas/ErrorResponse'
 
     # --- Wrapper Schemas (Requests) ---
@@ -300,6 +321,8 @@ components:
       allOf:
         - $ref: '#/components/schemas/IRequest'
         - type: object
+          required:
+            - analysisId
           properties:
             debug:
               $ref: '#/components/schemas/RequestDebug'
@@ -307,11 +330,14 @@ components:
               type: string
               description: ID анализа для получения
               example: "analysis_123"
+              nullable: false
 
     AnalysisRegenerateRequest:
       allOf:
         - $ref: '#/components/schemas/IRequest'
         - type: object
+          required:
+            - analysisId
           properties:
             debug:
               $ref: '#/components/schemas/RequestDebug'
@@ -319,17 +345,20 @@ components:
               type: string
               description: ID анализа для получения
               example: "analysis_123"
+              nullable: false
 
     CompositionCreateByManualRequest:
       allOf:
         - $ref: '#/components/schemas/IRequest'
         - type: object
+          required:
+            - scan
           properties:
             debug:
               $ref: '#/components/schemas/RequestDebug'
             scan:
               $ref: '#/components/schemas/ScanManualDto'
-        - type: object
+              nullable: false
 
     CompositionCreateByPhotosRequest:
       allOf:
@@ -353,6 +382,18 @@ components:
               type: string
               description: ID состава
               example: "composition_123"
+
+    CompositionContextGetRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - type: object
+          properties:
+            debug:
+              $ref: '#/components/schemas/RequestDebug'
+            contextId:
+              type: string
+              description: ID контекста
+              example: "context_123"
 
     DownloadFileRequest:
       allOf:
@@ -385,18 +426,18 @@ components:
         - $ref: '#/components/schemas/IResponse'
         - type: object
           properties:
-            compositionId:
+            contextId:
               type: string
-              example: "composition_123"
+              example: "context_123"
 
     CompositionCreateByPhotosResponse:
       allOf:
         - $ref: '#/components/schemas/IResponse'
         - type: object
           properties:
-            compositionId:
+            contextId:
               type: string
-              example: "composition_123"
+              example: "context_123"
 
     CompositionGetResponse:
       allOf:
@@ -405,6 +446,14 @@ components:
           properties:
             composition:
               $ref: '#/components/schemas/Composition'
+
+    CompositionContextGetResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - type: object
+          properties:
+            context:
+              $ref: '#/components/schemas/CompositionContext'
 
     ErrorResponse:
       allOf:
@@ -438,8 +487,7 @@ components:
           minimum: 1.0
           maximum: 5.0
         color:
-          type: string
-          enum: [dark_red, red, orange, yellow, light_yellow, light_green, green, dark_green]
+          $ref: '#/components/schemas/Color'
         problematicComponent:
           type: array
           items:
@@ -487,6 +535,26 @@ components:
         type:
           $ref: '#/components/schemas/ScanType'
 
+    CompositionContext:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID контекста
+          example: "context_123"
+        state:
+          $ref: '#/components/schemas/State'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+        timeStart:
+          type: string
+          format: date-time
+          description: Время начала
+        composition:
+          $ref: '#/components/schemas/Composition'
+
     Component:
       type: object
       properties:
@@ -511,7 +579,16 @@ components:
     ScanType:
       type: string
       enum: [MANUAL, PHOTO]
+      description: "Тип сканирования"
 
     RiskLevel:
       type: string
       enum: [MINIMAL, LOW, MEDIUM, HIGH, CRITICAL]
+
+    State:
+      type: string
+      enum: [NONE, RUNNING, FAILING, FINISHING]
+
+    Color:
+      type: string
+      enum: [DARK_RED, RED, ORANGE, YELLOW, LIGHT_YELLOW, LIGHT_GREEN, GREEN, DARK_GREEN]

@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: ingredient-scan-tests
+
+  mandatory-file-encoding: UTF-8
+
+  main:
+#    banner-mode: off
+#    web-application-type: none
+
+  webflux:
+    multipart:
+      max-in-memory-size: 256KB
+      max-disk-usage-per-part: 1GB
+
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: NON_NULL
+
+  docker:
+    compose:
+      enabled: false
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ingredient-scanner-test-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+
+logging:
+  level:
+    root: DEBUG
+    net.otuskotlin: DEBUG
+    org.springframework.boot.docker.compose: DEBUG
+    org.springframework.boot.docker.compose.service.connection: DEBUG
+
+    org.apache.kafka: WARN
+    org.apache.kafka.common.config.AbstractConfig: ERROR
+    org.apache.kafka.clients: WARN
+
+    org.springframework: INFO
+
+    org.testcontainers: INFO
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

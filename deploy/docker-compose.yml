@@ -1,43 +1,10 @@
-# Минимальная версия инфраструктуры на базе
-# OpenSearch - хранилище логов и метрик
-# OpenSearch Dashboards - отрисовка логов
-# Fluent Bit - служба сбора логов
-# Envoy - прокси
-# Keycloak - сервер идентификации
+# Production Docker Compose
+# Для Ingredient Scan Production
 
-# Адреса:
-# Приложение доступно по http://localhost:8080 (envoy прокси)
-# Панели мониторинга http://localhost:5601 (opensearch dashboards, kibana)
-# Управление пользователями http://localhost:8180/admin (keycloak)
+name: ingredient-scanner-prod
+
 services:
-  ingredient-scan-app:
-    # ОБРАЗ ИЗ JIB
-    image: darthchain/ingredient-scan-scan:latest
-    container_name: ingredient-scan-app
-    pull_policy: always # Всегда проверять обновление образа
-    environment:
-      - KEYCLOAK_URL=http://keycloak:8080
-      - KEYCLOAK_REALM=ingredient-scan
-      - KEYCLOAK_CLIENT_ID=ingredient-scan-service
-      - DATABASE_URL=jdbc:postgresql://postgres:5432/ingredient_scan
-      - SPRING_DATASOURCE_USERNAME=ingredient_user
-      - SPRING_DATASOURCE_PASSWORD=ingredient_pass
-    ports:
-      - "8081:8080" # !!! Прямой доступ к приложению (для отладки, в обход Envoy)
-    depends_on:
-      # ИЗМЕНЕНИЕ: Ждем, пока Keycloak будет HEALTHY
-      keycloak:
-        condition: service_healthy
-      postgres:
-        condition: service_started
-      opensearch:
-        condition: service_started
-    healthcheck:
-      # Alpine не имеет curl, используем wget. Путь к Actuator health.
-      test: wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  # ========== ИНФРАСТРУКТУРА ==========
 
   postgres:
     image: postgres:17.7
@@ -48,15 +15,163 @@ services:
       - POSTGRES_PASSWORD=ingredient_pass
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ingredient_user -d ingredient_scan"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.0
+    container_name: keycloak
+    command:
+      - start-dev
+      - --import-realm
+      - --hostname-strict=false
+      - --http-enabled=true
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/ingredient_scan
+      KC_DB_USERNAME: ingredient_user
+      KC_DB_PASSWORD: ingredient_pass
+      KC_HEALTH_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./volumes/keycloak/import:/opt/keycloak/data/import
+      - keycloak_data:/opt/keycloak/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5s bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    restart: unless-stopped
+
+  # ========== STORAGE (S3) ==========
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio_server
+    ports:
+      - "9000:9000"  # S3 API
+      - "9001:9001"  # Web Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadminpassword
+      MINIO_DEFAULT_BUCKETS: photos
+    volumes:
+      - ./volumes/minio_data:/data
+    command: server /data --console-address :9001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # ========== MESSAGE BROKER (Kafka) ==========
+
+  zookeeper:
+    image: zookeeper:3.8
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2181
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181
+      ZOO_4LW_COMMANDS_WHITELIST: "*"
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_datalog:/var/lib/zookeeper/datalog
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc -w 2 localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka_broker
+    ports:
+      - "9092:9092"  # External listener (от хоста)
+      - "9093:9093"  # Internal listener (в Docker сети)
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # Настройка листенеров
+      KAFKA_LISTENERS: INTERNAL://:9093,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      # Дополнительные настройки
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_LOG4J_ROOT_LOGLEVEL: WARN
+      KAFKA_BROKER_ID: 1
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list 2>/dev/null || exit 0"]
+      interval: 15s
+      timeout: 20s
+      retries: 15
+      start_period: 45s
+    restart: unless-stopped
+
+  # ========== LOGGING & MONITORING ==========
+
+  opensearch:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - http.port=9200
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=adm-Password0
+    ports:
+      - '9200:9200'
+      - '9600:9600'
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -ku admin:adm-Password0 https://localhost:9200/_cluster/health?pretty | grep status | grep -q '\\(green\\|yellow\\)'"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    restart: unless-stopped
 
   fluent-bit:
+    image: fluent/fluent-bit:latest
     container_name: fluent-bit
-    image: fluent/fluent-bit
     ports:
       - "24224:24224"
       - "24224:24224/udp"
@@ -69,32 +184,9 @@ services:
       - ./volumes/fluent-bit-etc/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
       - ./volumes/fluent-bit-etc/parsers.conf:/fluent-bit/etc/parsers.conf
     depends_on:
-      - opensearch
-
-  opensearch:
-    container_name: opensearch
-    image: opensearchproject/opensearch:latest
-    environment:
-      - discovery.type=single-node
-      - http.port=9200
-      - bootstrap.memory_lock=true
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=adm-Password0
-    ports:
-      - '9200:9200'
-      - '9600:9600'
-    healthcheck:
-      test: ["CMD-SHELL", "curl -ku admin:adm-Password0 https://localhost:9200/_cluster/health?pretty | grep status | grep -q '\\(green\\|yellow\\)'"]
-      interval: 10s
-      timeout: 10s
-      retries: 10
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
+      opensearch:
+        condition: service_healthy
+    restart: unless-stopped
 
   dashboards:
     image: opensearchproject/opensearch-dashboards:latest
@@ -108,6 +200,66 @@ services:
     depends_on:
       opensearch:
         condition: service_healthy
+    restart: unless-stopped
+
+  # ========== APPLICATION ==========
+
+  ingredient-scan-app:
+    image: darthchain/ingredient-scan-scan-hw:latest
+    container_name: ingredient-scan-app
+    pull_policy: always
+
+    environment:
+      # SPRING PROFILE
+      - SPRING_PROFILES_ACTIVE=prod
+
+      # ОТКЛЮЧАЕМ DOCKER COMPOSE SUPPORT ДЛЯ PROD!
+      - SPRING_BOOT_DOCKER_COMPOSE_ENABLED=false
+
+      # KEYCLOAK
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_REALM=ingredient-scan
+      - KEYCLOAK_CLIENT_ID=ingredient-scan-service
+
+      # DATABASE
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/ingredient_scan
+      - SPRING_DATASOURCE_USERNAME=ingredient_user
+      - SPRING_DATASOURCE_PASSWORD=ingredient_pass
+
+      # MINIO - minio:9000
+      - SPRING_CLOUD_AWS_CREDENTIALS_ACCESS_KEY=minioadmin
+      - SPRING_CLOUD_AWS_CREDENTIALS_SECRET_KEY=minioadminpassword
+      - SPRING_CLOUD_AWS_REGION_STATIC=us-east-1
+      - SPRING_CLOUD_AWS_ENDPOINT=http://minio:9000
+      - SPRING_CLOUD_AWS_S3_BUCKET_NAME=photos
+
+      # KAFKA - kafka:9093
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9093
+
+    ports:
+      - "8081:8080"
+
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+    # ✅ ДОБАВИЛ HEALTH CHECK
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+    restart: unless-stopped
+
+  # ========== API GATEWAY ==========
 
   envoy:
     image: envoyproxy/envoy:v1.29.0
@@ -119,43 +271,18 @@ services:
       - "8080:8080"
     depends_on:
       ingredient-scan-app:
-        condition: service_healthy
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.1.0
-    container_name: keycloak
-    # ИЗМЕНЕНИЕ: Упрощенная команда без shell-скриптов
-    command:
-      - start-dev
-      - --import-realm
-      - --hostname-strict=false
-      - --http-enabled=true
-    environment:
-      # ИЗМЕНЕНИЕ: Исправлены переменные администратора
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/ingredient_scan
-      KC_DB_USERNAME: ingredient_user
-      KC_DB_PASSWORD: ingredient_pass
-      KC_HEALTH_ENABLED: true
-      # ИЗМЕНЕНИЕ: Добавлены настройки hostname
-      KC_HOSTNAME_STRICT: "false"
-      KC_HOSTNAME_STRICT_HTTPS: "false"
-    ports:
-      - "8180:8080"
-    volumes:
-      - ./volumes/keycloak/import:/opt/keycloak/data/import
-    depends_on:
-      postgres:
-        condition: service_healthy
-    # ИЗМЕНЕНИЕ: Упрощенный healthcheck (без curl)
-    healthcheck:
-      test: ["CMD-SHELL", "timeout 5s bash -c ':> /dev/tcp/127.0.0.1/8080' || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 20
-      start_period: 30s
+        condition: service_started
+    restart: unless-stopped
 
 volumes:
-  opensearch-data:
+  postgres_data:
+  keycloak_data:
+  opensearch_data:
+  zookeeper_data:
+  zookeeper_datalog:
+  kafka_data:
+
+networks:
+  default:
+    name: ingredient-scan-network
+    driver: bridge

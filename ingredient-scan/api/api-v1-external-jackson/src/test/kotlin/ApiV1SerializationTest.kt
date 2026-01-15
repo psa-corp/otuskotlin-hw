@@ -22,7 +22,7 @@ private val TEST_ANALYSIS = Analysis(
     createDate = OffsetDateTime.parse("2025-11-28T10:00:00Z"),
     description = "Высокий риск. Продукт содержит критические компоненты.",
     rating = 1.2,
-    color = Analysis.Color.DARK_RED,
+    color = Color.DARK_RED,
     problematicComponent = listOf(TEST_COMPONENT),
     safeComponent = emptyList(),
 )
@@ -31,8 +31,6 @@ private val TEST_COMPOSITION = Composition(
     id = "composition-123",
     createDate = OffsetDateTime.parse("2025-11-28T09:00:00Z"),
     text = "Вода, сахар, пальмовое масло, краситель E100.",
-    analysisId = "analysis-123",
-    useCount = 5
 )
 
 private val DEBUG_MODE = RequestDebug(
@@ -45,7 +43,11 @@ class ApiV1SerializationTest {
 
     @Test
     fun testAnalysisGetRequestSerialization() {
-        val request = AnalysisGetRequest(requestType = "analysisGet", debug = DEBUG_MODE)
+        val request = AnalysisGetRequest(
+            requestType = "analysisGet",
+            debug = DEBUG_MODE,
+            analysisId = "analysis-test-123")
+
         val json = apiV1ExternalMapper.writeValueAsString(request)
 
         assertContains(json, "\"requestType\":\"analysisGet\"")
@@ -157,7 +159,7 @@ class ApiV1SerializationTest {
 
     @Test
     fun testRequestPolymorphism() {
-        val jsonGet = apiV1ExternalMapper.writeValueAsString(AnalysisGetRequest(requestType = "analysisGet"))
+        val jsonGet = apiV1ExternalMapper.writeValueAsString(AnalysisGetRequest(requestType = "analysisGet", analysisId = "analysis-test-123"))
         val jsonCreate = apiV1ExternalMapper.writeValueAsString(createManualRequest)
 
         val objGet = apiV1ExternalMapper.readValue(jsonGet, IRequest::class.java)

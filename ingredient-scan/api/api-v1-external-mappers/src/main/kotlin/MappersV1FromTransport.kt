@@ -4,22 +4,15 @@ import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsContextId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsScan
 import net.otuskotlin.ingredientscan.core.common.external.models.IsScanId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsScanType
 import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
-import net.otuskotlin.ingredientscan.core.common.external.stubs.IsStubs
+import net.otuskotlin.ingredientscan.core.common.external.IsStubs
 import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownRequestClass
 
-fun IsContext.fromTransport(request: IRequest) = when (request) {
-    is AnalysisGetRequest -> fromTransport(request)
-    is AnalysisRegenerateRequest -> fromTransport(request)
-    is CompositionCreateByManualRequest -> fromTransport(request)
-    is CompositionCreateByPhotosRequest -> fromTransport(request)
-    is CompositionGetRequest -> fromTransport(request)
-    is DownloadFileRequest -> fromTransport(request)
-    else -> throw UnknownRequestClass(request.javaClass)
-}
 
 // --- Analysis Mappers ---
 
@@ -53,10 +46,10 @@ fun IsContext.fromTransport(request: CompositionCreateByManualRequest) {
     stubCase = request.debug.transportToStubCase()
 }
 
-fun IsContext.fromTransport(request: CompositionCreateByPhotosRequest) {
+fun IsContext.fromTransport(request: CompositionCreateByPhotosRequest, photos: MutableList<String>) {
     command = IsCommand.COMPOSITION_CREATE_PHOTOS
 
-    scanRequest = request.scan?.toInternal() ?: IsScan()
+    scanRequest = request.scan?.toInternal(photos) ?: IsScan()
 
     workMode = request.debug.transportToWorkMode()
     stubCase = request.debug.transportToStubCase()
@@ -64,6 +57,14 @@ fun IsContext.fromTransport(request: CompositionCreateByPhotosRequest) {
 
 fun IsContext.fromTransport(request: CompositionGetRequest) {
     command = IsCommand.COMPOSITION_GET
+    compositionIdRequest = IsCompositionId(request.compositionId.toString())
+    workMode = request.debug.transportToWorkMode()
+    stubCase = request.debug.transportToStubCase()
+}
+
+fun IsContext.fromTransport(request: CompositionContextGetRequest) {
+    command = IsCommand.COMPOSITION_CONTEXT_GET
+    contextIdRequest = IsContextId(request.contextId.toString())
     workMode = request.debug.transportToWorkMode()
     stubCase = request.debug.transportToStubCase()
 }
@@ -76,41 +77,56 @@ fun IsContext.fromTransport(request: DownloadFileRequest) {
     stubCase = request.debug.transportToStubCase()
 }
 
+fun IsContext.fromTransport(request: IRequest, photos: MutableList<String>) = when (request) {
+    is CompositionCreateByPhotosRequest -> fromTransport(request, photos)
+    else -> throw UnknownRequestClass(request.javaClass)
+}
+
+fun IsContext.fromTransport(request: IRequest) = when (request) {
+    is AnalysisGetRequest -> fromTransport(request)
+    is AnalysisRegenerateRequest -> fromTransport(request)
+    is CompositionCreateByManualRequest -> fromTransport(request)
+    is CompositionContextGetRequest -> fromTransport(request)
+    is CompositionGetRequest -> fromTransport(request)
+    is DownloadFileRequest -> fromTransport(request)
+    else -> throw UnknownRequestClass(request.javaClass)
+}
+
 // --- Helpers ---
 
-private fun ScanManualDto.toInternal(): IsScan = IsScan(
+fun ScanManualDto.toInternal(): IsScan = IsScan(
     id = this.id.toScanId(),
     text = this.text ?: "",
     type = this.type.toInternal()
 )
 
-private fun ScanPhotosDto.toInternal(): IsScan = IsScan(
+fun ScanPhotosDto.toInternal(photos : MutableList<String>): IsScan = IsScan(
     id = this.id.toScanId(),
-    files = mutableListOf(),
+    files = photos,
     type = this.type.toInternal()
 )
 
-private fun String?.toScanId() = this?.let { IsScanId(it) } ?: IsScanId.NONE
+fun String?.toScanId() = this?.let { IsScanId(it) } ?: IsScanId.NONE
 
-private fun RequestDebug?.transportToWorkMode(): IsWorkMode = when (this?.mode) {
+fun RequestDebug?.transportToWorkMode(): IsWorkMode = when (this?.mode) {
     DebugMode.PROD -> IsWorkMode.PROD
     DebugMode.TEST -> IsWorkMode.TEST
     DebugMode.STUB -> IsWorkMode.STUB
     null -> IsWorkMode.PROD
 }
 
-private fun RequestDebug?.transportToStubCase(): IsStubs = when (this?.stub) {
+fun RequestDebug?.transportToStubCase(): IsStubs = when (this?.stub) {
     RequestDebugStub.SUCCESS -> IsStubs.SUCCESS
     RequestDebugStub.NOT_FOUND -> IsStubs.NOT_FOUND
     RequestDebugStub.BAD_ID -> IsStubs.BAD_ID
     else -> IsStubs.NONE
 }
 
-private fun ScanType?.toInternal(): IsScanType = when (this) {
+fun ScanType?.toInternal(): IsScanType = when (this) {
     ScanType.MANUAL -> IsScanType.MANUAL
     ScanType.PHOTO -> IsScanType.PHOTO
     null -> IsScanType.NONE
 }
 
 
-private fun String?.toAnalysisId() = this?.let { IsAnalysisId(it) } ?: IsAnalysisId.NONE
+fun String?.toAnalysisId() = this?.let { IsAnalysisId(it) } ?: IsAnalysisId.NONE

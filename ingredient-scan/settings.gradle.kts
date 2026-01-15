@@ -27,12 +27,12 @@ plugins {
 
 rootProject.name = "ingredient-scan"
 
-// --- Остальные модули ---
-include(":scanner") // Тоже лучше использовать kebab-case
-//include(":app:app-common")
-include(":core-common")
+include(":core:core-common")
+include(":core:core-stubs")
 include(":api:api-v1-external-jackson")
 include(":api:api-v1-external-mappers")
 include(":api:api-log1")
+include(":scanner")
+include(":biz:biz-common")
 
 

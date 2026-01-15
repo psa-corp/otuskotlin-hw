@@ -8,6 +8,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.slf4j.LoggerFactory
@@ -32,7 +33,7 @@ open class BaseWiremockTest {
         @BeforeAll
         @JvmStatic
         fun startWireMock() {
-            log.info("Starting WireMock...")
+            log.info("🚀 Starting WireMock...")
 
             compose = DockerComposeContainer(File("docker-compose/docker-compose-wiremock.yml"))
                 .withExposedService(SERVICE_NAME, SERVICE_PORT)
@@ -59,36 +60,42 @@ open class BaseWiremockTest {
 
     protected fun getBaseUrl(): String = "http://localhost:$wireMockPort"
 
-    protected fun executeGet(path: String) = client.newCall(
-        Request.Builder()
-            .url("${getBaseUrl()}$path")
-            .build()
-    ).execute()
+    protected fun executeGet(path: String): Response {
+        val url = "${getBaseUrl()}$path"
+        log.info("📤 Sending GET request to WireMock: $url")
+
+        return client.newCall(
+            Request.Builder()
+                .url(url)
+                .build()
+        ).execute()
+    }
 
     protected fun executePost(
         path: String,
         body: String,
         contentType: String = "application/json"
-    ): okhttp3.Response {
-        val mediaType = contentType.toMediaType()
+    ): Response {
+        val url = "${getBaseUrl()}$path"
+        log.info("📤 Sending POST request to WireMock: $url")
+        log.debug("Request body: $body")
 
+        val mediaType = contentType.toMediaType()
         return client.newCall(
             Request.Builder()
-                .url("${getBaseUrl()}$path")
+                .url(url)
                 .post(body.toRequestBody(mediaType))
                 .build()
         ).execute()
     }
 
-    protected inline fun <reified T : IResponse> readResponse(response: okhttp3.Response): T {
+    protected inline fun <reified T : IResponse> readResponse(response: Response): T {
         val responseBodyText = response.body?.string()
             ?: throw IllegalStateException("Response body is null")
-
         return apiV1ExternalResponseDeserialize(responseBodyText)
     }
 
     protected fun readRequest(request: IRequest): String {
         return apiV1ExternalRequestSerialize(request)
     }
-
 }

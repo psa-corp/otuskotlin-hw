@@ -2,30 +2,24 @@ package net.otuskotlin.ingredientscan.mappers.v1
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.LOCAL_DATE_TIME_NONE
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsColor
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComponent
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsContextId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.core.common.external.models.IsRiskLevel
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
+import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub.Companion.STUB_ANALYSIS
 import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownIsCommand
+import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownRequestClass
+import java.time.LocalDateTime
 import java.time.ZoneOffset
-
-fun IsContext.toTransport(): IResponse = when (val cmd = command) {
-    IsCommand.ANALYSIS_GET -> toTransportAnalysisGet()
-    IsCommand.ANALYSIS_REGENERATE -> toTransportAnalysisRegenerate()
-    IsCommand.COMPOSITION_CREATE_MANUAL -> toTransportCompositionCreateManual()
-    IsCommand.COMPOSITION_CREATE_PHOTOS -> toTransportCompositionCreatePhotos()
-    IsCommand.COMPOSITION_GET -> toTransportCompositionGet()
-    IsCommand.DOWNLOAD_FILE -> toTransportDownloadFile() // Обычно файлы отдаются стримом, но если есть JSON ответ при ошибке
-    IsCommand.NONE -> throw UnknownIsCommand(cmd)
-
-    else -> throw UnknownIsCommand(cmd)
-}
 
 // --- Analysis Responses ---
 
@@ -49,14 +43,29 @@ fun IsContext.toTransportCompositionCreateManual() = CompositionCreateByManualRe
     responseType = "compositionCreateByManual",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
-    compositionId = compositionResponse.id.takeIf { it != IsCompositionId.NONE }?.asString()
+    contextId = id.takeIf { it != IsContextId.NONE }?.asString()
 )
 
 fun IsContext.toTransportCompositionCreatePhotos() = CompositionCreateByPhotosResponse(
     responseType = "compositionCreateByPhotos",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
-    compositionId = compositionResponse.id.takeIf { it != IsCompositionId.NONE }?.asString()
+    contextId = id.takeIf { it != IsContextId.NONE }?.asString()
+)
+
+fun IsContext.toTransportCompositionContextGet() = CompositionContextGetResponse(
+    responseType = "compositionContextGet",
+    result = state.toResult(),
+    errors = errors.toTransportErrors(),
+    context = compositionContextResponse.toTransport()
+)
+
+fun IsContext.toCompositionContext() = IsCompositionContext(
+    id = id,
+    state = state,
+    errors = errors,
+    timeStart = timeStart,
+    composition = compositionResponse
 )
 
 fun IsContext.toTransportCompositionGet() = CompositionGetResponse(
@@ -65,6 +74,18 @@ fun IsContext.toTransportCompositionGet() = CompositionGetResponse(
     errors = errors.toTransportErrors(),
     composition = compositionResponse.toTransport()
 )
+
+fun IsContext.toTransport() =
+    when (command) {
+        IsCommand.ANALYSIS_GET -> toTransportAnalysisGet()
+        IsCommand.ANALYSIS_REGENERATE -> toTransportAnalysisRegenerate()
+        IsCommand.COMPOSITION_CONTEXT_GET -> toTransportCompositionContextGet()
+        IsCommand.COMPOSITION_CREATE_MANUAL -> toTransportCompositionCreateManual()
+        IsCommand.COMPOSITION_CREATE_PHOTOS -> toTransportCompositionCreatePhotos()
+        IsCommand.COMPOSITION_GET -> toTransportCompositionGet()
+        IsCommand.DOWNLOAD_FILE -> toTransportDownloadFile()
+        else -> throw UnknownIsCommand(command)
+    }
 
 // --- File/Error Responses ---
 
@@ -95,7 +116,14 @@ fun IsComposition.toTransport(): Composition? = if (this.id == IsCompositionId.N
     id = id.asString(),
     createDate = createDate.atOffset(ZoneOffset.UTC),
     text = text.takeIf { it.isNotBlank() },
-    // analysisId и useCount нужно добавить в IsComposition или брать из других мест, если они там есть
+)
+
+fun IsCompositionContext.toTransport(): CompositionContext? = if (this.id == IsContextId.NONE) null else CompositionContext(
+    id = id.asString(),
+    state = state.toTransport(),
+    errors = errors.toTransportErrors(),
+    timeStart = timeStart.atOffset(ZoneOffset.UTC),
+    composition = composition.toTransport()
 )
 
 fun IsComponent.toTransport(): Component = Component(
@@ -111,19 +139,19 @@ fun IsComponent.toTransport(): Component = Component(
 
 // --- Enum Mappers ---
 
-private fun IsColor.toTransport(): Analysis.Color? = when (this) {
-    IsColor.DARK_RED -> Analysis.Color.DARK_RED
-    IsColor.RED -> Analysis.Color.RED
-    IsColor.ORANGE -> Analysis.Color.ORANGE
-    IsColor.YELLOW -> Analysis.Color.YELLOW
-    IsColor.LIGHT_YELLOW -> Analysis.Color.LIGHT_YELLOW
-    IsColor.LIGHT_GREEN -> Analysis.Color.LIGHT_GREEN
-    IsColor.GREEN -> Analysis.Color.GREEN
-    IsColor.DARK_GREEN -> Analysis.Color.DARK_GREEN
+fun IsColor.toTransport(): Color? = when (this) {
+    IsColor.DARK_RED -> Color.DARK_RED
+    IsColor.RED -> Color.RED
+    IsColor.ORANGE -> Color.ORANGE
+    IsColor.YELLOW -> Color.YELLOW
+    IsColor.LIGHT_YELLOW -> Color.LIGHT_YELLOW
+    IsColor.LIGHT_GREEN -> Color.LIGHT_GREEN
+    IsColor.GREEN -> Color.GREEN
+    IsColor.DARK_GREEN -> Color.DARK_GREEN
     IsColor.NONE -> null
 }
 
-private fun IsRiskLevel.toTransport(): RiskLevel? = when (this) {
+fun IsRiskLevel.toTransport(): RiskLevel? = when (this) {
     IsRiskLevel.CRITICAL -> RiskLevel.CRITICAL
     IsRiskLevel.HIGH -> RiskLevel.HIGH
     IsRiskLevel.MEDIUM -> RiskLevel.MEDIUM
@@ -132,20 +160,27 @@ private fun IsRiskLevel.toTransport(): RiskLevel? = when (this) {
     IsRiskLevel.NONE -> null
 }
 
-private fun IsState.toResult(): ResponseResult = when (this) {
+fun IsState.toResult(): ResponseResult = when (this) {
     IsState.RUNNING, IsState.FINISHING -> ResponseResult.SUCCESS
     IsState.FAILING -> ResponseResult.ERROR
     IsState.NONE -> ResponseResult.ERROR
 }
 
+fun IsState.toTransport(): State? = when (this) {
+    IsState.RUNNING -> State.RUNNING
+    IsState.FINISHING -> State.FINISHING
+    IsState.FAILING -> State.FAILING
+    IsState.NONE -> State.NONE
+}
+
 // --- Error Mappers ---
 
-private fun List<IsError>.toTransportErrors(): List<Error>? = this
+fun List<IsError>.toTransportErrors(): List<Error>? = this
     .map { it.toTransport() }
     .toList()
     .takeIf { it.isNotEmpty() }
 
-private fun IsError.toTransport() = Error(
+fun IsError.toTransport() = Error(
     code = code.takeIf { it.isNotBlank() },
     group = group.takeIf { it.isNotBlank() },
     field = field.takeIf { it.isNotBlank() },

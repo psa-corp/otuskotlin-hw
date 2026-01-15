@@ -9,7 +9,7 @@
       "responseType": "compositionCreateByManual",
       "result": "success",
       "errors": null,
-      "compositionId": "{{randomValue length=10 type='ALPHANUMERIC' uppercase=true}}"
+      "contextId": "{{randomValue length=10 type='ALPHANUMERIC' uppercase=true}}"
     },
     "headers": {
       "Content-Type": "application/json"
