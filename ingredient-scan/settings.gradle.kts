@@ -29,6 +29,7 @@ rootProject.name = "ingredient-scan"
 
 include(":core:core-common")
 include(":core:core-stubs")
+include(":core:core-cor")
 include(":api:api-v1-external-jackson")
 include(":api:api-v1-external-mappers")
 include(":api:api-log1")
