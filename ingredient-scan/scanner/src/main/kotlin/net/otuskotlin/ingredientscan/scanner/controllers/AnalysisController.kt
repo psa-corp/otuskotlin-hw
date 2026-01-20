@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 open class AnalysisController(private val bizService: BizService): V1BaseController(), AnalysisApi {
     override suspend fun analysisGet(analysisGetRequest: AnalysisGetRequest): AnalysisGetResponse {
-         return bizService.execute(analysisGetRequest) as AnalysisGetResponse
+         return bizService.execute(analysisGetRequest ,"AnalysisGet")
     }
 
     override suspend fun analysisRegenerate(analysisRegenerateRequest: AnalysisRegenerateRequest): AnalysisRegenerateResponse {
-        return bizService.execute(analysisRegenerateRequest) as AnalysisRegenerateResponse
+        return bizService.execute(analysisRegenerateRequest,"AnalysisRegenerate")
     }
 }

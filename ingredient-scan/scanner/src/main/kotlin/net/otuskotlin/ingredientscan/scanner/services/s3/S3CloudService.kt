@@ -2,7 +2,9 @@ package net.otuskotlin.ingredientscan.scanner.services.s3
 
 import io.awspring.cloud.s3.S3Template
 import jakarta.annotation.PostConstruct
+import kotlinx.coroutines.reactor.awaitSingle
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.models.IsContentProvider
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -30,7 +32,7 @@ class S3CloudService(
     private val bucketName: String,
     @Value("\${app.upload.max-files:5}")
     private val maxFiles: Int
-) {
+) : IsContentProvider {
 
     private val log = LoggerFactory.getLogger(S3CloudService::class.java)
 
@@ -58,8 +60,15 @@ class S3CloudService(
         }
     }
 
-    fun uploadFiles(context: IsContext, files: Flux<FilePart>, prefix: String?): Mono<List<String>> {
+    override suspend fun upload(context: IsContext, files: Any, prefix: String?): List<String> {
+        @Suppress("UNCHECKED_CAST")
+        val fileParts = files as? Flux<FilePart>
+            ?: throw IllegalArgumentException("Expected Flux<FilePart>, got ${files::class.simpleName}")
 
+        return uploadFiles(context, fileParts, prefix).awaitSingle()
+    }
+
+    suspend fun uploadFiles(context: IsContext, files: Flux<FilePart>, prefix: String?): Mono<List<String>> {
         return files
             .index()
             .flatMap { tuple ->

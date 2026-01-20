@@ -20,7 +20,6 @@ open class MediaController(private val bizService: BizService): V1BaseController
         @RequestPart("photos") photos: Flux<FilePart>,
         @RequestPart("scan") scan: CompositionCreateByPhotosRequest
     ): CompositionCreateByPhotosResponse {
-        return bizService.execute(scan, photos)
-            .let { it as CompositionCreateByPhotosResponse }  // попробую такой вариант
+        return bizService.execute(scan, photos, "CompositionCreateByPhotos")
     }
 }

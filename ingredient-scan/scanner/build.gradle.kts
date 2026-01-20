@@ -19,6 +19,9 @@ dependencies {
 	implementation(projects.core.coreCommon)
 	implementation(projects.core.coreStubs)
 	implementation(projects.biz.bizCommon)
+	implementation(projects.biz.bizCommon)
+	implementation(projects.app.appCommon)
+	implementation(projects.app.appContent)
 
 //	implementation(libs.spring.boot.starter.web)
 	implementation(libs.spring.boot.starter.webflux)

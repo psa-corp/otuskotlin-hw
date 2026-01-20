@@ -1,16 +1,16 @@
 package net.otuskotlin.ingredientscan.scanner.services.biz
 
-import kotlinx.coroutines.reactor.awaitSingle
 import net.otuskotlin.ingredientscan.api.v1.external.models.IRequest
 import net.otuskotlin.ingredientscan.api.v1.external.models.IResponse
+import net.otuskotlin.ingredientscan.app.common.IsAppSettings
+import net.otuskotlin.ingredientscan.app.common.submitHelper
+import net.otuskotlin.ingredientscan.app.content.uploadHelper
 import net.otuskotlin.ingredientscan.biz.common.IsBizProcessor
 import net.otuskotlin.ingredientscan.biz.common.IsBizSubProcessor
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.IsCorSettings
-import net.otuskotlin.ingredientscan.core.common.external.models.*
-import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
+import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.mappers.v1.toDownloadFileErrorResponse
-import net.otuskotlin.ingredientscan.mappers.v1.toTransport
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryCompositionRepository
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
 import net.otuskotlin.ingredientscan.scanner.services.s3.JsonErrorResource
@@ -30,35 +30,30 @@ open class BizService(
     private val contextRepository: InMemoryContextRepository,
     private val s3CloudService: S3CloudService,
 ) {
-
-    private val settings: IsCorSettings
-    private val processor: IsBizProcessor
-    private val subProcessor: IsBizSubProcessor
+    private val appSettings: IsAppSettings
     private val log = LoggerFactory.getLogger(BizService::class.java)
 
     init {
-        settings = IsCorSettings(messageSender = kafkaSender, contextRepository = contextRepository)
-        processor = IsBizProcessor(settings)
-        subProcessor = IsBizSubProcessor(settings)
+        val settings = IsCorSettings(
+            messageSender = kafkaSender,
+            contextRepository = contextRepository,
+            contentProvider = s3CloudService
+        )
+
+        appSettings = AppSettings(
+            settings = settings,
+            processor = IsBizProcessor(settings),
+            subProcessor = IsBizSubProcessor(settings)
+        )
         log.info("BizService initialized")
     }
 
-    open suspend fun execute(request: IRequest) : IResponse {
-        val context = IsContext()
-        context.fromTransport(request)
-        processor.exec(context)
-        subProcessor.exec(context)
-        return context.toTransport()
+    open suspend fun <R : IResponse> execute(request: IRequest, operation : String) : R {
+        return appSettings.submitHelper(request, this::class, operation)
     }
 
-    open suspend fun execute(request: IRequest, photos: Flux<FilePart>) : IResponse {
-        val context = IsContext()
-        val names = s3CloudService.uploadFiles(context, photos, null)
-            .awaitSingle()
-        context.fromTransport(request, names.toMutableList())
-        processor.exec(context)
-        subProcessor.exec(context)
-        return context.toTransport()
+    open suspend fun <R : IResponse> execute(request: IRequest, photos: Flux<FilePart>, operation : String) : R {
+        return appSettings.uploadHelper(request, photos,this::class, operation)
     }
 
     open suspend fun get(fileName: String) : ResponseEntity<Resource> {
