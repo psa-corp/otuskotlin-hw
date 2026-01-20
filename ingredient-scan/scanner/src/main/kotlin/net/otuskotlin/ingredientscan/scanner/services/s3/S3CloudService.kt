@@ -6,10 +6,16 @@ import kotlinx.coroutines.reactor.awaitSingle
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContentProvider
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
+import net.otuskotlin.ingredientscan.mappers.v1.toDownloadFileErrorResponse
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
 import org.springframework.core.io.buffer.DataBufferUtils
+import org.springframework.http.ContentDisposition
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
@@ -20,6 +26,7 @@ import software.amazon.awssdk.services.s3.S3AsyncClient
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.*
 import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
 import java.util.*
 
 
@@ -147,6 +154,45 @@ class S3CloudService(
                     Mono.error(ex)
                 }
             }
+    }
+    override suspend fun download(context: IsContext, fileName: String) : Any {
+        return get(context ,fileName);
+    }
+
+    suspend fun get(context: IsContext, fileName: String) : ResponseEntity<Resource> {
+        val cleanedFileName = fileName.removePrefix("/")
+        val metadata = getObjectMetadata(context, cleanedFileName)
+        val resource = downloadFileAsResource(context, cleanedFileName)
+
+        if (context.errors.isEmpty() && metadata != null && resource != null) {
+            val fileNameForHeader = cleanedFileName.substringAfterLast("/")
+
+            val contentDisposition = ContentDisposition.inline()
+                .filename(fileNameForHeader, StandardCharsets.UTF_8)
+                .build()
+
+            return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, metadata.contentType())
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+                .body(resource)
+        }
+
+        if (context.errors.isEmpty()) {
+            context.errors.add(IsError(code = "FILE_NOT_FOUND", group = "s3", field = "", message = "File not found: $cleanedFileName"))
+        }
+
+        val errorResponse = context.toDownloadFileErrorResponse()
+        val jsonResource = JsonErrorResource(errorResponse)
+
+        val status = when (context.errors.firstOrNull()?.code) {
+            "FILE_NOT_FOUND" -> HttpStatus.NOT_FOUND
+            "STORE_NOT_FOUND" -> HttpStatus.NOT_FOUND
+            else -> HttpStatus.INTERNAL_SERVER_ERROR
+        }
+
+        return ResponseEntity.status(status)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(jsonResource)
     }
 
     fun getObjectMetadata(context: IsContext, fileName: String): HeadObjectResponse? {

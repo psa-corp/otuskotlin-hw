@@ -11,6 +11,6 @@ import org.springframework.web.bind.annotation.RestController
 open class DownloadController(private val bizService: BizService): V1BaseController(), DownloadApi  {
 
     override suspend fun downloadFile(fileName: String): ResponseEntity<Resource> {
-        return bizService.get(fileName)
+        return bizService.execute(fileName,  "DownloadFile")
     }
 }
