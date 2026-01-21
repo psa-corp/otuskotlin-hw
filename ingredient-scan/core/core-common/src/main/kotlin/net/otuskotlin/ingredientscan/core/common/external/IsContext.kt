@@ -13,7 +13,8 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsRequestId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsScan
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
-import net.otuskotlin.ingredientscan.core.common.external.IsStubs
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionRepository
+import net.otuskotlin.ingredientscan.core.common.external.models.IsContextRepository
 import net.otuskotlin.ingredientscan.core.common.external.models.IsSubCommand
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
@@ -47,4 +48,18 @@ data class IsContext(
     var componentsResponse: MutableList<IsComponent> = mutableListOf(),
     var scanResponse: IsScan = IsScan(),
     var compositionContextResponse: IsCompositionContext = IsCompositionContext(),
+
+    // Settings
+    var settings: IsCorSettings = IsCorSettings.NONE,
+
+    // Validate
+    var validateCompositionId: IsCompositionId = IsCompositionId.NONE,
+
+    // Validated
+    var validatedCompositionId: IsCompositionId = IsCompositionId.NONE,
+
+    // Repo
+    var compositionRepo: IsCompositionRepository? = null,
+    var contextRepo: IsContextRepository? = null,
+
 )
