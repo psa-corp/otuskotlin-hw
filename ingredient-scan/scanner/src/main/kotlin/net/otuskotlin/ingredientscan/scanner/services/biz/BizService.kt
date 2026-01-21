@@ -33,6 +33,7 @@ open class BizService(
         val settings = IsCorSettings(
             messageSender = kafkaSender,
             contextRepository = contextRepository,
+            compositionRepository = compositionRepository,
             contentProvider = s3CloudService
         )
 

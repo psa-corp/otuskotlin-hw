@@ -1,5 +1,6 @@
 package net.otuskotlin.ingredientscan.core.common.external
 
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionRepository
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContentProvider
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContextRepository
 import net.otuskotlin.ingredientscan.core.common.external.models.IsMessageSender
@@ -9,9 +10,10 @@ data class IsCorSettings(
     val loggerProvider: IsLoggerProvider = IsLoggerProvider(),
     val messageSender: IsMessageSender?,
     val contextRepository: IsContextRepository?,
+    val compositionRepository: IsCompositionRepository?,
     val contentProvider: IsContentProvider?,
 ) {
     companion object {
-        val NONE = IsCorSettings(messageSender = null, contextRepository = null, contentProvider = null)
+        val NONE = IsCorSettings(messageSender = null, contextRepository = null, compositionRepository = null, contentProvider = null)
     }
 }

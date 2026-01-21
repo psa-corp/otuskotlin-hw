@@ -6,11 +6,13 @@ import java.util.concurrent.ConcurrentHashMap
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionRepository
 import java.time.Duration
 
 // Имитируем Elasticsearch
 @Repository
-open class InMemoryCompositionRepository {
+open class InMemoryCompositionRepository : IsCompositionRepository {
     private val log = LoggerFactory.getLogger(InMemoryCompositionRepository::class.java)
     private val store: Cache<String, IsComposition> = Caffeine.newBuilder()
         .maximumSize(20_000)
@@ -19,7 +21,7 @@ open class InMemoryCompositionRepository {
 
     private val textIndex = ConcurrentHashMap<String, String>()
 
-    open fun save(composition: IsComposition): IsComposition {
+    override suspend fun save(composition: IsComposition): IsComposition {
         val id = composition.id.asString()
         val text = composition.text.trim()
 
@@ -30,11 +32,11 @@ open class InMemoryCompositionRepository {
         return composition
     }
 
-    open fun findById(id: String): IsComposition? {
-        return store.getIfPresent(id)
+    override suspend fun findById(id: IsCompositionId): IsComposition? {
+        return store.getIfPresent(id.asString())
     }
 
-    open fun findByText(text: String): IsComposition? {
+    override suspend fun findByText(text: String): IsComposition? {
         val cleanText = text.trim()
 
         val id = textIndex[cleanText] ?: return null
@@ -49,7 +51,7 @@ open class InMemoryCompositionRepository {
         return composition
     }
 
-    open fun clear() {
+    override suspend fun clear() {
         store.cleanUp()
         textIndex.clear()
     }
