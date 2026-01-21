@@ -16,57 +16,57 @@ open class CompositionValidateProcessor(private val contextRepository: InMemoryC
 
     private val log = LoggerFactory.getLogger(CompositionValidateProcessor::class.java)
 
-    fun processCompositionValidation(
-        @Payload json: String,
-        @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
-    ): String {
-        log.info("=== Composition Validate started ===\nkey: {}", key)
-        val context = commonContextDeserialize(json)
-        return try {
-
-            log.info("Received context:\n" +
-                    " command: {}\n" +
-                    " text: {}",
-                context.command,
-                context.compositionRequest.text.take(50) + "..."
-            )
-
-            // Валидируем текст состава
-            val validationErrors = validateCompositionText(context.compositionRequest.text)
-
-            if (validationErrors.isNotEmpty()) {
-                log.error("Composition validation failed")
-                context.errors.addAll(validationErrors)
-                context.state = IsState.FAILING
-
-            } else {
-                log.info("Composition validation passed - proceeding to save")
-                // Нормализуем текст (убираем лишние пробелы)
-                context.compositionRequest.text = normalizeText(context.compositionRequest.text)
-                context.state = IsState.RUNNING
-            }
-
-            log.info("=== Composition Validate completed ===\nState: {}", context.state.name)
-            contextRepository.save(context)
-            commonContextSerialize(context)
-
-        } catch (e: Exception) {
-            log.error("Error during composition validation", e)
-            val errorContext = IsContext().apply {
-                errors.add(
-                    IsError(
-                        code = "VALIDATION_ERROR",
-                        group = "VALIDATE_PROCESSOR",
-                        field = "validation",
-                        message = "Validation failed: ${e.message}"
-                    )
-                )
-                state = IsState.FAILING
-            }
-            contextRepository.save(context)
-            commonContextSerialize(errorContext)
-        }
-    }
+//    fun processCompositionValidation(
+//        @Payload json: String,
+//        @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
+//    ): String {
+//        log.info("=== Composition Validate started ===\nkey: {}", key)
+//        val context = commonContextDeserialize(json)
+//        return try {
+//
+//            log.info("Received context:\n" +
+//                    " command: {}\n" +
+//                    " text: {}",
+//                context.command,
+//                context.compositionRequest.text.take(50) + "..."
+//            )
+//
+//            // Валидируем текст состава
+//            val validationErrors = validateCompositionText(context.compositionRequest.text)
+//
+//            if (validationErrors.isNotEmpty()) {
+//                log.error("Composition validation failed")
+//                context.errors.addAll(validationErrors)
+//                context.state = IsState.FAILING
+//
+//            } else {
+//                log.info("Composition validation passed - proceeding to save")
+//                // Нормализуем текст (убираем лишние пробелы)
+//                context.compositionRequest.text = normalizeText(context.compositionRequest.text)
+//                context.state = IsState.RUNNING
+//            }
+//
+//            log.info("=== Composition Validate completed ===\nState: {}", context.state.name)
+//            contextRepository.save(context)
+//            commonContextSerialize(context)
+//
+//        } catch (e: Exception) {
+//            log.error("Error during composition validation", e)
+//            val errorContext = IsContext().apply {
+//                errors.add(
+//                    IsError(
+//                        code = "VALIDATION_ERROR",
+//                        group = "VALIDATE_PROCESSOR",
+//                        field = "validation",
+//                        message = "Validation failed: ${e.message}"
+//                    )
+//                )
+//                state = IsState.FAILING
+//            }
+//            contextRepository.save(context)
+//            commonContextSerialize(errorContext)
+//        }
+//    }
 
     private fun validateCompositionText(text: String): List<IsError> {
         val errors = mutableListOf<IsError>()
