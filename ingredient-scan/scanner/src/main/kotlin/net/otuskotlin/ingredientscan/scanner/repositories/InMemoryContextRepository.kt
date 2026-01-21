@@ -19,21 +19,21 @@ open class InMemoryContextRepository: IsContextRepository {
         .expireAfterAccess(Duration.ofMinutes(30))
         .build()
 
-    override fun save(context: IsContext): IsContext {
+    override suspend fun save(context: IsContext): IsContext {
         store.put(context.id.toString(), context)
         log.info("Context saved/updated for key: ${context.id} (State: ${context.state})")
         return context
     }
 
-    override fun findById(id: String): IsContext? {
+    override suspend fun findById(id: String): IsContext? {
         return store.getIfPresent(id)
     }
 
-    override fun delete(key: String) {
+    override suspend fun delete(key: String) {
         store.invalidate(key)
     }
 
-    override fun clear() {
+    override suspend fun clear() {
         store.cleanUp()
     }
 
