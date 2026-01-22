@@ -14,6 +14,14 @@ fun ICorChainDsl<IsContext>.finishAdValidationComposition(title: String) = worke
     }
 }
 
+fun ICorChainDsl<IsContext>.finishAdValidationContext(title: String) = worker {
+    this.title = title
+    on { state == IsState.RUNNING }
+    handle {
+        validatedContextId = validateContextId
+    }
+}
+
 //fun ICorChainDsl<IsContext>.finishAdFilterValidation(title: String) = worker {
 //    this.title = title
 //    on { state == IsState.RUNNING }

@@ -2,15 +2,8 @@ package net.otuskotlin.ingredientscan.biz.common
 
 import net.otuskotlin.ingredientscan.biz.common.general.initStatus
 import net.otuskotlin.ingredientscan.biz.common.general.operation
-import net.otuskotlin.ingredientscan.biz.common.repo.initRepoComposition
-import net.otuskotlin.ingredientscan.biz.common.repo.initRepoContext
-import net.otuskotlin.ingredientscan.biz.common.repo.prepareResult
-import net.otuskotlin.ingredientscan.biz.common.repo.repoReadComposition
-import net.otuskotlin.ingredientscan.biz.common.repo.repoSaveContext
-import net.otuskotlin.ingredientscan.biz.common.validation.finishAdValidationComposition
-import net.otuskotlin.ingredientscan.biz.common.validation.validateIdNotEmptyComposition
-import net.otuskotlin.ingredientscan.biz.common.validation.validateIdProperFormatComposition
-import net.otuskotlin.ingredientscan.biz.common.validation.validation
+import net.otuskotlin.ingredientscan.biz.common.repo.*
+import net.otuskotlin.ingredientscan.biz.common.validation.*
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.IsCorSettings
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
@@ -30,7 +23,7 @@ class IsBizProcessor(private val settings: IsCorSettings) {
     suspend fun exec(context: IsContext) {
 
         if (migrationCommand.contains(context.command)) {
-            exec1(context)
+            execCor(context)
             return;
         }
 
@@ -53,7 +46,7 @@ class IsBizProcessor(private val settings: IsCorSettings) {
 
     }
 
-    suspend fun exec1(context: IsContext) = businessChain.exec(context.also { it.settings = settings })
+    suspend fun execCor(context: IsContext) = businessChain.exec(context.also { it.settings = settings })
 
     private val businessChain = rootChain<IsContext> {
         initStatus("Инициализация статуса процессора")
@@ -71,6 +64,22 @@ class IsBizProcessor(private val settings: IsCorSettings) {
             chain {
                 title = "Логика чтения"
                 repoReadComposition("Чтение состава из БД")
+                repoSaveContext("Сохранение контекста в БД")
+            }
+            prepareResult("Подготовка ответа")
+        }
+
+        operation("Получение контекста состава по ID", IsCommand.COMPOSITION_CONTEXT_GET) {
+            validation {
+                worker("Копируем context id в validateContextId") { validateContextId = contextIdRequest }
+                validateIdNotEmptyContext("Проверка, что заголовок не пуст")
+                validateIdProperFormatContext("Проверка формата id", "context")
+
+                finishAdValidationContext("Завершение проверок")
+            }
+            chain {
+                title = "Логика чтения"
+                repoReadContext("Чтение состава из БД")
                 repoSaveContext("Сохранение контекста в БД")
             }
             prepareResult("Подготовка ответа")

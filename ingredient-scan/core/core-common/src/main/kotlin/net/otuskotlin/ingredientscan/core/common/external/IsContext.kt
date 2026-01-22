@@ -54,9 +54,11 @@ data class IsContext(
 
     // Validate
     var validateCompositionId: IsCompositionId = IsCompositionId.NONE,
+    var validateContextId: IsContextId = IsContextId.NONE,
 
     // Validated
     var validatedCompositionId: IsCompositionId = IsCompositionId.NONE,
+    var validatedContextId: IsContextId = IsContextId.NONE,
 
     // Repo
     var compositionRepo: IsCompositionRepository? = null,
