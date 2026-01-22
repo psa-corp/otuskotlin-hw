@@ -17,7 +17,7 @@ import net.otuskotlin.ingredientscan.core.cor.worker
 
 
 class IsBizProcessor(private val settings: IsCorSettings) {
-    var migrationCommand: List<IsCommand> = arrayListOf(IsCommand.COMPOSITION_GET)
+    var migrationCommand: List<IsCommand> = arrayListOf(IsCommand.COMPOSITION_GET, IsCommand.COMPOSITION_CONTEXT_GET)
 
 
     suspend fun exec(context: IsContext) {
