@@ -1,58 +1,49 @@
 package net.otuskotlin.ingredientscan.scanner.repositories
 
-import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Repository
-import java.util.concurrent.ConcurrentHashMap
-import com.github.benmanes.caffeine.cache.Cache
-import com.github.benmanes.caffeine.cache.Caffeine
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionRepository
-import java.time.Duration
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Repository
+import java.util.concurrent.ConcurrentHashMap
 
-// Имитируем Elasticsearch
+// Имитируем Elasticsearch или PostgreSQL
 @Repository
 open class InMemoryCompositionRepository : IsCompositionRepository {
     private val log = LoggerFactory.getLogger(InMemoryCompositionRepository::class.java)
-    private val store: Cache<String, IsComposition> = Caffeine.newBuilder()
-        .maximumSize(20_000)
-        .expireAfterWrite(Duration.ofDays(1))
-        .build()
+    private val store = ConcurrentHashMap<IsCompositionId, IsComposition>()
 
-    private val textIndex = ConcurrentHashMap<String, String>()
+    private val textStore = ConcurrentHashMap<String, IsComposition>()
 
-    override suspend fun save(composition: IsComposition): IsComposition {
-        val id = composition.id.asString()
+    override suspend fun saveComposition(composition: IsComposition) {
         val text = composition.text.trim()
+        store[composition.id] = composition
+        textStore[text] = composition
 
-        store.put(id, composition)
-        textIndex[text] = id
-
-        log.info("Saved composition: $id")
-        return composition
+        log.info("Saved composition: ${composition.id}")
     }
 
-    override suspend fun findById(id: IsCompositionId): IsComposition? {
-        return store.getIfPresent(id.asString())
+    override suspend fun findCompositionById(id: IsCompositionId): IsComposition? {
+        return store[id]
     }
 
-    override suspend fun findByText(text: String): IsComposition? {
+    override suspend fun findCompositionByText(text: String): IsComposition? {
         val cleanText = text.trim()
-
-        val id = textIndex[cleanText] ?: return null
-        val composition = store.getIfPresent(id)
-
-        if (composition != null) {
-            log.info("Found existing composition by text: ${composition.id.asString()}")
-        } else {
-            textIndex.remove(cleanText)
-        }
-
-        return composition
+        return textStore[cleanText]
     }
 
-    override suspend fun clear() {
-        store.cleanUp()
-        textIndex.clear()
+    override suspend fun deleteComposition(id: IsCompositionId) {
+        val comp = store[id]
+        if (comp != null) {
+            store.remove(id)
+            val cleanText = comp.text.trim()
+            textStore.remove(cleanText)
+            log.info("Delete analysis: ${comp.id}")
+        }
+    }
+
+    override suspend fun clearCompositions() {
+        store.clear()
+        textStore.clear()
     }
 }

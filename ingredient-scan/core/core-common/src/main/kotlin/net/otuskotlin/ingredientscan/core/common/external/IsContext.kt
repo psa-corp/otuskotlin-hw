@@ -1,6 +1,8 @@
 package net.otuskotlin.ingredientscan.core.common.external
 
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisRepository
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComponent
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComponentFilter
@@ -40,6 +42,7 @@ data class IsContext(
     var filterRequest: IsComponentFilter = IsComponentFilter(),
     var compositionIdRequest: IsCompositionId = IsCompositionId.NONE,
     var contextIdRequest: IsContextId = IsContextId.NONE,
+    var analysisIdRequest: IsAnalysisId = IsAnalysisId.NONE,
 
     // Response data
     var analysisResponse: IsAnalysis = IsAnalysis(),
@@ -55,13 +58,16 @@ data class IsContext(
     // Validate
     var validateCompositionId: IsCompositionId = IsCompositionId.NONE,
     var validateContextId: IsContextId = IsContextId.NONE,
+    var validateAnalysisId: IsAnalysisId = IsAnalysisId.NONE,
 
     // Validated
     var validatedCompositionId: IsCompositionId = IsCompositionId.NONE,
     var validatedContextId: IsContextId = IsContextId.NONE,
+    var validatedAnalysisId: IsAnalysisId = IsAnalysisId.NONE,
 
     // Repo
     var compositionRepo: IsCompositionRepository? = null,
     var contextRepo: IsContextRepository? = null,
+    var analysisRepo: IsAnalysisRepository? = null,
 
-)
+    )

@@ -3,14 +3,14 @@ package net.otuskotlin.ingredientscan.core.common.external.models
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 
 interface IsContextRepository {
-    suspend fun save(context: IsContext): IsContext
+    suspend fun save(context: IsContext)
     suspend fun findById(id: IsContextId): IsContext?
-    suspend fun delete(key: IsContextId)
+    suspend fun delete(id: IsContextId)
     suspend fun clear()
 
     companion object {
         val NONE = object : IsContextRepository {
-            override suspend fun save(context: IsContext): IsContext {
+            override suspend fun save(context: IsContext) {
                 throw NotImplementedError("Must not be used")
             }
 
@@ -18,7 +18,7 @@ interface IsContextRepository {
                 throw NotImplementedError("Must not be used")
             }
 
-            override suspend fun delete(key: IsContextId) {
+            override suspend fun delete(id: IsContextId) {
                 throw NotImplementedError("Must not be used")
             }
 
