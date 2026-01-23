@@ -10,6 +10,7 @@ import net.otuskotlin.ingredientscan.biz.common.IsBizProcessor
 import net.otuskotlin.ingredientscan.biz.common.IsBizSubProcessor
 import net.otuskotlin.ingredientscan.core.common.external.IsCorSettings
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryCompositionRepository
+import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryAnalysisRepository
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
 import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
 import org.slf4j.LoggerFactory
@@ -24,6 +25,7 @@ open class BizService(
     private val kafkaSender: BizKafkaSender,
     private val compositionRepository: InMemoryCompositionRepository,
     private val contextRepository: InMemoryContextRepository,
+    private val analysisRepository: InMemoryAnalysisRepository,
     private val s3CloudService: S3CloudService,
 ) {
     private val appSettings: IsAppSettings
@@ -32,9 +34,10 @@ open class BizService(
     init {
         val settings = IsCorSettings(
             messageSender = kafkaSender,
+            contentProvider = s3CloudService,
             contextRepository = contextRepository,
             compositionRepository = compositionRepository,
-            contentProvider = s3CloudService
+            analysisRepository = analysisRepository,
         )
 
         appSettings = AppSettings(
