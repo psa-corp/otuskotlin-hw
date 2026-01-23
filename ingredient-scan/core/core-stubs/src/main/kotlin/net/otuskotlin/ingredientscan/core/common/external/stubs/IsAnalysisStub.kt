@@ -10,8 +10,8 @@ open class IsAnalysisStub {
 
     companion object {
         val STUB_ANALYSIS: IsAnalysis = IsAnalysis(
-            id = IsAnalysisId("analysis-test-123"),
-            compositionId = IsCompositionId("comp-test-456"),
+            id = IsAnalysisId("analysis-test123"),
+            compositionId = IsCompositionId("composition-test456"),
             createDate = LocalDateTime.now(),
             description = "Test analysis description",
             rating = 4.5,
