@@ -2,23 +2,8 @@ package net.otuskotlin.ingredientscan.mappers.v1
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
-import net.otuskotlin.ingredientscan.core.common.external.LOCAL_DATE_TIME_NONE
-import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
-import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsColor
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
-import net.otuskotlin.ingredientscan.core.common.external.models.IsComponent
-import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionContext
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsContextId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsError
-import net.otuskotlin.ingredientscan.core.common.external.models.IsRiskLevel
-import net.otuskotlin.ingredientscan.core.common.external.models.IsState
-import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub.Companion.STUB_ANALYSIS
+import net.otuskotlin.ingredientscan.core.common.external.models.*
 import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownIsCommand
-import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownRequestClass
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 // --- Analysis Responses ---
@@ -58,14 +43,6 @@ fun IsContext.toTransportCompositionContextGet() = CompositionContextGetResponse
     result = state.toResult(),
     errors = errors.toTransportErrors(),
     context = compositionContextResponse.toTransport()
-)
-
-fun IsContext.toCompositionContext() = IsCompositionContext(
-    id = id,
-    state = state,
-    errors = errors,
-    timeStart = timeStart,
-    composition = compositionResponse
 )
 
 fun IsContext.toTransportCompositionGet() = CompositionGetResponse(

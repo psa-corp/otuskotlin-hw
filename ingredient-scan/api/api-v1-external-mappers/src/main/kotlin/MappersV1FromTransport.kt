@@ -19,7 +19,7 @@ import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownRequestClass
 fun IsContext.fromTransport(request: AnalysisGetRequest) {
     command = IsCommand.ANALYSIS_GET
 
-    analysisRequest.id = request.analysisId.toAnalysisId()
+    analysisIdRequest = request.analysisId.toAnalysisId()
 
     workMode = request.debug.transportToWorkMode()
     stubCase = request.debug.transportToStubCase()
@@ -28,7 +28,7 @@ fun IsContext.fromTransport(request: AnalysisGetRequest) {
 fun IsContext.fromTransport(request: AnalysisRegenerateRequest) {
     command = IsCommand.ANALYSIS_REGENERATE
 
-    analysisRequest.id = request.analysisId.toAnalysisId()
+    analysisIdRequest = request.analysisId.toAnalysisId()
 
     workMode = request.debug.transportToWorkMode()
     stubCase = request.debug.transportToStubCase()
