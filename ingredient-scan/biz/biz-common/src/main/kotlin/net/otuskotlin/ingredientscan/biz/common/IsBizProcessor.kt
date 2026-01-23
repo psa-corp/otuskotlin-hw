@@ -17,14 +17,18 @@ import net.otuskotlin.ingredientscan.core.cor.worker
 
 
 class IsBizProcessor(private val settings: IsCorSettings) {
-    var migrationCommand: List<IsCommand> = arrayListOf(IsCommand.COMPOSITION_GET, IsCommand.COMPOSITION_CONTEXT_GET)
+    var migrationCommand: List<IsCommand> = arrayListOf(
+        IsCommand.COMPOSITION_GET,
+        IsCommand.COMPOSITION_CONTEXT_GET,
+        IsCommand.ANALYSIS_GET
+    )
 
 
     suspend fun exec(context: IsContext) {
 
         if (migrationCommand.contains(context.command)) {
             execCor(context)
-            return;
+            return
         }
 
         when (context.command) {
@@ -59,7 +63,7 @@ class IsBizProcessor(private val settings: IsCorSettings) {
                 validateIdNotEmptyComposition("Проверка, что заголовок не пуст")
                 validateIdProperFormatComposition("Проверка формата id", "composition")
 
-                finishAdValidationComposition("Завершение проверок")
+                finishValidationComposition("Завершение проверок")
             }
             chain {
                 title = "Логика чтения"
@@ -68,14 +72,13 @@ class IsBizProcessor(private val settings: IsCorSettings) {
             }
             prepareResult("Подготовка ответа")
         }
-
         operation("Получение контекста состава по ID", IsCommand.COMPOSITION_CONTEXT_GET) {
             validation {
                 worker("Копируем context id в validateContextId") { validateContextId = contextIdRequest }
                 validateIdNotEmptyContext("Проверка, что заголовок не пуст")
                 validateIdProperFormatContext("Проверка формата id", "context")
 
-                finishAdValidationContext("Завершение проверок")
+                finishValidationContext("Завершение проверок")
             }
             chain {
                 title = "Логика чтения"
@@ -84,6 +87,21 @@ class IsBizProcessor(private val settings: IsCorSettings) {
             }
             prepareResult("Подготовка ответа")
         }
-    }.build();
+        operation("Получение анализа по ID", IsCommand.ANALYSIS_GET) {
+            validation {
+                worker("Копируем context id в validateAnalysisId") { validateAnalysisId = analysisIdRequest }
+                validateIdNotEmptyAnalysis("Проверка, что заголовок не пуст")
+                validateIdProperFormatAnalysis("Проверка формата id", "analysis")
+
+                finishValidationAnalysis("Завершение проверок")
+            }
+            chain {
+                title = "Логика чтения"
+                repoReadAnalysis("Чтение состава из БД")
+                repoSaveContext("Сохранение контекста в БД")
+            }
+            prepareResult("Подготовка ответа")
+        }
+    }.build()
 
 }

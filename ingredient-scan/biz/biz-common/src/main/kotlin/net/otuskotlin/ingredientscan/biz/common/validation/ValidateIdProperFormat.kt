@@ -3,6 +3,7 @@ package net.otuskotlin.ingredientscan.biz.common.validation
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.helpers.errorValidation
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContextId
 import net.otuskotlin.ingredientscan.core.cor.ICorChainDsl
@@ -54,6 +55,26 @@ fun ICorChainDsl<IsContext>.validateIdProperFormatContext(title: String, prefix:
                 description = "value $encodedId must be either: " +
                         "1. ${prefix}_[letters-numbers-dashes] " +
                         "2. ${prefix}_uuid (where uuid is in format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)"
+            )
+        )
+    }
+}
+
+fun ICorChainDsl<IsContext>.validateIdProperFormatAnalysis(title: String, prefix: String) = worker {
+    this.title = title
+
+    // Может быть вынесен в IsCompositionId для реализации различных форматов
+    val regExp = Regex("^${Regex.escape(prefix)}_[0-9a-zA-Z-]+$")
+    on { validateAnalysisId != IsAnalysisId.NONE && !validateAnalysisId.asString().matches(regExp) }
+    handle {
+        val encodedId = validateAnalysisId.asString()
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+        fail(
+            errorValidation(
+                field = "id",
+                violationCode = "badFormat",
+                description = "value $encodedId must contain only letters and numbers"
             )
         )
     }

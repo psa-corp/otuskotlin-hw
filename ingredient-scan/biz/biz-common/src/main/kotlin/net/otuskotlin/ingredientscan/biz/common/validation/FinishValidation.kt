@@ -6,7 +6,7 @@ import net.otuskotlin.ingredientscan.core.cor.ICorChainDsl
 import net.otuskotlin.ingredientscan.core.cor.worker
 
 
-fun ICorChainDsl<IsContext>.finishAdValidationComposition(title: String) = worker {
+fun ICorChainDsl<IsContext>.finishValidationComposition(title: String) = worker {
     this.title = title
     on { state == IsState.RUNNING }
     handle {
@@ -14,13 +14,22 @@ fun ICorChainDsl<IsContext>.finishAdValidationComposition(title: String) = worke
     }
 }
 
-fun ICorChainDsl<IsContext>.finishAdValidationContext(title: String) = worker {
+fun ICorChainDsl<IsContext>.finishValidationContext(title: String) = worker {
     this.title = title
     on { state == IsState.RUNNING }
     handle {
         validatedContextId = validateContextId
     }
 }
+
+fun ICorChainDsl<IsContext>.finishValidationAnalysis(title: String) = worker {
+    this.title = title
+    on { state == IsState.RUNNING }
+    handle {
+        validatedAnalysisId = validateAnalysisId
+    }
+}
+
 
 //fun ICorChainDsl<IsContext>.finishAdFilterValidation(title: String) = worker {
 //    this.title = title

@@ -3,7 +3,6 @@ package net.otuskotlin.ingredientscan.biz.common.repo
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.helpers.errorRepo
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
-import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.cor.ICorChainDsl
 import net.otuskotlin.ingredientscan.core.cor.worker
@@ -14,7 +13,7 @@ fun ICorChainDsl<IsContext>.repoReadComposition(title: String) = worker {
     on { state == IsState.RUNNING}
     handle {
         try {
-            compositionResponse = compositionRepo?.findById(validatedCompositionId)
+            compositionResponse = compositionRepo?.findCompositionById(validatedCompositionId)
                 ?: throw RuntimeException("Composition not found. ID:$validatedCompositionId")
         } catch (e: Throwable) {
             fail(
