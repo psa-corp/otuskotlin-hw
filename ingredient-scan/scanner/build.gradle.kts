@@ -29,6 +29,7 @@ dependencies {
 	implementation(libs.spring.boot.starter.validation)
 	implementation(libs.spring.boot.docker.compose)
 	implementation(libs.coroutines.reactor)
+	implementation(libs.coroutines.core)
 
 	implementation(libs.spring.kafka)
 	implementation(libs.kafka.streams)

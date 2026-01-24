@@ -19,7 +19,7 @@ class BizKafkaSender(private val kafkaTemplate: KafkaTemplate<String, String>) :
         const val COMPOSITION_SAVE_TOPIC = "composition-save-input"
     }
 
-    override fun send(context: IsContext) {
+    override suspend fun send(context: IsContext) {
         log.info("Sending context to Kafka topic: {}", COMPOSITION_CREATE_TOPIC)
         topicByCommand(context.subCommand)?.let {topic ->
             val contextJson = commonContextSerialize(context)
