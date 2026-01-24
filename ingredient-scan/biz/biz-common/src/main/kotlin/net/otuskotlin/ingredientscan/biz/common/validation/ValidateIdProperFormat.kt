@@ -12,9 +12,15 @@ import net.otuskotlin.ingredientscan.core.cor.worker
 fun ICorChainDsl<IsContext>.validateIdProperFormatComposition(title: String, prefix: String) = worker {
     this.title = title
 
-    // Может быть вынесен в IsCompositionId для реализации различных форматов
-    val regExp = Regex("^${Regex.escape(prefix)}_[0-9a-zA-Z-]+$")
-    on { validateCompositionId != IsCompositionId.NONE && !validateCompositionId.asString().matches(regExp) }
+    // Разрешаем два формата:
+    // 1. prefix_custom-id (буквы, цифры, дефисы)
+    // 2. prefix_uuid (где uuid - валидный UUID)
+    val customIdRegExp = Regex("^${Regex.escape(prefix)}-[0-9a-zA-Z-]+\$")
+    val uuidRegExp = Regex("^${Regex.escape(prefix)}-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\$")
+    on { validateCompositionId != IsCompositionId.NONE
+            && !validateCompositionId.asString().matches(customIdRegExp)
+            && !validateCompositionId.asString().matches(uuidRegExp)
+    }
     handle {
         val encodedId = validateCompositionId.asString()
             .replace("<", "&lt;")
@@ -36,8 +42,8 @@ fun ICorChainDsl<IsContext>.validateIdProperFormatContext(title: String, prefix:
     // Разрешаем два формата:
     // 1. prefix_custom-id (буквы, цифры, дефисы)
     // 2. prefix_uuid (где uuid - валидный UUID)
-    val customIdRegExp = Regex("^${Regex.escape(prefix)}_[0-9a-zA-Z-]+\$")
-    val uuidRegExp = Regex("^${Regex.escape(prefix)}_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\$")
+    val customIdRegExp = Regex("^${Regex.escape(prefix)}-[0-9a-zA-Z-]+\$")
+    val uuidRegExp = Regex("^${Regex.escape(prefix)}-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\$")
 
     on { validateContextId != IsContextId.NONE
             && !validateContextId.asString().matches(customIdRegExp)
