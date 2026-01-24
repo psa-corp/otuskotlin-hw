@@ -16,106 +16,76 @@ open class CompositionValidateProcessor(private val contextRepository: InMemoryC
 
     private val log = LoggerFactory.getLogger(CompositionValidateProcessor::class.java)
 
-//    fun processCompositionValidation(
-//        @Payload json: String,
-//        @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
-//    ): String {
-//        log.info("=== Composition Validate started ===\nkey: {}", key)
-//        val context = commonContextDeserialize(json)
-//        return try {
-//
-//            log.info("Received context:\n" +
-//                    " command: {}\n" +
-//                    " text: {}",
-//                context.command,
-//                context.compositionRequest.text.take(50) + "..."
-//            )
-//
-//            // Валидируем текст состава
-//            val validationErrors = validateCompositionText(context.compositionRequest.text)
-//
-//            if (validationErrors.isNotEmpty()) {
-//                log.error("Composition validation failed")
-//                context.errors.addAll(validationErrors)
-//                context.state = IsState.FAILING
-//
-//            } else {
-//                log.info("Composition validation passed - proceeding to save")
-//                // Нормализуем текст (убираем лишние пробелы)
-//                context.compositionRequest.text = normalizeText(context.compositionRequest.text)
-//                context.state = IsState.RUNNING
-//            }
-//
-//            log.info("=== Composition Validate completed ===\nState: {}", context.state.name)
-//            contextRepository.save(context)
-//            commonContextSerialize(context)
-//
-//        } catch (e: Exception) {
-//            log.error("Error during composition validation", e)
-//            val errorContext = IsContext().apply {
-//                errors.add(
-//                    IsError(
-//                        code = "VALIDATION_ERROR",
-//                        group = "VALIDATE_PROCESSOR",
-//                        field = "validation",
-//                        message = "Validation failed: ${e.message}"
-//                    )
-//                )
-//                state = IsState.FAILING
-//            }
-//            contextRepository.save(context)
-//            commonContextSerialize(errorContext)
-//        }
-//    }
+    fun processCompositionValidation(
+        @Payload json: String,
+        @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
+    ): String {
+        log.info("=== Composition Validate started ===\nkey: {}", key)
+        val context = commonContextDeserialize(json)
 
-    private fun validateCompositionText(text: String): List<IsError> {
-        val errors = mutableListOf<IsError>()
+        log.info(
+            "Received context:\n" +
+                    " command: {}\n" +
+                    " text: {}",
+            context.command,
+            context.compositionRequest.text.take(50) + "..."
+        )
 
-        log.info("Validating composition text: length = {}", text.length)
+        context.state = IsState.RUNNING
 
-        // Проверка: Текст не пустой
-        if (text.isBlank()) {
-            log.error("Validation failed: text is empty")
-            errors.add(
-                IsError(
-                    code = "EMPTY_TEXT",
-                    group = "VALIDATION",
-                    field = "composition.text",
-                    message = "Composition text cannot be empty"
-                )
-            )
-            return errors
-        }
-
-        // Проверка: Минимальная длина
-        if (text.length < 3) {
-            log.error("Validation failed: text too short (length = {})", text.length)
-            errors.add(
-                IsError(
-                    code = "TEXT_TOO_SHORT",
-                    group = "VALIDATION",
-                    field = "composition.text",
-                    message = "Composition text is too short (minimum 3 characters)"
-                )
-            )
-        }
-
-        // Проверка: Максимальная длина
-        if (text.length > 10_000) {
-            log.error("Validation failed: text too long (length = {})", text.length)
-            errors.add(
-                IsError(
-                    code = "TEXT_TOO_LONG",
-                    group = "VALIDATION",
-                    field = "composition.text",
-                    message = "Composition text exceeds maximum length (10000 characters)"
-                )
-            )
-        }
-
-        log.info("Validation result: errors = {}", errors.size)
-        return errors
+        log.info("=== Composition Validate completed ===\nState: {}", context.state.name)
+        contextRepository.saveUnsuspend(context)
+        return commonContextSerialize(context)
     }
+
+//    private fun validateCompositionText(text: String): List<IsError> {
+//        val errors = mutableListOf<IsError>()
+//
+//        log.info("Validating composition text: length = {}", text.length)
+//
+//        // Проверка: Текст не пустой
+//        if (text.isBlank()) {
+//            log.error("Validation failed: text is empty")
+//            errors.add(
+//                IsError(
+//                    code = "EMPTY_TEXT",
+//                    group = "VALIDATION",
+//                    field = "composition.text",
+//                    message = "Composition text cannot be empty"
+//                )
+//            )
+//            return errors
+//        }
+//
+//        // Проверка: Минимальная длина
+//        if (text.length < 3) {
+//            log.error("Validation failed: text too short (length = {})", text.length)
+//            errors.add(
+//                IsError(
+//                    code = "TEXT_TOO_SHORT",
+//                    group = "VALIDATION",
+//                    field = "composition.text",
+//                    message = "Composition text is too short (minimum 3 characters)"
+//                )
+//            )
+//        }
+//
+//        // Проверка: Максимальная длина
+//        if (text.length > 10_000) {
+//            log.error("Validation failed: text too long (length = {})", text.length)
+//            errors.add(
+//                IsError(
+//                    code = "TEXT_TOO_LONG",
+//                    group = "VALIDATION",
+//                    field = "composition.text",
+//                    message = "Composition text exceeds maximum length (10000 characters)"
+//                )
+//            )
+//        }
+//
+//        log.info("Validation result: errors = {}", errors.size)
+//        return errors
+//    }
 
     private fun normalizeText(text: String): String = text.replace("\\s+".toRegex(), " ").trim()
 

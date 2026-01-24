@@ -21,24 +21,24 @@ open class ManualFlowConfigurer(
     private val log = LoggerFactory.getLogger(ManualFlowConfigurer::class.java)
 
     override fun configure(streamsBuilder: StreamsBuilder) {
-//        log.info("Setting up COMPOSITION_CREATE_MANUAL pipeline...")
-//
-//        val stringSerde = Serdes.StringSerde()
-//        val consumed = Consumed.with(stringSerde, stringSerde)
-//        val produced = Produced.with(stringSerde, stringSerde)
-//
-//        // Validation & Save
-//        streamsBuilder.stream(KafkaStreamsConfig.Companion.COMPOSITION_CREATE_INPUT, consumed)
-//            .mapValues { json ->
-//                log.info("COMPOSITION_CREATE_MANUAL: Validating - {}", json.take(100))
-//                validateProcessor.processCompositionValidation(json, null)
-//            }
-//            .mapValues { json ->
-//                log.info("COMPOSITION_CREATE_MANUAL: Saving - {}", json.take(100))
-//                saveProcessor.processCompositionSave(json, null)
-//            }
-//            .to(KafkaStreamsConfig.Companion.COMPOSITION_OUTPUT, produced)
-//
-//        log.info("COMPOSITION_CREATE_MANUAL pipeline ready")
+        log.info("Setting up COMPOSITION_CREATE pipeline...")
+
+        val stringSerde = Serdes.StringSerde()
+        val consumed = Consumed.with(stringSerde, stringSerde)
+        val produced = Produced.with(stringSerde, stringSerde)
+
+        // Validation & Save
+        streamsBuilder.stream(KafkaStreamsConfig.Companion.COMPOSITION_CREATE_INPUT, consumed)
+            .mapValues { json ->
+                log.info("COMPOSITION_CREATE : Validating - {}", json.take(100))
+                validateProcessor.processCompositionValidation(json, null)
+            }
+            .mapValues { json ->
+                log.info("COMPOSITION_CREATE: Saving - {}", json.take(100))
+                saveProcessor.processCompositionSave(json, null)
+            }
+            .to(KafkaStreamsConfig.Companion.COMPOSITION_OUTPUT, produced)
+
+        log.info("COMPOSITION_CREATE pipeline ready")
     }
 }
