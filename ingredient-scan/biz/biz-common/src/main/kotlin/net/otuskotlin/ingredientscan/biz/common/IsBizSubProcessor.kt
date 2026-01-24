@@ -2,6 +2,7 @@ package net.otuskotlin.ingredientscan.biz.common
 
 import net.otuskotlin.ingredientscan.biz.common.general.initStatus
 import net.otuskotlin.ingredientscan.biz.common.general.subOperation
+import net.otuskotlin.ingredientscan.biz.common.repo.initRepoContext
 import net.otuskotlin.ingredientscan.biz.common.repo.prepareResult
 import net.otuskotlin.ingredientscan.biz.common.repo.repoSaveContext
 import net.otuskotlin.ingredientscan.biz.common.sub.awaitContext
@@ -38,6 +39,7 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
 
     private val businessChain = rootChain<IsContext> {
         initStatus("Инициализация статуса пост процессора")
+        initRepoContext("Инициализация репозитория контекста")
         initMessageSender("Инициализация отправителя сообщений в очередь")
         initContextAwaitService("Инициализация ожидающего сервиса")
 
