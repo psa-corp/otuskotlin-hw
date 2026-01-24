@@ -30,6 +30,13 @@ fun ICorChainDsl<IsContext>.finishValidationAnalysis(title: String) = worker {
     }
 }
 
+fun ICorChainDsl<IsContext>.finishValidationScan(title: String) = worker {
+    this.title = title
+    on { state == IsState.RUNNING }
+    handle {
+        validatedScan = validateScan
+    }
+}
 
 //fun ICorChainDsl<IsContext>.finishAdFilterValidation(title: String) = worker {
 //    this.title = title

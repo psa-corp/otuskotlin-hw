@@ -22,7 +22,7 @@ import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 
 data class IsContext(
-    var id: IsContextId = IsContextId("context_${randomUUID()}"),
+    var id: IsContextId = IsContextId("context-${randomUUID()}"),
     var command: IsCommand = IsCommand.NONE,
     var subCommand: IsSubCommand = IsSubCommand.NONE,
     var state: IsState = IsState.NONE,
@@ -59,11 +59,14 @@ data class IsContext(
     var validateCompositionId: IsCompositionId = IsCompositionId.NONE,
     var validateContextId: IsContextId = IsContextId.NONE,
     var validateAnalysisId: IsAnalysisId = IsAnalysisId.NONE,
+    var validateScan: IsScan = IsScan.NONE,
+
 
     // Validated
     var validatedCompositionId: IsCompositionId = IsCompositionId.NONE,
     var validatedContextId: IsContextId = IsContextId.NONE,
     var validatedAnalysisId: IsAnalysisId = IsAnalysisId.NONE,
+    var validatedScan: IsScan = IsScan.NONE,
 
     // Repo
     var compositionRepo: IsCompositionRepository? = null,

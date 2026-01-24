@@ -3,11 +3,14 @@ package net.otuskotlin.ingredientscan.biz.common
 import net.otuskotlin.ingredientscan.biz.common.general.initStatus
 import net.otuskotlin.ingredientscan.biz.common.general.operation
 import net.otuskotlin.ingredientscan.biz.common.repo.*
+import net.otuskotlin.ingredientscan.biz.common.sub.prepareToSubProcessor
 import net.otuskotlin.ingredientscan.biz.common.validation.*
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.IsCorSettings
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
+import net.otuskotlin.ingredientscan.core.common.external.models.IsScanType
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
+import net.otuskotlin.ingredientscan.core.common.external.models.IsSubCommand
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub.Companion.STUB_ANALYSIS
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION_CONTEXT_FINISHING
@@ -20,9 +23,11 @@ class IsBizProcessor(private val settings: IsCorSettings) {
     var migrationCommand: List<IsCommand> = arrayListOf(
         IsCommand.COMPOSITION_GET,
         IsCommand.COMPOSITION_CONTEXT_GET,
-        IsCommand.ANALYSIS_GET
+        IsCommand.COMPOSITION_CREATE_MANUAL,
+        IsCommand.COMPOSITION_CREATE_PHOTOS,
+        IsCommand.ANALYSIS_GET,
+        IsCommand.ANALYSIS_REGENERATE
     )
-
 
     suspend fun exec(context: IsContext) {
 
@@ -68,9 +73,9 @@ class IsBizProcessor(private val settings: IsCorSettings) {
             chain {
                 title = "Логика чтения"
                 repoReadComposition("Чтение состава из БД")
-                repoSaveContext("Сохранение контекста в БД")
             }
             prepareResult("Подготовка ответа")
+            repoSaveContext("Сохранение контекста в БД")
         }
         operation("Получение контекста состава по ID", IsCommand.COMPOSITION_CONTEXT_GET) {
             validation {
@@ -83,13 +88,43 @@ class IsBizProcessor(private val settings: IsCorSettings) {
             chain {
                 title = "Логика чтения"
                 repoReadContext("Чтение состава из БД")
-                repoSaveContext("Сохранение контекста в БД")
             }
             prepareResult("Подготовка ответа")
+            repoSaveContext("Сохранение контекста в БД")
+        }
+        operation("Создание состава по руками заполненному тексту", IsCommand.COMPOSITION_CREATE_MANUAL) {
+            validation {
+                worker("Копируем scan request в validateScan") { validateScan = scanRequest }
+                validateScanType("Проверка scan type", IsScanType.MANUAL)
+                validateTextNotEmptyScan("Проверка, что текст не пуст")
+
+
+                finishValidationScan("Завершение проверок")
+            }
+            chain {
+                title = "Логика подготовки состава к пост процессингу"
+                prepareToSubProcessor("Подготовка данных для пост процесса", IsSubCommand.COMPOSITION_CREATE)
+            }
+            repoSaveContext("Сохранение контекста в БД")
+        }
+        operation("Создание состава по фото", IsCommand.COMPOSITION_CREATE_PHOTOS) {
+            validation {
+                worker("Копируем scan request в validateScan") { validateScan = scanRequest }
+                validateScanType("Проверка scan type", IsScanType.PHOTO)
+                validateFilesScan("Проверка, что список файлов не пуст")
+
+
+                finishValidationScan("Завершение проверок")
+            }
+            chain {
+                title = "Логика подготовки состава к пост процессингу"
+                prepareToSubProcessor("Подготовка данных для пост процесса", IsSubCommand.OCR_RECOGNITION)
+            }
+            repoSaveContext("Сохранение контекста в БД")
         }
         operation("Получение анализа по ID", IsCommand.ANALYSIS_GET) {
             validation {
-                worker("Копируем context id в validateAnalysisId") { validateAnalysisId = analysisIdRequest }
+                worker("Копируем analysis id в validateAnalysisId") { validateAnalysisId = analysisIdRequest }
                 validateIdNotEmptyAnalysis("Проверка, что заголовок не пуст")
                 validateIdProperFormatAnalysis("Проверка формата id", "analysis")
 
@@ -98,9 +133,9 @@ class IsBizProcessor(private val settings: IsCorSettings) {
             chain {
                 title = "Логика чтения"
                 repoReadAnalysis("Чтение состава из БД")
-                repoSaveContext("Сохранение контекста в БД")
+                prepareToSubProcessor("Подготовка данных для пост процесса", IsSubCommand.ANALYSIS_REGENERATE)
             }
-            prepareResult("Подготовка ответа")
+            repoSaveContext("Сохранение контекста в БД")
         }
     }.build()
 

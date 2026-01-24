@@ -9,6 +9,7 @@ enum class IsCommand {
     COMPOSITION_CONTEXT_GET,
     // Analysis operations
     ANALYSIS_GET,
+    ANALYSIS_CREATE,
     ANALYSIS_REGENERATE,
     DOWNLOAD_FILE,
 }
