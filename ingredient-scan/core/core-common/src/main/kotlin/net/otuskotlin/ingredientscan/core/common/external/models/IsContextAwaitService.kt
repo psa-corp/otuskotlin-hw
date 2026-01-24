@@ -2,12 +2,12 @@ package net.otuskotlin.ingredientscan.core.common.external.models
 
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 
-interface IsMessageSender {
-    suspend fun send(context: IsContext)
+interface IsContextAwaitService {
+    suspend fun await(context: IsContext, timeout: Long) : IsContext
 
     companion object {
-        val NONE = object : IsMessageSender {
-            override suspend fun send(context: IsContext) {
+        val NONE = object : IsContextAwaitService {
+            override suspend fun await(context: IsContext, timeout: Long) : IsContext {
                 throw NotImplementedError("Must not be used")
             }
         }

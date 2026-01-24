@@ -49,6 +49,36 @@ inline fun errorValidation(
     level = level,
 )
 
+
+inline fun errorProcessing(
+    field: String,
+    violationCode: String,
+    id: String,
+    timeout: Long,
+    level: IsLogLevel = IsLogLevel.ERROR,
+) = IsError(
+    code = "validation-$field-$violationCode",
+    field = field,
+    group = "processing",
+    message = "Context $id timeout after ${timeout}ms",
+    level = level,
+)
+
+inline fun errorProcessing(
+    field: String,
+    violationCode: String,
+    id: String,
+    e: Throwable,
+    level: IsLogLevel = IsLogLevel.ERROR,
+) = IsError(
+    code = "validation-$field-$violationCode",
+    field = field,
+    group = "processing",
+    message = "Context $id processing error for field $field",
+    level = level,
+    exception = e,
+)
+
 inline fun errorSystem(
     violationCode: String,
     level: IsLogLevel = IsLogLevel.ERROR,

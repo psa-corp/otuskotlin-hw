@@ -21,11 +21,10 @@ enum class IsSubCommand {
     OCR_RECOGNITION,
     COMPOSITION_VALIDATE,
     COMPOSITION_SAVE,
-    COMPOSITION_OUTPUT,
     // Analysis operations
     ANALYSIS_CREATE,
     ANALYSIS_REGENERATE,
-    ANALYSIS_OUTPUT
+    READY
 }
 
 enum class IsState {

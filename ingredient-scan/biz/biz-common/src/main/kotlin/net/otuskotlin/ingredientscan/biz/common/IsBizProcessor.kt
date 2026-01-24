@@ -63,6 +63,7 @@ class IsBizProcessor(private val settings: IsCorSettings) {
         initStatus("Инициализация статуса процессора")
         initRepoComposition("Инициализация репозитория состава")
         initRepoContext("Инициализация репозитория контекста")
+        initRepoAnalysis("Инициализация репозитория анализа")
 
         operation("Получение состава по ID", IsCommand.COMPOSITION_GET) {
             validation {
@@ -70,7 +71,7 @@ class IsBizProcessor(private val settings: IsCorSettings) {
                 validateIdNotEmptyComposition("Проверка, что заголовок не пуст")
                 validateIdProperFormatComposition("Проверка формата id", "composition")
 
-                finishValidationComposition("Завершение проверок")
+                finishValidationCompositionId("Завершение проверок")
             }
             chain {
                 title = "Логика чтения"
@@ -97,22 +98,22 @@ class IsBizProcessor(private val settings: IsCorSettings) {
         operation("Создание состава по руками заполненному тексту", IsCommand.COMPOSITION_CREATE_MANUAL) {
             validation {
                 worker("Копируем scan request в validateScan") { validateScan = scanRequest }
-                validateScanType("Проверка scan type", IsScanType.MANUAL)
+                validateScanType("Проверка scan type", arrayListOf(IsScanType.MANUAL))
                 validateTextNotEmptyScan("Проверка, что текст не пуст")
-
 
                 finishValidationScan("Завершение проверок")
             }
             chain {
                 title = "Логика подготовки состава к пост процессингу"
                 prepareToSubProcessor("Подготовка данных для пост процесса", IsSubCommand.COMPOSITION_CREATE)
+                worker("Копируем scan request в validateScan") { scan = validatedScan }
             }
             repoSaveContext("Сохранение контекста в БД")
         }
         operation("Создание состава по фото", IsCommand.COMPOSITION_CREATE_PHOTOS) {
             validation {
                 worker("Копируем scan request в validateScan") { validateScan = scanRequest }
-                validateScanType("Проверка scan type", IsScanType.PHOTO)
+                validateScanType("Проверка scan type", arrayListOf(IsScanType.PHOTO))
                 validateFilesScan("Проверка, что список файлов не пуст")
 
 

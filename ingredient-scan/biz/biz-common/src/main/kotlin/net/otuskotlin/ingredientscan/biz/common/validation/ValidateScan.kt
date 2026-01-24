@@ -7,15 +7,15 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsScanType
 import net.otuskotlin.ingredientscan.core.cor.ICorChainDsl
 import net.otuskotlin.ingredientscan.core.cor.worker
 
-fun ICorChainDsl<IsContext>.validateScanType(title: String, type: IsScanType) = worker {
+fun ICorChainDsl<IsContext>.validateScanType(title: String, types: List<IsScanType>) = worker {
     this.title = title
-    on { validateScan.type == IsScanType.NONE || validateScan.type != type }
+    on { validateScan.type == IsScanType.NONE || !types.contains(validateScan.type) }
     handle {
         fail(
             errorValidation(
                 field = "type",
                 violationCode = "invalidType",
-                description = "Scan type must be $type, got ${type.name}"
+                description = "Scan type must be $types, got ${validateScan.type.name}"
             )
         )
     }
@@ -48,3 +48,4 @@ fun ICorChainDsl<IsContext>.validateFilesScan(title: String) = worker {
         )
     }
 }
+

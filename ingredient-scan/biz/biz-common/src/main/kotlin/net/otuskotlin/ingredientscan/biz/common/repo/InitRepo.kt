@@ -1,9 +1,10 @@
 package net.otuskotlin.ingredientscan.biz.common.repo
 
-import net.otuskotlin.ingredientscan.biz.common.exceptions.IsDbNotConfiguredException
+import net.otuskotlin.ingredientscan.biz.common.exceptions.IsNotConfiguredException
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.helpers.errorSystem
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisRepository
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionRepository
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContextRepository
 import net.otuskotlin.ingredientscan.core.cor.ICorChainDsl
@@ -19,7 +20,7 @@ fun ICorChainDsl<IsContext>.initRepoComposition(title: String) = worker {
         if (compositionRepo == IsCompositionRepository.NONE) fail(
             errorSystem(
                 violationCode = "dbNotConfigured",
-                e = IsDbNotConfiguredException("composition")
+                e = IsNotConfiguredException("composition database")
             )
         )
     }
@@ -35,8 +36,25 @@ fun ICorChainDsl<IsContext>.initRepoContext(title: String) = worker {
         if (contextRepo == IsContextRepository.NONE) fail(
             errorSystem(
                 violationCode = "dbNotConfigured",
-                e = IsDbNotConfiguredException("context")
+                e = IsNotConfiguredException("context database")
             )
         )
     }
 }
+
+fun ICorChainDsl<IsContext>.initRepoAnalysis(title: String) = worker {
+    this.title = title
+    description = """
+        Вычисление основного рабочего репозитория в зависимости от запрошенного режима работы        
+    """.trimIndent()
+    handle {
+        analysisRepo = settings.analysisRepository
+        if (analysisRepo == IsAnalysisRepository.NONE) fail(
+            errorSystem(
+                violationCode = "dbNotConfigured",
+                e = IsNotConfiguredException("analysis database")
+            )
+        )
+    }
+}
+

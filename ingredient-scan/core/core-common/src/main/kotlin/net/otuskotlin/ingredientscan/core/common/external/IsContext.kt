@@ -16,7 +16,9 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsScan
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionRepository
+import net.otuskotlin.ingredientscan.core.common.external.models.IsContextAwaitService
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContextRepository
+import net.otuskotlin.ingredientscan.core.common.external.models.IsMessageSender
 import net.otuskotlin.ingredientscan.core.common.external.models.IsSubCommand
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
@@ -52,25 +54,34 @@ data class IsContext(
     var scanResponse: IsScan = IsScan(),
     var compositionContextResponse: IsCompositionContext = IsCompositionContext(),
 
-    // Settings
-    var settings: IsCorSettings = IsCorSettings.NONE,
-
     // Validate
     var validateCompositionId: IsCompositionId = IsCompositionId.NONE,
+    var validateComposition: IsComposition = IsComposition.NONE,
     var validateContextId: IsContextId = IsContextId.NONE,
     var validateAnalysisId: IsAnalysisId = IsAnalysisId.NONE,
     var validateScan: IsScan = IsScan.NONE,
 
-
     // Validated
     var validatedCompositionId: IsCompositionId = IsCompositionId.NONE,
+    var validatedComposition: IsComposition = IsComposition.NONE,
     var validatedContextId: IsContextId = IsContextId.NONE,
     var validatedAnalysisId: IsAnalysisId = IsAnalysisId.NONE,
     var validatedScan: IsScan = IsScan.NONE,
+
+    var scan: IsScan = IsScan(),
+
+    // Settings
+    var settings: IsCorSettings = IsCorSettings.NONE,
 
     // Repo
     var compositionRepo: IsCompositionRepository? = null,
     var contextRepo: IsContextRepository? = null,
     var analysisRepo: IsAnalysisRepository? = null,
 
+    // Service
+    var contextAwaitService: IsContextAwaitService? = null,
+    var messageSender: IsMessageSender? = null,
+
+    // Context
+    var context: IsContext? = null,
     )
