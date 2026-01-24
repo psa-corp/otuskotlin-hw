@@ -22,7 +22,10 @@ open class InMemoryContextRepository: IsContextRepository {
 
     override suspend fun save(context: IsContext) {
         store.put(context.id.asString(), context)
-        log.info("Context saved/updated for key: ${context.id} (State: ${context.state})")
+    }
+
+    override fun saveUnsuspend(context: IsContext) {
+        store.put(context.id.asString(), context)
     }
 
     override suspend fun findById(id: IsContextId): IsContext? {

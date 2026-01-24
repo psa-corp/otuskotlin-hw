@@ -15,7 +15,7 @@ open class InMemoryCompositionRepository : IsCompositionRepository {
 
     private val textStore = ConcurrentHashMap<String, IsComposition>()
 
-    override suspend fun saveComposition(composition: IsComposition) {
+    override suspend fun save(composition: IsComposition) {
         val text = composition.text.trim()
         store[composition.id] = composition
         textStore[text] = composition
@@ -23,16 +23,29 @@ open class InMemoryCompositionRepository : IsCompositionRepository {
         log.info("Saved composition: ${composition.id}")
     }
 
-    override suspend fun findCompositionById(id: IsCompositionId): IsComposition? {
+    override fun saveUnsuspend(composition: IsComposition) {
+        val text = composition.text.trim()
+        store[composition.id] = composition
+        textStore[text] = composition
+
+        log.info("Saved composition: ${composition.id}")
+    }
+
+    override suspend fun findById(id: IsCompositionId): IsComposition? {
         return store[id]
     }
 
-    override suspend fun findCompositionByText(text: String): IsComposition? {
+    override suspend fun findByText(text: String): IsComposition? {
         val cleanText = text.trim()
         return textStore[cleanText]
     }
 
-    override suspend fun deleteComposition(id: IsCompositionId) {
+    override fun findByTextUnsuspend(text: String): IsComposition? {
+        val cleanText = text.trim()
+        return textStore[cleanText]
+    }
+
+    override suspend fun delete(id: IsCompositionId) {
         val comp = store[id]
         if (comp != null) {
             store.remove(id)
@@ -42,7 +55,7 @@ open class InMemoryCompositionRepository : IsCompositionRepository {
         }
     }
 
-    override suspend fun clearCompositions() {
+    override suspend fun clear() {
         store.clear()
         textStore.clear()
     }

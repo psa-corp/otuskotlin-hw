@@ -13,7 +13,7 @@ fun ICorChainDsl<IsContext>.repoReadComposition(title: String) = worker {
     on { state == IsState.RUNNING}
     handle {
         try {
-            compositionResponse = compositionRepo?.findCompositionById(validatedCompositionId)
+            compositionResponse = compositionRepo?.findById(validatedCompositionId)
                 ?: throw RuntimeException("Composition not found. ID:$validatedCompositionId")
         } catch (e: Throwable) {
             fail(

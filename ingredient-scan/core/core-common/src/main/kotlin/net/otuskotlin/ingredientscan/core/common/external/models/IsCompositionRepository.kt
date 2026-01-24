@@ -1,31 +1,42 @@
 package net.otuskotlin.ingredientscan.core.common.external.models
 
 interface IsCompositionRepository {
-    suspend fun saveComposition(composition: IsComposition)
-    suspend fun findCompositionById(id: IsCompositionId): IsComposition?
-    suspend fun findCompositionByText(text: String): IsComposition?
-    suspend fun deleteComposition(id: IsCompositionId)
-    suspend fun clearCompositions()
+    suspend fun save(composition: IsComposition)
+    suspend fun findById(id: IsCompositionId): IsComposition?
+    suspend fun findByText(text: String): IsComposition?
+    suspend fun delete(id: IsCompositionId)
+    suspend fun clear()
+
+    fun saveUnsuspend(composition: IsComposition)
+    fun findByTextUnsuspend(text: String): IsComposition?
 
     companion object {
         val NONE = object : IsCompositionRepository {
-            override suspend fun saveComposition(composition: IsComposition) {
+            override suspend fun save(composition: IsComposition) {
                 throw NotImplementedError("Must not be used")
             }
 
-            override suspend fun findCompositionById(id: IsCompositionId): IsComposition? {
+            override fun saveUnsuspend(composition: IsComposition) {
                 throw NotImplementedError("Must not be used")
             }
 
-            override suspend fun findCompositionByText(text: String): IsComposition? {
+            override suspend fun findById(id: IsCompositionId): IsComposition? {
                 throw NotImplementedError("Must not be used")
             }
 
-            override suspend fun deleteComposition(id: IsCompositionId) {
+            override suspend fun findByText(text: String): IsComposition? {
                 throw NotImplementedError("Must not be used")
             }
 
-            override suspend fun clearCompositions() {
+            override fun findByTextUnsuspend(text: String): IsComposition? {
+                throw NotImplementedError("Must not be used")
+            }
+
+            override suspend fun delete(id: IsCompositionId) {
+                throw NotImplementedError("Must not be used")
+            }
+
+            override suspend fun clear() {
                 throw NotImplementedError("Must not be used")
             }
         }
