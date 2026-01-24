@@ -1,6 +1,8 @@
 package net.otuskotlin.ingredientscan.scanner.controllers
 
 import net.otuskotlin.ingredientscan.api.v1.external.api.AnalysisApi
+import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisCreateRequest
+import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisCreateResponse
 import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisGetRequest
 import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisGetResponse
 import net.otuskotlin.ingredientscan.api.v1.external.models.AnalysisRegenerateRequest
@@ -10,6 +12,10 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 open class AnalysisController(private val bizService: BizService): V1BaseController(), AnalysisApi {
+    override suspend fun analysisCreate(analysisCreateRequest: AnalysisCreateRequest): AnalysisCreateResponse {
+        return bizService.execute(analysisCreateRequest ,"AnalysisCreate")
+    }
+
     override suspend fun analysisGet(analysisGetRequest: AnalysisGetRequest): AnalysisGetResponse {
          return bizService.execute(analysisGetRequest ,"AnalysisGet")
     }
