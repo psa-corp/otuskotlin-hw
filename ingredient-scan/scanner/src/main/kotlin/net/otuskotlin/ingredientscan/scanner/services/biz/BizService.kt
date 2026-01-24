@@ -9,9 +9,10 @@ import net.otuskotlin.ingredientscan.app.content.uploadHelper
 import net.otuskotlin.ingredientscan.biz.common.IsBizProcessor
 import net.otuskotlin.ingredientscan.biz.common.IsBizSubProcessor
 import net.otuskotlin.ingredientscan.core.common.external.IsCorSettings
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryCompositionRepository
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryAnalysisRepository
+import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryCompositionRepository
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
+import net.otuskotlin.ingredientscan.scanner.services.await.ContextAwaitService
 import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
@@ -27,6 +28,7 @@ open class BizService(
     private val contextRepository: InMemoryContextRepository,
     private val analysisRepository: InMemoryAnalysisRepository,
     private val s3CloudService: S3CloudService,
+    private val contextAwaitService: ContextAwaitService
 ) {
     private val appSettings: IsAppSettings
     private val log = LoggerFactory.getLogger(BizService::class.java)
@@ -38,6 +40,7 @@ open class BizService(
             contextRepository = contextRepository,
             compositionRepository = compositionRepository,
             analysisRepository = analysisRepository,
+            contextAwaitService = contextAwaitService,
         )
 
         appSettings = AppSettings(
