@@ -26,6 +26,15 @@ fun IsContext.fromTransport(request: AnalysisGetRequest) {
     stubCase = request.debug.transportToStubCase()
 }
 
+fun IsContext.fromTransport(request: AnalysisCreateRequest) {
+    command = IsCommand.ANALYSIS_CREATE
+
+    compositionIdRequest = IsCompositionId(request.compositionId.toString())
+
+    workMode = request.debug.transportToWorkMode()
+    stubCase = request.debug.transportToStubCase()
+}
+
 fun IsContext.fromTransport(request: AnalysisRegenerateRequest) {
     command = IsCommand.ANALYSIS_REGENERATE
 
@@ -85,6 +94,7 @@ fun IsContext.fromTransport(request: IRequest, photos: MutableList<String>) = wh
 
 fun IsContext.fromTransport(request: IRequest) = when (request) {
     is AnalysisGetRequest -> fromTransport(request)
+    is AnalysisCreateRequest -> fromTransport(request)
     is AnalysisRegenerateRequest -> fromTransport(request)
     is CompositionCreateByManualRequest -> fromTransport(request)
     is CompositionContextGetRequest -> fromTransport(request)

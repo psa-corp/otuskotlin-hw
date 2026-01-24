@@ -15,6 +15,13 @@ fun IsContext.toTransportAnalysisGet() = AnalysisGetResponse(
     analysis = analysisResponse.toTransport()
 )
 
+fun IsContext.toTransportAnalysisCreate() = AnalysisCreateResponse(
+    responseType = "analysisCreate",
+    result = state.toResult(),
+    errors = errors.toTransportErrors(),
+    analysis = analysisResponse.toTransport()
+)
+
 fun IsContext.toTransportAnalysisRegenerate() = AnalysisRegenerateResponse(
     responseType = "analysisRegenerate",
     result = state.toResult(),
@@ -55,6 +62,7 @@ fun IsContext.toTransportCompositionGet() = CompositionGetResponse(
 fun IsContext.toTransport() =
     when (command) {
         IsCommand.ANALYSIS_GET -> toTransportAnalysisGet()
+        IsCommand.ANALYSIS_CREATE -> toTransportAnalysisCreate()
         IsCommand.ANALYSIS_REGENERATE -> toTransportAnalysisRegenerate()
         IsCommand.COMPOSITION_CONTEXT_GET -> toTransportCompositionContextGet()
         IsCommand.COMPOSITION_CREATE_MANUAL -> toTransportCompositionCreateManual()

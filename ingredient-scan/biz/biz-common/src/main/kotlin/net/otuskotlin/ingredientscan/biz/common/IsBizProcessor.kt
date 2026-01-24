@@ -26,6 +26,7 @@ class IsBizProcessor(private val settings: IsCorSettings) {
         IsCommand.COMPOSITION_CREATE_MANUAL,
         IsCommand.COMPOSITION_CREATE_PHOTOS,
         IsCommand.ANALYSIS_GET,
+        IsCommand.ANALYSIS_CREATE,
         IsCommand.ANALYSIS_REGENERATE
     )
 
@@ -38,6 +39,7 @@ class IsBizProcessor(private val settings: IsCorSettings) {
 
         when (context.command) {
             IsCommand.ANALYSIS_GET,
+            IsCommand.ANALYSIS_CREATE,
             IsCommand.ANALYSIS_REGENERATE -> context.analysisResponse = STUB_ANALYSIS
             IsCommand.COMPOSITION_GET -> context.compositionResponse = STUB_COMPOSITION
             IsCommand.COMPOSITION_CONTEXT_GET,
@@ -134,6 +136,20 @@ class IsBizProcessor(private val settings: IsCorSettings) {
                 title = "Логика чтения"
                 repoReadAnalysis("Чтение состава из БД")
                 prepareToSubProcessor("Подготовка данных для пост процесса", IsSubCommand.ANALYSIS_REGENERATE)
+            }
+            repoSaveContext("Сохранение контекста в БД")
+        }
+        operation("Создание анализа по id состава", IsCommand.ANALYSIS_CREATE) {
+            validation {
+                worker("Копируем composition id в validateCompositionId") { validateCompositionId = compositionIdRequest }
+                validateIdNotEmptyComposition("Проверка, что заголовок не пуст")
+                validateIdProperFormatComposition("Проверка формата id", "composition")
+
+                finishValidationScan("Завершение проверок")
+            }
+            chain {
+                title = "Логика подготовки анализа к созданию в пост процессинге"
+                prepareToSubProcessor("Подготовка данных для пост процесса", IsSubCommand.ANALYSIS_CREATE)
             }
             repoSaveContext("Сохранение контекста в БД")
         }

@@ -78,6 +78,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /analysis/create:
+    post:
+      tags: [ analysis ]
+      summary: Создание анализа состава
+      operationId: analysisCreate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalysisCreateRequest'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisCreateResponse'
+        '400':
+          description: Неверные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Превышен лимит перегенераций
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /composition/create/manual:
     post:
       tags: [composition]
@@ -347,6 +378,20 @@ components:
               example: "analysis_123"
               nullable: false
 
+    AnalysisCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - type: object
+          required:
+            - analysisId
+          properties:
+            debug:
+              $ref: '#/components/schemas/RequestDebug'
+            compositionId:
+              type: string
+              description: ID состава
+              example: "composition_123"
+
     CompositionCreateByManualRequest:
       allOf:
         - $ref: '#/components/schemas/IRequest'
@@ -414,6 +459,14 @@ components:
               $ref: '#/components/schemas/Analysis'
 
     AnalysisRegenerateResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - type: object
+          properties:
+            analysis:
+              $ref: '#/components/schemas/Analysis'
+
+    AnalysisCreateResponse:
       allOf:
         - $ref: '#/components/schemas/IResponse'
         - type: object
