@@ -1,6 +1,7 @@
 package net.otuskotlin.ingredientscan.biz.common.sub
 
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.external.models.IsSubCommand
 import net.otuskotlin.ingredientscan.core.cor.ICorChainDsl
@@ -12,5 +13,24 @@ fun ICorChainDsl<IsContext>.prepareToSubProcessor(title: String, sub: IsSubComma
     on { state == IsState.RUNNING }
     handle {
        subCommand = sub
+    }
+}
+
+fun ICorChainDsl<IsContext>.checkAndPrepareToSubProcessor(title: String, sub: IsSubCommand) = worker {
+    this.title = title
+    description = "Если есть анализ,то возвращаем иначе создаем"
+    on { state == IsState.RUNNING && analysis == IsAnalysis.NONE}
+    handle {
+        subCommand = sub
+    }
+}
+
+
+fun ICorChainDsl<IsContext>.checkAndPrepareResult(title: String) = worker {
+    this.title = title
+    description = "Подготовка данных для ответа клиенту на запрос"
+    on { subCommand != IsSubCommand.NONE && state == IsState.RUNNING}
+    handle {
+        state = IsState.FINISHING
     }
 }

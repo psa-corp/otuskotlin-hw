@@ -3,31 +3,17 @@ package net.otuskotlin.ingredientscan.biz.common.validation
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.helpers.errorValidation
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
-import net.otuskotlin.ingredientscan.core.common.external.models.IsScanType
+import net.otuskotlin.ingredientscan.core.common.external.models.IsColor
 import net.otuskotlin.ingredientscan.core.cor.ICorChainDsl
 import net.otuskotlin.ingredientscan.core.cor.worker
 
-fun ICorChainDsl<IsContext>.validateScanType(title: String, types: List<IsScanType>) = worker {
+fun ICorChainDsl<IsContext>.validateDescriptionNotEmptyAnalysis(title: String) = worker {
     this.title = title
-    on { validateScan.type == IsScanType.NONE || !types.contains(validateScan.type) }
+    on { validateAnalysis.description.isEmpty() }
     handle {
         fail(
             errorValidation(
-                field = "type",
-                violationCode = "invalidType",
-                description = "Scan type must be $types, got ${validateScan.type.name}"
-            )
-        )
-    }
-}
-
-fun ICorChainDsl<IsContext>.validateTextNotEmptyScan(title: String) = worker {
-    this.title = title
-    on { validateScan.text.isEmpty() }
-    handle {
-        fail(
-            errorValidation(
-                field = "text",
+                field = "description",
                 violationCode = "empty",
                 description = "field must not be empty"
             )
@@ -35,13 +21,13 @@ fun ICorChainDsl<IsContext>.validateTextNotEmptyScan(title: String) = worker {
     }
 }
 
-fun ICorChainDsl<IsContext>.validateFilesScan(title: String) = worker {
+fun ICorChainDsl<IsContext>.validateColorNotEmptyAnalysis(title: String) = worker {
     this.title = title
-    on { validateScan.files.isEmpty() }
+    on { validateAnalysis.color == IsColor.NONE }
     handle {
         fail(
             errorValidation(
-                field = "files",
+                field = "color",
                 violationCode = "empty",
                 description = "field must not be empty"
             )
@@ -49,13 +35,13 @@ fun ICorChainDsl<IsContext>.validateFilesScan(title: String) = worker {
     }
 }
 
-fun ICorChainDsl<IsContext>.validateFilesNotEmptyScan(title: String) = worker {
+fun ICorChainDsl<IsContext>.validateHasRatingAnalysis(title: String) = worker {
     this.title = title
-    on { validateScan.files.isEmpty() }
+    on { validateAnalysis.rating >= 0.0 }
     handle {
         fail(
             errorValidation(
-                field = "files",
+                field = "rating",
                 violationCode = "empty",
                 description = "field must not be empty"
             )

@@ -10,7 +10,7 @@ import net.otuskotlin.ingredientscan.core.cor.worker
 fun ICorChainDsl<IsContext>.repoSaveContext(title: String) = worker {
     this.title = title
     description = "Сохранение контекста в БД"
-    on { state == IsState.RUNNING }
+    on { state != IsState.NONE }
     handle {
         try {
             contextRepo?.save(this)

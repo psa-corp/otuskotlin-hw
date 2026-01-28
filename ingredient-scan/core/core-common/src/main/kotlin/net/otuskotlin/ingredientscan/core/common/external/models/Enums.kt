@@ -2,12 +2,10 @@ package net.otuskotlin.ingredientscan.core.common.external.models
 
 enum class IsCommand {
     NONE,
-    // Composition operations
     COMPOSITION_CREATE_MANUAL,
     COMPOSITION_CREATE_PHOTOS,
     COMPOSITION_GET,
     COMPOSITION_CONTEXT_GET,
-    // Analysis operations
     ANALYSIS_GET,
     ANALYSIS_CREATE,
     ANALYSIS_REGENERATE,
@@ -16,14 +14,12 @@ enum class IsCommand {
 
 enum class IsSubCommand {
     NONE,
-    // Composition operations
     COMPOSITION_CREATE,
     OCR_RECOGNITION,
     COMPOSITION_VALIDATE,
-    COMPOSITION_SAVE,
-    // Analysis operations
     ANALYSIS_CREATE,
     ANALYSIS_REGENERATE,
+    ANALYSIS_VALIDATE,
     READY
 }
 

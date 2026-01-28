@@ -37,9 +37,9 @@ data class IsContext(
     var timeStart: LocalDateTime = LOCAL_DATE_TIME_NONE,
 
     // Request data
-    var analysisRequest: IsAnalysis = IsAnalysis(),
-    var compositionRequest: IsComposition = IsComposition(),
-    var componentRequest: IsComponent = IsComponent(),
+    var analysisRequest: IsAnalysis = IsAnalysis.NONE,
+    var compositionRequest: IsComposition = IsComposition.NONE,
+    var componentRequest: IsComponent = IsComponent.NONE,
     var scanRequest: IsScan = IsScan(),
     var filterRequest: IsComponentFilter = IsComponentFilter(),
     var compositionIdRequest: IsCompositionId = IsCompositionId.NONE,
@@ -47,12 +47,12 @@ data class IsContext(
     var analysisIdRequest: IsAnalysisId = IsAnalysisId.NONE,
 
     // Response data
-    var analysisResponse: IsAnalysis = IsAnalysis(),
-    var compositionResponse: IsComposition = IsComposition(),
+    var analysisResponse: IsAnalysis = IsAnalysis.NONE,
+    var compositionResponse: IsComposition = IsComposition.NONE,
     var componentResponse: IsComponent = IsComponent(),
     var componentsResponse: MutableList<IsComponent> = mutableListOf(),
     var scanResponse: IsScan = IsScan(),
-    var compositionContextResponse: IsCompositionContext = IsCompositionContext(),
+    var compositionContextResponse: IsCompositionContext = IsCompositionContext.NONE,
 
     // Validate
     var validateCompositionId: IsCompositionId = IsCompositionId.NONE,
@@ -60,6 +60,7 @@ data class IsContext(
     var validateContextId: IsContextId = IsContextId.NONE,
     var validateAnalysisId: IsAnalysisId = IsAnalysisId.NONE,
     var validateScan: IsScan = IsScan.NONE,
+    var validateAnalysis: IsAnalysis = IsAnalysis.NONE,
 
     // Validated
     var validatedCompositionId: IsCompositionId = IsCompositionId.NONE,
@@ -67,8 +68,7 @@ data class IsContext(
     var validatedContextId: IsContextId = IsContextId.NONE,
     var validatedAnalysisId: IsAnalysisId = IsAnalysisId.NONE,
     var validatedScan: IsScan = IsScan.NONE,
-
-    var scan: IsScan = IsScan(),
+    var validatedAnalysis: IsAnalysis = IsAnalysis.NONE,
 
     // Settings
     var settings: IsCorSettings = IsCorSettings.NONE,
@@ -84,4 +84,8 @@ data class IsContext(
 
     // Context
     var context: IsContext? = null,
+
+    var scan: IsScan = IsScan.NONE,
+    var analysis: IsAnalysis = IsAnalysis.NONE,
+    var composition: IsComposition = IsComposition.NONE,
     )

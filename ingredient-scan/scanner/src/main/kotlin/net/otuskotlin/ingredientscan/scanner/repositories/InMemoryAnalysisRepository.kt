@@ -31,6 +31,7 @@ open class InMemoryAnalysisRepository : IsAnalysisRepository {
         return storeByComposition[id]
     }
 
+
     override suspend fun updateAnalysis(analysis: IsAnalysis) {
         saveAnalysis(analysis)
     }
@@ -47,5 +48,15 @@ open class InMemoryAnalysisRepository : IsAnalysisRepository {
     override suspend fun clearAnalysis() {
         storeByAnalysis.clear()
         storeByComposition.clear()
+    }
+
+    override fun findAnalysisByCompositionIdUnsuspend(id: IsCompositionId): IsAnalysis? {
+        return storeByComposition[id]
+    }
+
+    override fun saveAnalysisUnsuspend(analysis: IsAnalysis) {
+        storeByAnalysis[analysis.id] = analysis
+        storeByComposition[analysis.compositionId] = analysis
+        log.info("Saved analysis: $analysis.id")
     }
 }

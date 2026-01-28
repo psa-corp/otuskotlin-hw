@@ -22,11 +22,19 @@ fun ICorChainDsl<IsContext>.finishValidationContext(title: String) = worker {
     }
 }
 
-fun ICorChainDsl<IsContext>.finishValidationAnalysis(title: String) = worker {
+fun ICorChainDsl<IsContext>.finishValidationAnalysisId(title: String) = worker {
     this.title = title
     on { state == IsState.RUNNING }
     handle {
         validatedAnalysisId = validateAnalysisId
+    }
+}
+
+fun ICorChainDsl<IsContext>.finishValidationAnalysis(title: String) = worker {
+    this.title = title
+    on { state == IsState.RUNNING }
+    handle {
+        validatedAnalysis = validateAnalysis
     }
 }
 

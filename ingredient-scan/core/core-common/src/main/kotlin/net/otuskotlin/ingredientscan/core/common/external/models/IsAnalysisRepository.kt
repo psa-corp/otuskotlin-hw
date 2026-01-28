@@ -8,6 +8,9 @@ interface IsAnalysisRepository {
     suspend fun deleteAnalysis(id: IsAnalysisId)
     suspend fun clearAnalysis()
 
+    fun findAnalysisByCompositionIdUnsuspend(id: IsCompositionId): IsAnalysis?
+    fun saveAnalysisUnsuspend(analysis: IsAnalysis)
+
     companion object {
         val NONE = object : IsAnalysisRepository {
             override suspend fun saveAnalysis(analysis: IsAnalysis) {
@@ -31,6 +34,14 @@ interface IsAnalysisRepository {
             }
 
             override suspend fun clearAnalysis() {
+                throw NotImplementedError("Must not be used")
+            }
+
+            override fun findAnalysisByCompositionIdUnsuspend(id: IsCompositionId): IsAnalysis? {
+                throw NotImplementedError("Must not be used")
+            }
+
+            override fun saveAnalysisUnsuspend(analysis: IsAnalysis) {
                 throw NotImplementedError("Must not be used")
             }
         }

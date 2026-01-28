@@ -3,6 +3,8 @@ package net.otuskotlin.ingredientscan.biz.common
 import net.otuskotlin.ingredientscan.biz.common.general.initStatus
 import net.otuskotlin.ingredientscan.biz.common.general.operation
 import net.otuskotlin.ingredientscan.biz.common.repo.*
+import net.otuskotlin.ingredientscan.biz.common.sub.checkAndPrepareResult
+import net.otuskotlin.ingredientscan.biz.common.sub.checkAndPrepareToSubProcessor
 import net.otuskotlin.ingredientscan.biz.common.sub.prepareToSubProcessor
 import net.otuskotlin.ingredientscan.biz.common.validation.*
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
@@ -76,6 +78,7 @@ class IsBizProcessor(private val settings: IsCorSettings) {
             chain {
                 title = "Логика чтения"
                 repoReadComposition("Чтение состава из БД")
+                worker("Копируем composition в ответ") { compositionResponse = composition }
             }
             prepareResult("Подготовка ответа")
             repoSaveContext("Сохранение контекста в БД")
@@ -121,6 +124,7 @@ class IsBizProcessor(private val settings: IsCorSettings) {
             }
             chain {
                 title = "Логика подготовки состава к пост процессингу"
+                worker("Копируем scan request в validateScan") { scan = validatedScan }
                 prepareToSubProcessor("Подготовка данных для пост процесса", IsSubCommand.OCR_RECOGNITION)
             }
             repoSaveContext("Сохранение контекста в БД")
@@ -131,13 +135,29 @@ class IsBizProcessor(private val settings: IsCorSettings) {
                 validateIdNotEmptyAnalysis("Проверка, что заголовок не пуст")
                 validateIdProperFormatAnalysis("Проверка формата id", "analysis")
 
-                finishValidationAnalysis("Завершение проверок")
+                finishValidationAnalysisId("Завершение проверок")
             }
             chain {
                 title = "Логика чтения"
                 repoReadAnalysis("Чтение состава из БД")
-                prepareToSubProcessor("Подготовка данных для пост процесса", IsSubCommand.ANALYSIS_REGENERATE)
             }
+            prepareResult("Подготовка ответа")
+            repoSaveContext("Сохранение контекста в БД")
+        }
+        operation("Получение анализа по ID", IsCommand.ANALYSIS_REGENERATE) {
+            validation {
+                worker("Копируем analysis id в validateAnalysisId") { validateAnalysisId = analysisIdRequest }
+                validateIdNotEmptyAnalysis("Проверка, что заголовок не пуст")
+                validateIdProperFormatAnalysis("Проверка формата id", "analysis")
+
+                finishValidationAnalysisId("Завершение проверок")
+            }
+            chain {
+                title = "Логика чтения"
+                repoReadComposition("Чтение состава из БД")
+                repoReadAnalysis("Чтение состава из БД")
+            }
+            prepareToSubProcessor("Подготовка данных для пост процесса", IsSubCommand.ANALYSIS_REGENERATE)
             repoSaveContext("Сохранение контекста в БД")
         }
         operation("Создание анализа по id состава", IsCommand.ANALYSIS_CREATE) {
@@ -146,12 +166,16 @@ class IsBizProcessor(private val settings: IsCorSettings) {
                 validateIdNotEmptyComposition("Проверка, что заголовок не пуст")
                 validateIdProperFormatComposition("Проверка формата id", "composition")
 
-                finishValidationScan("Завершение проверок")
+                finishValidationCompositionId("Завершение проверок")
             }
             chain {
                 title = "Логика подготовки анализа к созданию в пост процессинге"
-                prepareToSubProcessor("Подготовка данных для пост процесса", IsSubCommand.ANALYSIS_CREATE)
+                repoReadAnalysisByComposition("Чтение состава из БД")
+                checkAndPrepareToSubProcessor("Подготовка к обработке", IsSubCommand.ANALYSIS_CREATE)
+                repoReadCompositionToAnalysis("Чтение состава из БД, когда анализа нет")
             }
+
+            checkAndPrepareResult("Подготовка ответа если не нужен пост процессинг")
             repoSaveContext("Сохранение контекста в БД")
         }
     }.build()

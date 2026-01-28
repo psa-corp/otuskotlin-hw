@@ -26,6 +26,7 @@ open class KafkaStreamsConfig(
         const val OCR_RECOGNITION_INPUT = "ocr-recognition-input"
         const val COMPOSITION_VALIDATE_INPUT = "composition-validate-input"
         const val COMPOSITION_OUTPUT = "composition-output"
+        const val ANALYSIS_CREATE_INPUT = "analysis-create-input"
     }
 
     @Bean

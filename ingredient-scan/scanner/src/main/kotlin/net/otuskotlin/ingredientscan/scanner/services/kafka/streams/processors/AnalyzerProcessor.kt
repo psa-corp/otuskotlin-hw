@@ -1,11 +1,13 @@
 package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors
 
-import net.otuskotlin.ingredientscan.core.common.external.models.*
-import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
+import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
+import net.otuskotlin.ingredientscan.core.common.external.models.IsError
+import net.otuskotlin.ingredientscan.core.common.external.models.IsState
+import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub
 import net.otuskotlin.ingredientscan.core.common.mappers.commonContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
-
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
@@ -13,48 +15,48 @@ import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Service
 
 @Service
-open class OcrRecognitionProcessor(private val contextRepository: InMemoryContextRepository) {
+open class AnalyzerProcessor(private val contextRepository: InMemoryContextRepository) {
 
-    private val log = LoggerFactory.getLogger(OcrRecognitionProcessor::class.java)
+    private val log = LoggerFactory.getLogger(AnalyzerProcessor::class.java)
 
-    fun processOcrRecognition(
+    fun processAnalyzer(
         @Payload json: String,
         @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
     ): String {
-        log.info("=== OCR Recognition started ===\nkey: {}", key)
+        log.info("=== Analyzer started ===\nkey: {}", key)
         val context = commonContextDeserialize(json)
         return try {
 
             log.info("Received context:\n" +
                     "  command: {}\n" +
-                    "  photoUrls: {}",
+                    "  composition: {}",
                 context.command,
-                context.scanRequest.text
+                context.composition
             )
 
             // STUB: Распознавание текста
-            val recognizedText = performOcrRecognition(context.scanRequest.files)
-            log.info("OCR recognized text: {}", recognizedText)
+            val analysis = performAnalyzer(context.composition)
+            log.info("OCR recognized text: {}", analysis)
 
             // Добавляем распознанный текст в контекст
-            context.compositionRequest.text = recognizedText
+            context.analysisResponse = analysis
 
             context.state = IsState.RUNNING
 
-            log.info("=== OCR Recognition completed ===\nRecognized text: {}", recognizedText)
+            log.info("=== Analyzer completed ===\nanalysis: {}", analysis)
 
             contextRepository.saveUnsuspend(context)
             commonContextSerialize(context)
 
         } catch (e: Exception) {
-            log.error("Error during OCR recognition", e)
+            log.error("Error during analyzer", e)
             val errorContext = context.apply {
                 errors.add(
                     IsError(
-                        code = "OCR_ERROR",
-                        group = "OCR_PROCESSOR",
-                        field = "recognition",
-                        message = "OCR recognition failed: ${e.message}"
+                        code = "ANALYZER",
+                        group = "ANALYZER_PROCESSOR",
+                        field = "analyzer",
+                        message = "Analyzer failed: ${e.message}"
                     )
                 )
                 state = IsState.FAILING
@@ -64,13 +66,13 @@ open class OcrRecognitionProcessor(private val contextRepository: InMemoryContex
         }
     }
 
-    private fun performOcrRecognition(photoUrls: MutableList<String>): String {
-        log.debug("Performing OCR recognition on photos: {}", photoUrls)
+    private fun performAnalyzer(composition: IsComposition): IsAnalysis {
+        log.debug("Performing Analyzer on composition: {}", composition)
 
         // STUB DATA - тестовый текст состава
-        val stubCompositionText = STUB_COMPOSITION.text
+        val stub  = IsAnalysisStub.Companion.STUB_ANALYSIS
 
-        log.info("OCR STUB: returning test composition text")
-        return stubCompositionText
+        log.info("Analyzer STUB: returning analysis")
+        return stub
     }
 }
