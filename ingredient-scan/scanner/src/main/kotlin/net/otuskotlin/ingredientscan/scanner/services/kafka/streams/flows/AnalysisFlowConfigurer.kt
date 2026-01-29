@@ -1,7 +1,7 @@
 package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.flows
 
 
-import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.AnalysisSaveProcessor
+import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors.AnalysisSaveProcessor
 import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config.KafkaTopicsConfig
 import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config.TopologyConfigurer
 import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors.AnalyzerProcessor

@@ -1,10 +1,15 @@
-package net.otuskotlin.ingredientscan.scanner.services.kafka.streams
+package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors
 
+import net.otuskotlin.ingredientscan.core.common.external.helpers.errorContext
+import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
-import net.otuskotlin.ingredientscan.core.common.mappers.commonContextDeserialize
+import net.otuskotlin.ingredientscan.core.common.external.models.IsSubCommand
 import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
+import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextDeserialize
+import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
+import net.otuskotlin.ingredientscan.core.common.mappers.toLightContext
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryAnalysisRepository
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
 import org.slf4j.LoggerFactory
@@ -27,7 +32,27 @@ open class AnalysisSaveProcessor(
         @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
     ): String {
         log.info("=== Analysis Save started ===\nkey: {}", key)
-        val context = commonContextDeserialize(json)
+        val lightContext = commonLightContextDeserialize(json)
+        val context = contextRepository.findByIdUnsuspend(lightContext.id)
+        if (context == null || context.state == IsState.FAILING) {
+            if (context == null) {
+                lightContext.fail(
+                    errorContext(
+                        violationCode = "kafka-processor",
+                        message = "Context not found to Repos. id:${lightContext.id.asString()} : AnalysisSaveProcessor"
+                    )
+                )
+            } else {
+                lightContext.fail(
+                    errorContext(
+                        violationCode = "kafka-processor",
+                        message = "Context error state. id:${lightContext.id.asString()} : AnalysisSaveProcessor"
+                    )
+                )
+            }
+            log.error("=== Analysis Save error ===\n  LightContext ID:{}", lightContext.id)
+            return commonLightContextSerialize(lightContext)
+        }
         return try {
 
             // Проверяем: есть ли ошибки от предыдущих процессоров
@@ -40,7 +65,7 @@ open class AnalysisSaveProcessor(
                 return commonContextSerialize(context)
             }
 
-            log.debug("Received context for saving:\n" +
+            log.info("Received context for saving:\n" +
                     " command: {}\n" +
                     " compositionText: {}",
                 context.command,
@@ -60,18 +85,16 @@ open class AnalysisSaveProcessor(
 
             log.info("Analysis processed with ID: {}", context.analysisResponse)
 
-            // Добавляем результат в ответ
-
-            context.state = IsState.FINISHING
 
             log.info("=== Analysis Save completed successfully ===")
+            context.subCommand = IsSubCommand.READY
             contextRepository.saveUnsuspend(context)
-            commonContextSerialize(context)
+            commonLightContextSerialize(context.toLightContext())
 
         } catch (e: Exception) {
             log.error("Error during analysis save", e)
-            val errorContext = context.apply {
-                errors.add(
+
+                context.fail(
                     IsError(
                         code = "SAVE_ERROR",
                         group = "SAVE_PROCESSOR",
@@ -79,10 +102,9 @@ open class AnalysisSaveProcessor(
                         message = "Failed to save analysis: ${e.message}"
                     )
                 )
-                state = IsState.FAILING
-            }
+
             contextRepository.saveUnsuspend(context)
-            commonContextSerialize(errorContext)
+            commonLightContextSerialize(context.toLightContext())
         }
     }
 
