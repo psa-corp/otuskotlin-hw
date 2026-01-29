@@ -51,13 +51,14 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
-      group-id: ingredient-scanner-group
+      group-id: ingredient-scanner-group-v2
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
 
 kafka:
   topics:
+    bootstrap-servers: localhost:9092
     partitions: 1
     replication-factor: 1
     auto-create: true

@@ -17,33 +17,9 @@ open class KafkaStreamsConfig(
 
     private val log = LoggerFactory.getLogger(KafkaStreamsConfig::class.java)
 
-//    companion object {
-//        val COMPOSITION_CREATE_INPUT: String = KafkaTopicsConfig.COMPOSITION_CREATE_INPUT
-//        val COMPOSITION_OUTPUT: String = KafkaTopicsConfig.COMPOSITION_OUTPUT
-//        val OCR_RECOGNITION_INPUT: String = KafkaTopicsConfig.OCR_RECOGNITION_INPUT
-//        val ANALYSIS_CREATE_INPUT: String = KafkaTopicsConfig.ANALYSIS_CREATE_INPUT
-//    }
-//    @Bean
-//    open fun streamsBuilderCustomizer(): StreamsBuilderFactoryBeanCustomizer {
-//        return StreamsBuilderFactoryBeanCustomizer { factoryBean ->
-//            factoryBean.setInfrastructureCustomizer(object : KafkaStreamsInfrastructureCustomizer {
-//                override fun configureBuilder(builder: StreamsBuilder) {
-//                    log.info("Starting topology configuration...")
-//                    if (topologyConfigurers.isEmpty()) {
-//                        log.warn("No topology configurers found!")
-//                    } else {
-//                        topologyConfigurers.forEach { configurer ->
-//                            log.info("Applying: {}", configurer::class.java.simpleName)
-//                            configurer.configure(builder)
-//                        }
-//                    }
-//                }
-//            })
-//        }
-//    }
     @Bean
     open fun kStream(
-        builder: StreamsBuilder, // Spring сам создаст и внедрит сюда builder
+        builder: StreamsBuilder,
         topologyConfigurers: List<TopologyConfigurer>
     ): KStream<String, String>? {
         log.info("BUILDING TOPOLOGY: Found {} configurers", topologyConfigurers.size)

@@ -4,6 +4,7 @@ import net.otuskotlin.ingredientscan.biz.common.general.initStatus
 import net.otuskotlin.ingredientscan.biz.common.general.subOperation
 import net.otuskotlin.ingredientscan.biz.common.repo.initRepoContext
 import net.otuskotlin.ingredientscan.biz.common.repo.prepareResult
+import net.otuskotlin.ingredientscan.biz.common.repo.repoReadContext
 import net.otuskotlin.ingredientscan.biz.common.repo.repoSaveContext
 import net.otuskotlin.ingredientscan.biz.common.sub.awaitContext
 import net.otuskotlin.ingredientscan.biz.common.sub.initContextAwaitService
@@ -49,7 +50,7 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
                 repoSaveContext("Сохранение контекста в БД")
                 sendContext("Отправляем сообщение для ИИ валидации текста и создания состава")
                 awaitContext("Ожидание выполнения задачи", 300_000)
-                worker("Копируем composition в ответ") { context?.let { compositionResponse = it.compositionResponse } }
+                repoReadContext("Чтение состава из БД")
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.COMPOSITION_VALIDATE }
             }
         }
@@ -67,13 +68,14 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
                 repoSaveContext("Сохранение контекста в БД")
                 sendContext("Отправляем сообщение для получения текста из фото, ИИ валидации текста и создания состава")
                 awaitContext("Ожидание выполнения задачи", 300_000)
-                worker("Копируем scan в ответ") { context?.let { compositionResponse = it.compositionResponse } }
+                repoReadContext("Чтение состава из БД")
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.COMPOSITION_VALIDATE }
             }
         }
         subOperation("Валидация состава перед ответом", IsSubCommand.COMPOSITION_VALIDATE) {
             validation {
                 worker("Копируем состав response в validateComposition") { validateComposition = compositionResponse }
+                validateIdContext("Проверяем что разморозили правильный поток")
                 validateTextNotEmptyComposition("Проверка, что текст не пуст")
 
                 worker("Копируем composition id в validateCompositionId") {
@@ -86,6 +88,7 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
             chain {
                 title = "Логика чтения"
                 worker("Копируем состав после валидации в ответ") { compositionResponse = validatedComposition }
+                worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.READY }
                 repoSaveContext("Сохранение контекста в БД")
             }
             prepareResult("Подготовка ответа")
@@ -107,11 +110,7 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
                 repoSaveContext("Сохранение контекста в БД")
                 sendContext("Отправляем сообщение для создания анализа")
                 awaitContext("Ожидание выполнения задачи", 300_000)
-                worker("Копируем новый analysis ") {
-                    context?.let {
-                        analysisResponse = it.analysisResponse
-                    }
-                }
+                repoReadContext("Чтение состава из БД")
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.ANALYSIS_VALIDATE }
             }
         }
@@ -140,11 +139,7 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
                 repoSaveContext("Сохранение контекста в БД")
                 sendContext("Отправляем сообщение для создания анализа")
                 awaitContext("Ожидание выполнения задачи", 300_000)
-                worker("Копируем новый analysis ") {
-                    context?.let {
-                        analysisResponse = it.analysisResponse
-                    }
-                }
+                repoReadContext("Чтение состава из БД")
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.ANALYSIS_VALIDATE }
             }
         }

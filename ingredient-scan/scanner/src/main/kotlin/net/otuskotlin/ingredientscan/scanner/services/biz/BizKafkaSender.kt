@@ -4,6 +4,8 @@ import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsMessageSender
 import net.otuskotlin.ingredientscan.core.common.external.models.IsSubCommand
 import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
+import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
+import net.otuskotlin.ingredientscan.core.common.mappers.toLightContext
 import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config.KafkaTopicsConfig.Companion.ANALYSIS_CREATE_INPUT
 import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config.KafkaTopicsConfig.Companion.COMPOSITION_CREATE_INPUT
 import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config.KafkaTopicsConfig.Companion.OCR_RECOGNITION_INPUT
@@ -20,9 +22,10 @@ class BizKafkaSender(private val kafkaTemplate: KafkaTemplate<String, String>) :
         log.info("Sending context to Kafka")
         topicByCommand(context.subCommand).let { topic ->
             if (!topic.isEmpty()) {
-                val contextJson = commonContextSerialize(context)
-                log.info("Sending to topic: {}, key: {}", topic, context.id.asString())
-                kafkaTemplate.send(topic, context.id.asString(), contextJson)
+                val lightContext = context.toLightContext()
+                val json = commonLightContextSerialize(lightContext)
+                log.info("Sending to topic: {}, key: {}", topic, lightContext.id.asString())
+                kafkaTemplate.send(topic, lightContext.id.asString(), json)
                     .whenComplete { result, ex ->
                         if (ex != null) {
                             log.error("Failed to send message to Kafka: {}", ex.message)

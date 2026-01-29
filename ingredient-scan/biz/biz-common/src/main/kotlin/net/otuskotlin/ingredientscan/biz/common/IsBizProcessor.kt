@@ -93,7 +93,7 @@ class IsBizProcessor(private val settings: IsCorSettings) {
             }
             chain {
                 title = "Логика чтения"
-                repoReadContext("Чтение состава из БД")
+                repoReadCompositionContext("Чтение состава из БД")
             }
             prepareResult("Подготовка ответа")
             repoSaveContext("Сохранение контекста в БД")

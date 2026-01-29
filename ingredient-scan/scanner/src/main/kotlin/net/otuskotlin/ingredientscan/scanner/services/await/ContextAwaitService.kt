@@ -4,11 +4,13 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.IsLightContext
 import net.otuskotlin.ingredientscan.core.common.external.helpers.errorProcessing
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContextAwaitService
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContextId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsSubCommand
+import net.otuskotlin.ingredientscan.core.common.mappers.toLightContext
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
 import net.otuskotlin.ingredientscan.scanner.services.await.Constants.Companion.TASK_READY
 import org.slf4j.LoggerFactory
@@ -30,8 +32,8 @@ open class ContextAwaitService(
     // Создаем CoroutineScope для запуска корутин
     private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    override suspend fun await(context: IsContext, timeout: Long): IsContext {
-        val deferred = CompletableDeferred<IsContext>()
+    override suspend fun await(context: IsContext, timeout: Long): IsLightContext {
+        val deferred = CompletableDeferred<IsLightContext>()
         val contextAwait = ContextAwait(
             deferred = deferred,
             id = context.id,
@@ -67,7 +69,7 @@ open class ContextAwaitService(
                     e = e,
                 )
             )
-            context
+            context.toLightContext()
         } finally {
             mutex.withLock {
                 awaitingContexts.remove(context.id)
@@ -111,9 +113,6 @@ open class ContextAwaitService(
         val contextAwait = mutex.withLock {
             awaitingContexts.remove(event.context.id)
         }
-
-        event.context.subCommand = IsSubCommand.READY
-        contextRepository.save(event.context)
 
         contextAwait?.let { track ->
             try {

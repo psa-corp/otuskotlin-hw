@@ -1,17 +1,18 @@
 package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors
 
-import net.otuskotlin.ingredientscan.core.common.external.models.*
+import net.otuskotlin.ingredientscan.core.common.external.helpers.errorContext
+import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
+import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION
-import net.otuskotlin.ingredientscan.core.common.mappers.commonContextDeserialize
-import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
+import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextDeserialize
+import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
+import net.otuskotlin.ingredientscan.core.common.mappers.toLightContext
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
-
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
-import org.springframework.stereotype.Service
 
 @Component
 open class OcrRecognitionProcessor(private val contextRepository: InMemoryContextRepository) {
@@ -23,46 +24,49 @@ open class OcrRecognitionProcessor(private val contextRepository: InMemoryContex
         @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
     ): String {
         log.info("=== OCR Recognition started ===\nkey: {}", key)
-        val context = commonContextDeserialize(json)
-        return try {
 
-            log.info("Received context:\n" +
-                    "  command: {}\n" +
-                    "  photoUrls: {}",
-                context.command,
-                context.scanRequest.text
-            )
+        val lightContext = commonLightContextDeserialize(json)
 
-            // STUB: Распознавание текста
-            val recognizedText = performOcrRecognition(context.scanRequest.files)
-            log.info("OCR recognized text: {}", recognizedText)
+        log.info(
+            "Composition Validate: Received light context:{}\n" +
+                    " command: {}\n" +
+                    " state: {}\n:",
+            lightContext.id,
+            lightContext.command,
+            lightContext.state
+        )
 
-            // Добавляем распознанный текст в контекст
-            context.compositionRequest.text = recognizedText
-
-            context.state = IsState.RUNNING
-
-            log.info("=== OCR Recognition completed ===\nRecognized text: {}", recognizedText)
-
-            contextRepository.saveUnsuspend(context)
-            commonContextSerialize(context)
-
-        } catch (e: Exception) {
-            log.error("Error during OCR recognition", e)
-            val errorContext = context.apply {
-                errors.add(
-                    IsError(
-                        code = "OCR_ERROR",
-                        group = "OCR_PROCESSOR",
-                        field = "recognition",
-                        message = "OCR recognition failed: ${e.message}"
+        val context = contextRepository.findByIdUnsuspend(lightContext.id)
+        if (context == null || context.state == IsState.FAILING) {
+            if (context == null) {
+                lightContext.fail(
+                    errorContext(
+                        violationCode = "kafka-processor",
+                        message = "Context not found to Repos. id:${lightContext.id.asString()} : CompositionValidateProcessor"
                     )
                 )
-                state = IsState.FAILING
+            } else {
+                lightContext.fail(
+                    errorContext(
+                        violationCode = "kafka-processor",
+                        message = "Context error state. id:${lightContext.id.asString()} : CompositionValidateProcessor"
+                    )
+                )
             }
-            contextRepository.saveUnsuspend(context)
-            commonContextSerialize(errorContext)
+            log.error("=== Composition Validate error ===\n  LightContext ID:{}", lightContext.id)
+            return commonLightContextSerialize(lightContext)
         }
+
+        val recognizedText = performOcrRecognition(context.scanRequest.files)
+        log.info("OCR recognized text: {}", recognizedText)
+
+        context.compositionRequest.text = recognizedText
+
+
+        log.info("=== OCR Recognition completed ===\nRecognized text: {}", recognizedText)
+
+        contextRepository.saveUnsuspend(context)
+        return commonLightContextSerialize(context.toLightContext())
     }
 
     private fun performOcrRecognition(photoUrls: MutableList<String>): String {

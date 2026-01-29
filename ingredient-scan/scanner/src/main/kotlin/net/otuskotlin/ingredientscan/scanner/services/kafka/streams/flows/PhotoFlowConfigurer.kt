@@ -1,9 +1,8 @@
 package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.flows
 
 
-import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.CompositionSaveProcessor
-import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.CompositionValidateProcessor
-import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config.KafkaStreamsConfig
+import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors.CompositionSaveProcessor
+import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors.CompositionValidateProcessor
 import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config.KafkaTopicsConfig
 import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config.TopologyConfigurer
 import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors.OcrRecognitionProcessor

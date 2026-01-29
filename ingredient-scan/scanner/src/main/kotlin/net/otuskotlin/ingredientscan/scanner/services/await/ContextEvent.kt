@@ -1,5 +1,5 @@
 package net.otuskotlin.ingredientscan.scanner.services.await
-import net.otuskotlin.ingredientscan.core.common.external.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.IsLightContext
 
 
-data class ContextEvent(val context: IsContext, val task : String)
+data class ContextEvent(val context: IsLightContext, val task : String)
