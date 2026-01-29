@@ -23,6 +23,7 @@ suspend inline fun <R : IResponse> IsAppSettings.uploadHelper(
     val logger = settings.loggerProvider.logger(clazz)
     val context = IsContext(
         timeStart = LocalDateTime.now(),
+        state = IsState.RUNNING
     )
     return try {
 

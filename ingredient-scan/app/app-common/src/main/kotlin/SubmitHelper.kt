@@ -19,6 +19,7 @@ suspend inline fun <R : IResponse> IsAppSettings.submitHelper(
     val logger = settings.loggerProvider.logger(clazz)
     val context = IsContext(
         timeStart = LocalDateTime.now(),
+        state = IsState.RUNNING
     )
     return try {
         context.fromTransport(request)
@@ -27,7 +28,6 @@ suspend inline fun <R : IResponse> IsAppSettings.submitHelper(
             marker = "BIZ",
             data = context.toLog(logId)
         )
-
         processor.exec(context)
 
         logger.info(
