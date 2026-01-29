@@ -2,6 +2,7 @@ package net.otuskotlin.ingredientscan.core.common.external.helpers
 
 
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.IsLightContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.logging.IsLogLevel
@@ -32,6 +33,18 @@ inline fun IsContext.fail(errors: Collection<IsError>) {
     state = IsState.FAILING
 }
 
+inline fun IsLightContext.addError(error: IsError) = errors.add(error)
+inline fun IsLightContext.addErrors(error: Collection<IsError>) = errors.addAll(error)
+
+inline fun IsLightContext.fail(error: IsError) {
+    addError(error)
+    state = IsState.FAILING
+}
+
+inline fun IsLightContext.fail(errors: Collection<IsError>) {
+    addErrors(errors)
+    state = IsState.FAILING
+}
 inline fun errorValidation(
     field: String,
     /**
@@ -57,7 +70,7 @@ inline fun errorProcessing(
     timeout: Long,
     level: IsLogLevel = IsLogLevel.ERROR,
 ) = IsError(
-    code = "validation-$field-$violationCode",
+    code = "processing-$field-$violationCode",
     field = field,
     group = "processing",
     message = "Context $id timeout after ${timeout}ms",
@@ -71,7 +84,7 @@ inline fun errorProcessing(
     e: Throwable,
     level: IsLogLevel = IsLogLevel.ERROR,
 ) = IsError(
-    code = "validation-$field-$violationCode",
+    code = "processing-$field-$violationCode",
     field = field,
     group = "processing",
     message = "Context $id processing error for field $field",
@@ -103,5 +116,17 @@ inline fun errorRepo(
     message = "Repository error for field $field: $description",
     level = level,
     exception = e,
+)
+
+inline fun errorContext(
+    violationCode: String,
+    message: String,
+    level: IsLogLevel = IsLogLevel.ERROR,
+) = IsError(
+    code = "context-$violationCode",
+    group = "repository",
+    message = message,
+    level = level,
+
 )
 

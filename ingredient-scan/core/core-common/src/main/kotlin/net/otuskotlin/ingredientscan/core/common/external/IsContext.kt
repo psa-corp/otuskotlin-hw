@@ -83,7 +83,7 @@ data class IsContext(
     var messageSender: IsMessageSender? = null,
 
     // Context
-    var context: IsContext? = null,
+    var context: IsLightContext = IsLightContext.NONE,
 
     var scan: IsScan = IsScan.NONE,
     var analysis: IsAnalysis = IsAnalysis.NONE,
