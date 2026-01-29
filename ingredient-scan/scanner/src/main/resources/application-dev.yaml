@@ -43,7 +43,9 @@ spring:
 
   kafka:
     streams:
-      auto-startup: false
+      auto-startup: true
+    admin:
+      auto-create: true
     bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -53,6 +55,13 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
+
+kafka:
+  topics:
+    partitions: 1
+    replication-factor: 1
+    auto-create: true
+
 
 server:
   port: 8081

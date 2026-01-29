@@ -11,9 +11,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
 import org.springframework.messaging.handler.annotation.Payload
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
+
+@Component
 open class AnalysisSaveProcessor(
     private val analysisRepository: InMemoryAnalysisRepository,
     private val contextRepository: InMemoryContextRepository

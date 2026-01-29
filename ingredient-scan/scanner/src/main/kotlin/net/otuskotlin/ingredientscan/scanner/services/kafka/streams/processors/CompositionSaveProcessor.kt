@@ -1,6 +1,9 @@
 package net.otuskotlin.ingredientscan.scanner.services.kafka.streams
 
-import net.otuskotlin.ingredientscan.core.common.external.models.*
+import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
+import net.otuskotlin.ingredientscan.core.common.external.models.IsError
+import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.mappers.commonContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryCompositionRepository
@@ -9,11 +12,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
 import org.springframework.messaging.handler.annotation.Payload
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.UUID.randomUUID
 
-@Service
+@Component
 open class CompositionSaveProcessor(
     private val compositionRepository: InMemoryCompositionRepository,
     private val contextRepository: InMemoryContextRepository

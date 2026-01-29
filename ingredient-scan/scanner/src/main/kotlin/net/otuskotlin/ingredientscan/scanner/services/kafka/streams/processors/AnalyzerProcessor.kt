@@ -12,9 +12,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
 import org.springframework.messaging.handler.annotation.Payload
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 
-@Service
+@Component
 open class AnalyzerProcessor(private val contextRepository: InMemoryContextRepository) {
 
     private val log = LoggerFactory.getLogger(AnalyzerProcessor::class.java)
