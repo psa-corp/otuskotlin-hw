@@ -9,14 +9,11 @@ interface IsContextRepository {
     suspend fun clear()
 
     fun saveUnsuspend(context: IsContext)
+    fun findByIdUnsuspend(id: IsContextId): IsContext?
 
     companion object {
         val NONE = object : IsContextRepository {
             override suspend fun save(context: IsContext) {
-                throw NotImplementedError("Must not be used")
-            }
-
-            override fun saveUnsuspend(context: IsContext) {
                 throw NotImplementedError("Must not be used")
             }
 
@@ -29,6 +26,14 @@ interface IsContextRepository {
             }
 
             override suspend fun clear() {
+                throw NotImplementedError("Must not be used")
+            }
+
+            override fun saveUnsuspend(context: IsContext) {
+                throw NotImplementedError("Must not be used")
+            }
+
+            override fun findByIdUnsuspend(id: IsContextId): IsContext? {
                 throw NotImplementedError("Must not be used")
             }
         }
