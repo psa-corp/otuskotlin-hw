@@ -32,7 +32,7 @@ fun ICorChainDsl<IsContext>.repoReadComposition(title: String) = worker {
 fun ICorChainDsl<IsContext>.repoReadCompositionToAnalysis(title: String) = worker {
     this.title = title
     description = "Чтение состава из БД"
-    on { state == IsState.RUNNING && subCommand != IsSubCommand.NONE}
+    on { state == IsState.RUNNING && subCommand != IsSubCommand.READY}
     handle {
         try {
             composition = compositionRepo?.findById(validatedCompositionId)

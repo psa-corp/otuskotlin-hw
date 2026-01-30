@@ -3,11 +3,11 @@ package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors
 import net.otuskotlin.ingredientscan.core.common.external.helpers.errorContext
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub
-import net.otuskotlin.ingredientscan.core.common.mappers.commonContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
@@ -17,7 +17,7 @@ import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
-import org.springframework.stereotype.Service
+import java.util.UUID.randomUUID
 
 @Component
 open class AnalyzerProcessor(private val contextRepository: InMemoryContextRepository) {
@@ -95,7 +95,9 @@ open class AnalyzerProcessor(private val contextRepository: InMemoryContextRepos
         log.debug("Performing Analyzer on composition: {}", composition)
 
         // STUB DATA - тестовый текст состава
-        val stub  = IsAnalysisStub.Companion.STUB_ANALYSIS
+        val stub = IsAnalysisStub.Companion.STUB_ANALYSIS
+        stub.id = IsAnalysisId("analysis-${randomUUID()}")
+        stub.compositionId = composition.id
 
         log.info("Analyzer STUB: returning analysis")
         return stub

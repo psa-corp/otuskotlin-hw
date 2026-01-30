@@ -65,22 +65,33 @@ fun ICorChainDsl<IsContext>.validateIdProperFormatContext(title: String, prefix:
         )
     }
 }
+//on { validateAnalysisId != IsAnalysisId.NONE && !validateAnalysisId.asString().matches(regExp) }
 
 fun ICorChainDsl<IsContext>.validateIdProperFormatAnalysis(title: String, prefix: String) = worker {
     this.title = title
 
-    // Может быть вынесен в IsCompositionId для реализации различных форматов
-    val regExp = Regex("^${Regex.escape(prefix)}_[0-9a-zA-Z-]+$")
-    on { validateAnalysisId != IsAnalysisId.NONE && !validateAnalysisId.asString().matches(regExp) }
+    // Разрешаем два формата:
+    // 1. prefix_custom-id (буквы, цифры, дефисы)
+    // 2. prefix_uuid (где uuid - валидный UUID)
+    val customIdRegExp = Regex("^${Regex.escape(prefix)}-[0-9a-zA-Z-]+\$")
+    val uuidRegExp = Regex("^${Regex.escape(prefix)}-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\$")
+
+    on { validateAnalysisId != IsAnalysisId.NONE
+            && !validateAnalysisId.asString().matches(customIdRegExp)
+            && !validateAnalysisId.asString().matches(uuidRegExp)
+    }
     handle {
         val encodedId = validateAnalysisId.asString()
             .replace("<", "&lt;")
             .replace(">", "&gt;")
+
         fail(
             errorValidation(
                 field = "id",
                 violationCode = "badFormat",
-                description = "value $encodedId must contain only letters and numbers"
+                description = "value $encodedId must be either: " +
+                        "1. ${prefix}_[letters-numbers-dashes] " +
+                        "2. ${prefix}_uuid (where uuid is in format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)"
             )
         )
     }

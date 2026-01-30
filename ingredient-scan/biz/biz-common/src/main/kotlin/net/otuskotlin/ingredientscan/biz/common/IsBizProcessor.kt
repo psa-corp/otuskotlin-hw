@@ -170,11 +170,12 @@ class IsBizProcessor(private val settings: IsCorSettings) {
             }
             chain {
                 title = "Логика подготовки анализа к созданию в пост процессинге"
+                worker("Копируем composition id в compositionIdRequest") { compositionIdRequest = validateCompositionId }
                 repoReadAnalysisByComposition("Чтение состава из БД")
+                worker("Копируем composition id в compositionIdRequest") { subCommand = IsSubCommand.READY }
                 checkAndPrepareToSubProcessor("Подготовка к обработке", IsSubCommand.ANALYSIS_CREATE)
                 repoReadCompositionToAnalysis("Чтение состава из БД, когда анализа нет")
             }
-
             checkAndPrepareResult("Подготовка ответа если не нужен пост процессинг")
             repoSaveContext("Сохранение контекста в БД")
         }

@@ -47,10 +47,6 @@ inline fun IsLightContext.fail(errors: Collection<IsError>) {
 }
 inline fun errorValidation(
     field: String,
-    /**
-     * Код, характеризующий ошибку. Не должен включать имя поля или указание на валидацию.
-     * Например: empty, badSymbols, tooLong, etc
-     */
     violationCode: String,
     description: String,
     level: IsLogLevel = IsLogLevel.ERROR,

@@ -29,8 +29,9 @@ fun ICorChainDsl<IsContext>.checkAndPrepareToSubProcessor(title: String, sub: Is
 fun ICorChainDsl<IsContext>.checkAndPrepareResult(title: String) = worker {
     this.title = title
     description = "Подготовка данных для ответа клиенту на запрос"
-    on { subCommand != IsSubCommand.NONE && state == IsState.RUNNING}
+    on { subCommand == IsSubCommand.READY && state == IsState.RUNNING}
     handle {
+        analysisResponse = analysis
         state = IsState.FINISHING
     }
 }

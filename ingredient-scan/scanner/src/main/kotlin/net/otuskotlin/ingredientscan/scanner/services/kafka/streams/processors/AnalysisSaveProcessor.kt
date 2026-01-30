@@ -3,6 +3,7 @@ package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors
 import net.otuskotlin.ingredientscan.core.common.external.helpers.errorContext
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.external.models.IsSubCommand
@@ -72,16 +73,22 @@ open class AnalysisSaveProcessor(
                 context.analysisRequest.description.take(100) + "..."
             )
 
-            // Идемпотентность
-            val existingAnalysis = analysisRepository.findAnalysisByCompositionIdUnsuspend(context.analysis.compositionId)
 
-             if (existingAnalysis != null && context.analysis == IsAnalysis.NONE) {
-                 context.analysisResponse = existingAnalysis
-             }else{
-                 context.analysisResponse.id = context.analysis.id
-             }
+            if (context.command == IsCommand.ANALYSIS_REGENERATE) {
+                context.analysisResponse.id = context.analysis.id
+                analysisRepository.saveAnalysisUnsuspend(context.analysisResponse)
+            } else {
+                // Идемпотентность
+                val existingAnalysis =
+                    analysisRepository.findAnalysisByCompositionIdUnsuspend(context.composition.id)
 
-            analysisRepository.saveAnalysisUnsuspend(context.analysisResponse)
+                if (existingAnalysis != null) {
+                    context.analysisResponse = existingAnalysis
+                } else {
+                    analysisRepository.saveAnalysisUnsuspend(context.analysisResponse)
+                }
+            }
+
 
             log.info("Analysis processed with ID: {}", context.analysisResponse)
 

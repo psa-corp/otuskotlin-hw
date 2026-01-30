@@ -37,7 +37,7 @@ fun ICorChainDsl<IsContext>.validateColorNotEmptyAnalysis(title: String) = worke
 
 fun ICorChainDsl<IsContext>.validateHasRatingAnalysis(title: String) = worker {
     this.title = title
-    on { validateAnalysis.rating >= 0.0 }
+    on { validateAnalysis.rating < 0.0 }
     handle {
         fail(
             errorValidation(

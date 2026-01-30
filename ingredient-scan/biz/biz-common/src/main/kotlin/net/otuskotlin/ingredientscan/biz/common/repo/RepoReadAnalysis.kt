@@ -35,7 +35,7 @@ fun ICorChainDsl<IsContext>.repoReadAnalysisByComposition(title: String) = worke
     on { state == IsState.RUNNING}
     handle {
         try {
-            analysis = analysisRepo?.findAnalysisByCompositionId(validatedCompositionId) ?: IsAnalysis.NONE
+            analysis = analysisRepo?.findAnalysisByCompositionId(compositionIdRequest) ?: IsAnalysis.NONE
         } catch (e: Throwable) {
             fail(
                 errorRepo(

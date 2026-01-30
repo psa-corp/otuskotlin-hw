@@ -29,7 +29,7 @@ fun IsContext.fromTransport(request: AnalysisGetRequest) {
 fun IsContext.fromTransport(request: AnalysisCreateRequest) {
     command = IsCommand.ANALYSIS_CREATE
 
-    compositionIdRequest = IsCompositionId(request.compositionId.toString())
+    compositionIdRequest = IsCompositionId(request.compositionId)
 
     workMode = request.debug.transportToWorkMode()
     stubCase = request.debug.transportToStubCase()
