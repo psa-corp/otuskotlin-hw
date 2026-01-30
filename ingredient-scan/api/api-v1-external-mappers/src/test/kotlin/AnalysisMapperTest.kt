@@ -28,7 +28,7 @@ class AnalysisMapperTest {
 
         assertEquals(IsStubs.SUCCESS, context.stubCase)
         assertEquals(IsWorkMode.STUB, context.workMode)
-        assertEquals(STUB_ANALYSIS.id, context.analysisRequest.id)
+        assertEquals(STUB_ANALYSIS.id, context.analysisIdRequest)
         assertEquals(IsCommand.ANALYSIS_GET, context.command)
     }
 
