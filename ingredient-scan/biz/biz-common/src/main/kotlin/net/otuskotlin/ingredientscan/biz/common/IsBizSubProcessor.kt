@@ -83,7 +83,7 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
                 }
                 validateIdNotEmptyComposition("Проверка, что ID не пуст")
 
-                finishValidationCompositionId("Завершение проверок")
+                finishValidationComposition("Завершение проверок")
             }
             chain {
                 title = "Логика чтения"

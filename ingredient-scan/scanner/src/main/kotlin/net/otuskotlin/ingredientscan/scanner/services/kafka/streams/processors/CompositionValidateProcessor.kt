@@ -29,15 +29,7 @@ open class CompositionValidateProcessor(
         @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
     ): String {
         log.info("=== Composition Validate started ===\nkey: {}", key)
-        var lightContext = IsLightContext()
-
-        try {
-            lightContext = commonLightContextDeserialize(json)
-            val i : Int =0
-        } catch (e: Exception) {
-            log.error(e.message, e)
-        }
-
+        var lightContext = commonLightContextDeserialize(json)
 
         log.info(
             "Composition Validate: Received light context:{}\n" +

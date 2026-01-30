@@ -126,7 +126,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompositionCreateByManualResponse' # JSON с compositionId
+                $ref: '#/components/schemas/CompositionCreateByManualResponse'
         '400':
           description: Неверные данные запроса
           content:
@@ -479,6 +479,8 @@ components:
         - $ref: '#/components/schemas/IResponse'
         - type: object
           properties:
+            composition:
+              $ref: '#/components/schemas/Composition'
             contextId:
               type: string
               example: "context_123"
