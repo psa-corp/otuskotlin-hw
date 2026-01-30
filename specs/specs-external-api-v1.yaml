@@ -80,7 +80,7 @@ paths:
 
   /analysis/create:
     post:
-      tags: [ analysis ]
+      tags: [analysis]
       summary: Создание анализа состава
       operationId: analysisCreate
       requestBody:
@@ -315,6 +315,7 @@ components:
         mapping:
           analysisGet: '#/components/schemas/AnalysisGetRequest'
           analysisRegenerate: '#/components/schemas/AnalysisRegenerateRequest'
+          analysisCreate: '#/components/schemas/AnalysisCreateRequest'
           compositionCreateByManual: '#/components/schemas/CompositionCreateByManualRequest'
           compositionCreateByPhotos: '#/components/schemas/CompositionCreateByPhotosRequest'
           compositionGet: '#/components/schemas/CompositionGetRequest'
@@ -340,6 +341,7 @@ components:
         mapping:
           analysisGet: '#/components/schemas/AnalysisGetResponse'
           analysisRegenerate: '#/components/schemas/AnalysisRegenerateResponse'
+          analysisCreate: '#/components/schemas/AnalysisCreateResponse'
           compositionCreateByManual: '#/components/schemas/CompositionCreateByManualResponse'
           compositionCreateByPhotos: '#/components/schemas/CompositionCreateByPhotosResponse'
           compositionGet: '#/components/schemas/CompositionGetResponse'
@@ -383,7 +385,7 @@ components:
         - $ref: '#/components/schemas/IRequest'
         - type: object
           required:
-            - analysisId
+            - compositionId
           properties:
             debug:
               $ref: '#/components/schemas/RequestDebug'
