@@ -26,14 +26,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AnalysisGetRequest' # Используем Request Wrapper
+              $ref: '#/components/schemas/AnalysisGetRequest'
       responses:
         '200':
           description: Успешный ответ
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AnalysisGetResponse' # Используем Response Wrapper
+                $ref: '#/components/schemas/AnalysisGetResponse'
         '404':
           description: Анализ не найден
           content:
@@ -161,14 +161,14 @@ paths:
                     format: binary
                     x-content-type: application/octet-stream
                 scan:
-                  $ref: '#/components/schemas/CompositionCreateByPhotosRequest' # Используем Request Wrapper
+                  $ref: '#/components/schemas/CompositionCreateByPhotosRequest'
       responses:
         '200':
           description: Успешный ответ
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompositionCreateByPhotosResponse' # JSON с compositionId
+                $ref: '#/components/schemas/CompositionCreateByPhotosResponse'
         '400':
           description: Неверные данные или размер файла
           content:
@@ -360,7 +360,7 @@ components:
             analysisId:
               type: string
               description: ID анализа для получения
-              example: "analysis_123"
+              example: "analysis-123"
               nullable: false
 
     AnalysisRegenerateRequest:
@@ -390,7 +390,7 @@ components:
             compositionId:
               type: string
               description: ID состава
-              example: "composition_123"
+              example: "composition-123"
 
     CompositionCreateByManualRequest:
       allOf:
@@ -426,7 +426,7 @@ components:
             compositionId:
               type: string
               description: ID состава
-              example: "composition_123"
+              example: "composition-123"
 
     CompositionContextGetRequest:
       allOf:
@@ -438,7 +438,7 @@ components:
             contextId:
               type: string
               description: ID контекста
-              example: "context_123"
+              example: "context-123"
 
     DownloadFileRequest:
       allOf:
@@ -483,7 +483,7 @@ components:
               $ref: '#/components/schemas/Composition'
             contextId:
               type: string
-              example: "context_123"
+              example: "context-123"
 
     CompositionCreateByPhotosResponse:
       allOf:
@@ -492,7 +492,7 @@ components:
           properties:
             contextId:
               type: string
-              example: "context_123"
+              example: "context-123"
 
     CompositionGetResponse:
       allOf:
@@ -501,6 +501,9 @@ components:
           properties:
             composition:
               $ref: '#/components/schemas/Composition'
+            contextId:
+              type: string
+              example: "context-123"
 
     CompositionContextGetResponse:
       allOf:
@@ -596,7 +599,7 @@ components:
         id:
           type: string
           description: ID контекста
-          example: "context_123"
+          example: "context-123"
         state:
           $ref: '#/components/schemas/State'
         errors:

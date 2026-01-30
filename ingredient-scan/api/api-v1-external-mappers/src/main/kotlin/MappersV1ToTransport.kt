@@ -57,7 +57,8 @@ fun IsContext.toTransportCompositionGet() = CompositionGetResponse(
     responseType = "compositionGet",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
-    composition = compositionResponse.toTransport()
+    composition = compositionResponse.toTransport(),
+    contextId = id.takeIf { it != IsContextId.NONE }?.asString()
 )
 
 fun IsContext.toTransport() =
