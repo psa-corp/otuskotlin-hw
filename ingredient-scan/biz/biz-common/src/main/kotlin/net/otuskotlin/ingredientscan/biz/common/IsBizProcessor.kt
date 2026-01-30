@@ -140,8 +140,9 @@ class IsBizProcessor(private val settings: IsCorSettings) {
             chain {
                 title = "Логика чтения"
                 repoReadAnalysis("Чтение состава из БД")
+                worker("Пост процессинг не нужен ") { subCommand = IsSubCommand.READY }
             }
-            prepareResult("Подготовка ответа")
+            checkAndPrepareResult("Подготовка ответа если не нужен пост процессинг")
             repoSaveContext("Сохранение контекста в БД")
         }
         operation("Получение анализа по ID", IsCommand.ANALYSIS_REGENERATE) {
@@ -172,7 +173,7 @@ class IsBizProcessor(private val settings: IsCorSettings) {
                 title = "Логика подготовки анализа к созданию в пост процессинге"
                 worker("Копируем composition id в compositionIdRequest") { compositionIdRequest = validateCompositionId }
                 repoReadAnalysisByComposition("Чтение состава из БД")
-                worker("Копируем composition id в compositionIdRequest") { subCommand = IsSubCommand.READY }
+                worker("Пост процессинг не нужен ") { subCommand = IsSubCommand.READY }
                 checkAndPrepareToSubProcessor("Подготовка к обработке", IsSubCommand.ANALYSIS_CREATE)
                 repoReadCompositionToAnalysis("Чтение состава из БД, когда анализа нет")
             }
