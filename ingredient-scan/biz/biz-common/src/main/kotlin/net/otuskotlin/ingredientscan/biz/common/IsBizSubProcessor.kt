@@ -96,6 +96,7 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
         subOperation("Создание анализа на состава", IsSubCommand.ANALYSIS_CREATE) {
             validation {
                 worker("Копируем composition в validateComposition") { validateComposition = composition }
+                worker("Копируем composition id в validateCompositionId") { validateCompositionId = validateComposition.id }
                 worker("Стираем analysisResponse") { analysisResponse = IsAnalysis.NONE }
                 validateIdNotEmptyComposition("Проверка, что заголовок не пуст")
                 validateIdProperFormatComposition("Проверка формата id", "composition")
@@ -116,12 +117,10 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
         }
         subOperation("Создание анализа на состава", IsSubCommand.ANALYSIS_REGENERATE) {
             validation {
-                worker("Копируем scan request в validateScan") { validateComposition = composition }
+                worker("Копируем composition в validateComposition") { validateComposition = composition }
+                worker("Копируем composition id в validateCompositionId") { validateCompositionId = validateComposition.id }
                 worker("Копируем анализ для валидации") { validateAnalysis = analysis }
-                worker("Копируем id анализа для валидации") { validateAnalysisId = validateAnalysis.id }
-
-                worker("Копируем id состава для валидации") { validateCompositionId = composition.id }
-                worker("Копируем id состава для валидации") { validateAnalysisId = validateAnalysis.id }
+                worker("Копируем анализ id в validateAnalysisId") { validateAnalysisId = validateAnalysis.id }
                 validateIdNotEmptyComposition("Проверка, что заголовок не пуст")
                 validateIdProperFormatComposition("Проверка формата id", "composition")
                 validateIdNotEmptyAnalysis("Проверка, что заголовок не пуст")
@@ -132,8 +131,8 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
             }
             chain {
                 title = "Логика создания состава"
-                worker("Копируем validatedComposition в composition") { composition = validatedComposition }
                 worker("Копируем validatedAnalysis в analysis") { analysis = validatedAnalysis }
+                worker("Копируем composition в validatedComposition") { composition = validatedComposition }
                 worker("Стираем analysisResponse") { analysisResponse = IsAnalysis.NONE }
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.ANALYSIS_CREATE }
                 repoSaveContext("Сохранение контекста в БД")

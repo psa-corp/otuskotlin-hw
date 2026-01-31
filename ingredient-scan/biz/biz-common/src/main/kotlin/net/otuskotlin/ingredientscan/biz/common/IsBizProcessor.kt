@@ -155,8 +155,9 @@ class IsBizProcessor(private val settings: IsCorSettings) {
             }
             chain {
                 title = "Логика чтения"
-                repoReadComposition("Чтение состава из БД")
                 repoReadAnalysis("Чтение состава из БД")
+                worker("Копируем compositionId id в validatedCompositionId") { validatedCompositionId = analysis.compositionId }
+                repoReadComposition("Чтение состава из БД")
             }
             prepareToSubProcessor("Подготовка данных для пост процесса", IsSubCommand.ANALYSIS_REGENERATE)
             repoSaveContext("Сохранение контекста в БД")

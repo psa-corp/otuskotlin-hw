@@ -65,9 +65,6 @@ open class AnalyzerProcessor(private val contextRepository: InMemoryContextRepos
 
             // Добавляем распознанный текст в контекст
             context.analysisResponse = analysis
-
-            context.state = IsState.RUNNING
-
             log.info("=== Analyzer completed ===\nanalysis: {}", analysis)
 
             contextRepository.saveUnsuspend(context)
