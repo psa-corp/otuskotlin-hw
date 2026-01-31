@@ -44,7 +44,7 @@ logback-access = "2.0.7"
 #S3
 awssdk = "2.38.7"
 awspring = "3.3.1"
-
+aws-crt = "0.33.1"
 
 coroutines = "1.10.2"
 caffeine = "3.2.2"
@@ -141,6 +141,9 @@ springdoc-openapi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-u
 #s3
 spring-cloud-aws = { module = "io.awspring.cloud:spring-cloud-aws-starter-s3", version.ref = "awspring" }
 software-amazon = { module = "software.amazon.awssdk:s3", version.ref = "awssdk" }
+software-amazon-transfer-manager = { module = "software.amazon.awssdk:s3-transfer-manager", version.ref = "awssdk" }
+software-amazon-aws-crt = { module = "software.amazon.awssdk.crt:aws-crt", version.ref = "aws-crt" }
+
 software-amazon-client = { module = "software.amazon.awssdk:netty-nio-client", version.ref = "awssdk" }
 
 

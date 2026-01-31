@@ -92,7 +92,7 @@ open class AnalyzerProcessor(private val contextRepository: InMemoryContextRepos
         log.debug("Performing Analyzer on composition: {}", composition)
 
         // STUB DATA - тестовый текст состава
-        val stub = IsAnalysisStub.Companion.STUB_ANALYSIS
+        val stub = IsAnalysisStub.STUB_ANALYSIS
         stub.id = IsAnalysisId("analysis-${randomUUID()}")
         stub.compositionId = composition.id
 

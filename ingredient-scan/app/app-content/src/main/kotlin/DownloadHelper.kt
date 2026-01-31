@@ -2,27 +2,27 @@
 
 package net.otuskotlin.ingredientscan.app.content
 
-import net.otuskotlin.ingredientscan.api.log1.mapper.toLog
 import net.otuskotlin.ingredientscan.app.common.IsAppSettings
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.helpers.errorCustom
+import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
-import net.otuskotlin.ingredientscan.mappers.v1.toDownloadFileErrorResponse
-import org.springframework.core.io.Resource
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
+import org.springframework.core.io.buffer.DataBuffer
+import reactor.core.publisher.Flux
 import java.time.LocalDateTime
 import kotlin.reflect.KClass
 
 suspend inline fun IsAppSettings.downloadHelper(
-    fileName: String,
+    fileNames: List<String>,
     clazz: KClass<*>,
     logId: String,
-): ResponseEntity<Resource> {
+): Flux<DataBuffer> {
     val logger = settings.loggerProvider.logger(clazz)
     val context = IsContext(
         timeStart = LocalDateTime.now(),
     )
+
+    val contextRepository = settings.contextRepository
     try {
         val contentProvider = settings.contentProvider
         if (contentProvider == null) {
@@ -36,46 +36,27 @@ suspend inline fun IsAppSettings.downloadHelper(
 
             throw IllegalStateException("Content provider is not configured")
         }
+
         logger.info(
             msg = "Request $logId started for ${clazz.simpleName}",
             marker = "BIZ",
-            data = "file name:$fileName"
+            data = "file names:$fileNames"
         )
 
-        return contentProvider.download(context, fileName) as ResponseEntity<Resource>
-
+        context.files = fileNames
+        context.zipFilesResponse = contentProvider.download(context)
+        contextRepository?.save(context)
+        return context.zipFilesResponse as Flux<DataBuffer>
     } catch (e: Throwable) {
-        val cleanedFileName = fileName.removePrefix("/")
-
-        if (context.errors.isEmpty()) {
-            context.errors.add(
-                IsError(
-                    code = "FILE_NOT_FOUND",
-                    group = "s3",
-                    field = "",
-                    message = "File not found: $cleanedFileName"
-                )
+        context.fail(
+            errorCustom(
+                code = "downloadError",
+                field = "downloadError",
+                group = "s3",
+                message = e.message ?: "Unknown S3 error"
             )
-        }
-
-        val errorResponse = context.toDownloadFileErrorResponse()
-        val jsonResource = JsonErrorResource(errorResponse)
-
-        val status = when (context.errors.firstOrNull()?.code) {
-            "SERVICE_UNAVAILABLE" -> HttpStatus.SERVICE_UNAVAILABLE
-            "FILE_NOT_FOUND" -> HttpStatus.NOT_FOUND
-            "STORE_NOT_FOUND" -> HttpStatus.NOT_FOUND
-            else -> HttpStatus.INTERNAL_SERVER_ERROR
-        }
-
-        logger.info(
-            msg = "Response error $logId started for ${clazz.simpleName}",
-            marker = "BIZ",
-            data = errorResponse
         )
-
-        return ResponseEntity.status(status)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(jsonResource)
+        contextRepository?.save(context)
+        throw e
     }
 }

@@ -15,8 +15,7 @@ import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextReposit
 import net.otuskotlin.ingredientscan.scanner.services.await.ContextAwaitService
 import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
 import org.slf4j.LoggerFactory
-import org.springframework.core.io.Resource
-import org.springframework.http.ResponseEntity
+import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -59,8 +58,7 @@ open class BizService(
         return appSettings.uploadHelper(request, photos,this::class, operation)
     }
 
-    open suspend fun execute(fileName: String, operation : String) : ResponseEntity<Resource> {
+    open suspend fun execute(fileName: List<String>, operation : String) : Flux<DataBuffer>  {
         return appSettings.downloadHelper(fileName, this::class, operation)
     }
-
 }

@@ -25,11 +25,15 @@ spring:
         static: us-east-1
       endpoint: http://localhost:9000
       s3:
+        enabled: false
         # Ключевой параметр для MinIO
         endpoint: http://localhost:9000
         path-style-access-enabled: true
         bucket:
           name: photos # Имя вашего бакета в MinIO
+      transfer-manager:
+        enabled: false
+
   docker:
     compose:
       enabled: true

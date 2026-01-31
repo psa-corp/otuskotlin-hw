@@ -46,6 +46,8 @@ data class IsContext(
     var contextIdRequest: IsContextId = IsContextId.NONE,
     var analysisIdRequest: IsAnalysisId = IsAnalysisId.NONE,
 
+    var files: List<String> = mutableListOf(),
+
     // Response data
     var analysisResponse: IsAnalysis = IsAnalysis.NONE,
     var compositionResponse: IsComposition = IsComposition.NONE,
@@ -53,6 +55,7 @@ data class IsContext(
     var componentsResponse: MutableList<IsComponent> = mutableListOf(),
     var scanResponse: IsScan = IsScan(),
     var compositionContextResponse: IsCompositionContext = IsCompositionContext.NONE,
+    var zipFilesResponse: Any? = null,
 
     // Validate
     var validateCompositionId: IsCompositionId = IsCompositionId.NONE,

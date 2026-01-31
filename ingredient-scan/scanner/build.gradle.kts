@@ -42,6 +42,9 @@ dependencies {
 
 	implementation(libs.software.amazon)
 	implementation(libs.software.amazon.client)
+	implementation(libs.software.amazon.transfer.manager)
+	implementation(libs.software.amazon.aws.crt)
+
 
 	implementation(libs.swagger.core)
 

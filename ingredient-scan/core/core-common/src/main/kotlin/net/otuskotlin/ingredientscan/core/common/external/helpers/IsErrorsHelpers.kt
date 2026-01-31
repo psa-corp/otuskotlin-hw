@@ -58,6 +58,20 @@ inline fun errorValidation(
     level = level,
 )
 
+inline fun errorCustom(
+    code: String,
+    field: String,
+    group: String,
+    message: String,
+    level: IsLogLevel = IsLogLevel.ERROR,
+) = IsError(
+    code = code,
+    field = field,
+    group = group,
+    message = message,
+    level = level,
+)
+
 
 inline fun errorProcessing(
     field: String,
@@ -120,7 +134,7 @@ inline fun errorContext(
     level: IsLogLevel = IsLogLevel.ERROR,
 ) = IsError(
     code = "context-$violationCode",
-    group = "repository",
+    group = "context",
     message = message,
     level = level,
 
