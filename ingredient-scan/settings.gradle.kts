@@ -36,6 +36,7 @@ include(":api:api-log1")
 include(":app:app-common")
 include(":app:app-content")
 include(":scanner")
+include(":analyzer")
 include(":biz:biz-common")
 
 

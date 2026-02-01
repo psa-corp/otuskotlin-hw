@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config
+package net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.config
 
 import org.apache.kafka.streams.StreamsBuilder
 

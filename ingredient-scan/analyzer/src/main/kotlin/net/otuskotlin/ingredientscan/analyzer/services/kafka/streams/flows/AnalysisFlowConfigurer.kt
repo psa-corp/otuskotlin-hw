@@ -1,10 +1,10 @@
-package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.flows
+package net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.flows
 
 
-import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors.AnalysisSaveProcessor
-import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config.KafkaTopicsConfig
-import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config.TopologyConfigurer
-import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors.AnalyzerProcessor
+import net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.processors.AnalysisSaveProcessor
+import net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.config.KafkaTopicsConfig
+import net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.config.TopologyConfigurer
+import net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.processors.AnalyzerProcessor
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.kstream.Consumed

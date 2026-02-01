@@ -1,10 +1,11 @@
-package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.flows
+package net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.flows
 
 
-import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors.CompositionSaveProcessor
-import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors.CompositionValidateProcessor
-import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config.KafkaTopicsConfig
-import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config.TopologyConfigurer
+import net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.processors.CompositionSaveProcessor
+import net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.processors.CompositionValidateProcessor
+import net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.config.KafkaTopicsConfig
+import net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.config.TopologyConfigurer
+import net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.processors.OcrRecognitionProcessor
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.kstream.Consumed
@@ -15,22 +16,27 @@ import org.springframework.stereotype.Component
 
 @Component
 @DependsOn("kafkaAdmin")
-open class ManualFlowConfigurer(
+open class PhotoFlowConfigurer(
+    private val ocrProcessor: OcrRecognitionProcessor,
     private val validateProcessor: CompositionValidateProcessor,
     private val saveProcessor: CompositionSaveProcessor
 ) : TopologyConfigurer {
 
-    private val log = LoggerFactory.getLogger(ManualFlowConfigurer::class.java)
+    private val log = LoggerFactory.getLogger(PhotoFlowConfigurer::class.java)
 
     override fun configure(streamsBuilder: StreamsBuilder) {
-        log.info("Setting up COMPOSITION_CREATE pipeline...")
+        log.info("Setting up OCR_RECOGNITION and COMPOSITION_CREATE pipeline...")
 
         val stringSerde = Serdes.String()
         val consumed = Consumed.with(stringSerde, stringSerde)
         val produced = Produced.with(stringSerde, stringSerde)
 
         // Validation & Save
-        streamsBuilder.stream(KafkaTopicsConfig.COMPOSITION_CREATE_INPUT, consumed)
+        streamsBuilder.stream(KafkaTopicsConfig.OCR_RECOGNITION_INPUT, consumed)
+            .mapValues { json ->
+                log.info("OCR_RECOGNITION : OCR Processing - {}", json.take(100))
+                ocrProcessor.processOcrRecognition(json, null)
+            }
             .mapValues { json ->
                 log.info("COMPOSITION_CREATE : Validating - {}", json.take(100))
                 validateProcessor.processCompositionValidation(json, null)
@@ -41,8 +47,6 @@ open class ManualFlowConfigurer(
             }
             .to(KafkaTopicsConfig.COMPOSITION_OUTPUT, produced)
 
-        log.info("COMPOSITION_CREATE pipeline ready")
-        log.info("Input topic: {}", KafkaTopicsConfig.COMPOSITION_CREATE_INPUT)
-        log.info("Output topic: {}", KafkaTopicsConfig.COMPOSITION_OUTPUT)
+        log.info("COMPOSITION_CREATE_MANUAL pipeline ready")
     }
 }

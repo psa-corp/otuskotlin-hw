@@ -1,11 +1,11 @@
-package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors
+package net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.processors
 
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
 import net.otuskotlin.ingredientscan.core.common.external.models.*
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryAnalysisRepository
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryLightContextRepository
+import net.otuskotlin.ingredientscan.analyzer.repositories.InMemoryAnalysisRepository
+import net.otuskotlin.ingredientscan.analyzer.repositories.InMemoryLightContextRepository
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header

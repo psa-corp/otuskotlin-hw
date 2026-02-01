@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.scanner.repositories
+package net.otuskotlin.ingredientscan.analyzer.repositories
 
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine

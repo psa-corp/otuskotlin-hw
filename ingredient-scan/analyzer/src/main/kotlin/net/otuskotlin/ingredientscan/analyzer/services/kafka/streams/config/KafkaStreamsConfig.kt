@@ -1,13 +1,11 @@
-package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config
+package net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.config
 
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.kstream.KStream
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.kafka.StreamsBuilderFactoryBeanCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.annotation.EnableKafkaStreams
-import org.springframework.kafka.config.KafkaStreamsInfrastructureCustomizer
 
 @Configuration
 @EnableKafkaStreams
