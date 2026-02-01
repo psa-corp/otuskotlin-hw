@@ -4,7 +4,6 @@ import net.otuskotlin.ingredientscan.biz.common.general.initStatus
 import net.otuskotlin.ingredientscan.biz.common.general.subOperation
 import net.otuskotlin.ingredientscan.biz.common.repo.initRepoContext
 import net.otuskotlin.ingredientscan.biz.common.repo.prepareResult
-import net.otuskotlin.ingredientscan.biz.common.repo.repoReadContext
 import net.otuskotlin.ingredientscan.biz.common.repo.repoSaveContext
 import net.otuskotlin.ingredientscan.biz.common.sub.awaitContext
 import net.otuskotlin.ingredientscan.biz.common.sub.initContextAwaitService
@@ -50,8 +49,8 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
                 repoSaveContext("Сохранение контекста в БД")
                 sendContext("Отправляем сообщение для ИИ валидации текста и создания состава")
                 awaitContext("Ожидание выполнения задачи", 300_000)
-                repoReadContext("Чтение состава из БД")
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.COMPOSITION_VALIDATE }
+                repoSaveContext("Сохранение контекста в БД")
             }
         }
         subOperation("Создание состава по фото скана", IsSubCommand.OCR_RECOGNITION) {
@@ -68,13 +67,13 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
                 repoSaveContext("Сохранение контекста в БД")
                 sendContext("Отправляем сообщение для получения текста из фото, ИИ валидации текста и создания состава")
                 awaitContext("Ожидание выполнения задачи", 300_000)
-                repoReadContext("Чтение состава из БД")
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.COMPOSITION_VALIDATE }
+                repoSaveContext("Сохранение контекста в БД")
             }
         }
         subOperation("Валидация состава перед ответом", IsSubCommand.COMPOSITION_VALIDATE) {
             validation {
-                worker("Копируем состав response в validateComposition") { validateComposition = compositionResponse }
+                worker("Копируем состав response в validateComposition") { validateComposition = composition }
                 validateIdContext("Проверяем что разморозили правильный поток")
                 validateTextNotEmptyComposition("Проверка, что текст не пуст")
 
@@ -111,8 +110,8 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
                 repoSaveContext("Сохранение контекста в БД")
                 sendContext("Отправляем сообщение для создания анализа")
                 awaitContext("Ожидание выполнения задачи", 300_000)
-                repoReadContext("Чтение состава из БД")
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.ANALYSIS_VALIDATE }
+                repoSaveContext("Сохранение контекста в БД")
             }
         }
         subOperation("Создание анализа на состава", IsSubCommand.ANALYSIS_REGENERATE) {
@@ -138,13 +137,13 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
                 repoSaveContext("Сохранение контекста в БД")
                 sendContext("Отправляем сообщение для создания анализа")
                 awaitContext("Ожидание выполнения задачи", 300_000)
-                repoReadContext("Чтение состава из БД")
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.ANALYSIS_VALIDATE }
+                repoSaveContext("Сохранение контекста в БД")
             }
         }
         subOperation("Валидация анализа перед ответом", IsSubCommand.ANALYSIS_VALIDATE) {
             validation {
-                worker("Копируем состав response в validateComposition") { validateAnalysis = analysisResponse }
+                worker("Копируем состав response в validateComposition") { validateAnalysis = analysis }
                 worker("Копируем id состава для валидации") { validateCompositionId = validateAnalysis.compositionId }
                 worker("Копируем id состава для валидации") { validateAnalysisId = validateAnalysis.id }
                 validateIdNotEmptyComposition("Проверка, что заголовок не пуст")

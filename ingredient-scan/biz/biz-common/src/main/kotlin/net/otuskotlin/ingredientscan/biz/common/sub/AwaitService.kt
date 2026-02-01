@@ -4,6 +4,7 @@ import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.helpers.errorRepo
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
+import net.otuskotlin.ingredientscan.core.common.mappers.update
 import net.otuskotlin.ingredientscan.core.cor.ICorChainDsl
 import net.otuskotlin.ingredientscan.core.cor.worker
 
@@ -33,8 +34,9 @@ fun ICorChainDsl<IsContext>.awaitContext(title: String, timeout: Long) = worker 
     on { state == IsState.RUNNING }
     handle {
         try {
-         context = contextAwaitService?.await(this, timeout)
-             ?: throw RuntimeException("Context must not be empty:$id")
+            context = contextAwaitService?.await(this, timeout)
+                 ?: throw RuntimeException("Context must not be empty:$id")
+            update()
         } catch (e: Throwable) {
             fail(
                 errorRepo(
