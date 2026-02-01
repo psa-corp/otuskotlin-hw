@@ -23,6 +23,15 @@ enum class IsSubCommand {
     READY
 }
 
+enum class IsLightCommand {
+    NONE,
+    COMPOSITION_VALIDATION,
+    COMPOSITION_SAVE,
+    OCR_RECOGNITION,
+    ANALYZER,
+    ANALYSIS_SAVE,
+}
+
 enum class IsState {
     NONE,
     RUNNING,

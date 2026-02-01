@@ -1,17 +1,11 @@
 package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors
 
-import net.otuskotlin.ingredientscan.core.common.external.helpers.errorContext
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
-import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsError
-import net.otuskotlin.ingredientscan.core.common.external.models.IsState
-import net.otuskotlin.ingredientscan.core.common.external.models.IsSubCommand
+import net.otuskotlin.ingredientscan.core.common.external.models.*
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
-import net.otuskotlin.ingredientscan.core.common.mappers.toLightContext
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryCompositionRepository
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
+import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryLightContextRepository
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
@@ -23,7 +17,7 @@ import java.util.UUID.randomUUID
 @Component
 open class CompositionSaveProcessor(
     private val compositionRepository: InMemoryCompositionRepository,
-    private val contextRepository: InMemoryContextRepository
+    private val lightContextRepository: InMemoryLightContextRepository,
 ) {
 
     private val log = LoggerFactory.getLogger(CompositionSaveProcessor::class.java)
@@ -33,37 +27,22 @@ open class CompositionSaveProcessor(
         @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
     ): String {
         log.info("=== Composition Save started ===\nkey: {}", key)
-        val lightContext = commonLightContextDeserialize(json)
-
-        log.info(
-            "Composition Save: Received light context:{}\n" +
-                    " command: {}\n" +
-                    " state: {}\n:",
-            lightContext.id,
-            lightContext.command,
-            lightContext.state
-        )
-
-        val context = contextRepository.findByIdUnsuspend(lightContext.id)
-        if (context == null || context.state == IsState.FAILING) {
-            if (context == null) {
-                lightContext.fail(
-                    errorContext(
-                        violationCode = "kafka-processor",
-                        message = "Context not found to Repos. id:${lightContext.id.asString()} : CompositionValidateProcessor"
-                    )
-                )
-            } else {
-                lightContext.fail(
-                    errorContext(
-                        violationCode = "kafka-processor",
-                        message = "Context error state. id:${lightContext.id.asString()} : CompositionValidateProcessor"
-                    )
-                )
+        var context = commonLightContextDeserialize(json)
+        val con = lightContextRepository.findById(context.id)
+        if (con != null) {
+            if (con.lightCommands.contains(IsLightCommand.COMPOSITION_SAVE)) {
+                log.info("=== Composition Save Skip ===\n  LightContext ID:{}", con.id)
+                return commonLightContextSerialize(con)
             }
-            log.error("=== Composition Validate error ===\n  LightContext ID:{}", lightContext.id)
-            return commonLightContextSerialize(lightContext)
+            context = con
         }
+
+        if (context.state == IsState.FAILING) {
+            lightContextRepository.save(context)
+            log.error("=== Composition Save Error ===\n  LightContext ID:{}", context.id)
+            return commonLightContextSerialize(context)
+        }
+
 
         return try {
 
@@ -82,12 +61,12 @@ open class CompositionSaveProcessor(
             log.info("Composition processed with ID: {}", existingComposition.id.asString())
 
             // Добавляем результат в ответ
-            context.compositionResponse = existingComposition
+            context.composition = existingComposition
             context.subCommand = IsSubCommand.READY
-
+            context.lightCommands.add(IsLightCommand.COMPOSITION_SAVE)
             log.info("=== Composition Save completed successfully ===")
-            contextRepository.saveUnsuspend(context)
-            return commonLightContextSerialize(context.toLightContext())
+            lightContextRepository.save(context)
+            return commonLightContextSerialize(context )
         } catch (e: Exception) {
             log.error("Error during composition save", e)
              context.fail(
@@ -99,9 +78,9 @@ open class CompositionSaveProcessor(
                     )
                 )
 
-
-            contextRepository.saveUnsuspend(context)
-            commonLightContextSerialize(context.toLightContext())
+            context.lightCommands.add(IsLightCommand.COMPOSITION_SAVE)
+            lightContextRepository.save(context)
+            commonLightContextSerialize(context)
         }
     }
 

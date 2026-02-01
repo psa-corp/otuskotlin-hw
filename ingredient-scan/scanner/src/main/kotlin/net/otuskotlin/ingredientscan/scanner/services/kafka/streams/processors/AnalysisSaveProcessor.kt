@@ -1,18 +1,11 @@
 package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors
 
-import net.otuskotlin.ingredientscan.core.common.external.helpers.errorContext
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
-import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
-import net.otuskotlin.ingredientscan.core.common.external.models.IsError
-import net.otuskotlin.ingredientscan.core.common.external.models.IsState
-import net.otuskotlin.ingredientscan.core.common.external.models.IsSubCommand
-import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
+import net.otuskotlin.ingredientscan.core.common.external.models.*
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
-import net.otuskotlin.ingredientscan.core.common.mappers.toLightContext
 import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryAnalysisRepository
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
+import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryLightContextRepository
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
@@ -23,7 +16,7 @@ import org.springframework.stereotype.Component
 @Component
 open class AnalysisSaveProcessor(
     private val analysisRepository: InMemoryAnalysisRepository,
-    private val contextRepository: InMemoryContextRepository
+    private val lightContextRepository: InMemoryLightContextRepository
 ) {
 
     private val log = LoggerFactory.getLogger(AnalysisSaveProcessor::class.java)
@@ -33,70 +26,41 @@ open class AnalysisSaveProcessor(
         @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
     ): String {
         log.info("=== Analysis Save started ===\nkey: {}", key)
-        val lightContext = commonLightContextDeserialize(json)
-        val context = contextRepository.findByIdUnsuspend(lightContext.id)
-        if (context == null || context.state == IsState.FAILING) {
-            if (context == null) {
-                lightContext.fail(
-                    errorContext(
-                        violationCode = "kafka-processor",
-                        message = "Context not found to Repos. id:${lightContext.id.asString()} : AnalysisSaveProcessor"
-                    )
-                )
-            } else {
-                lightContext.fail(
-                    errorContext(
-                        violationCode = "kafka-processor",
-                        message = "Context error state. id:${lightContext.id.asString()} : AnalysisSaveProcessor"
-                    )
-                )
+        var context = commonLightContextDeserialize(json)
+        val con = lightContextRepository.findById(context.id)
+        if (con != null) {
+            if (con.lightCommands.contains(IsLightCommand.ANALYSIS_SAVE)) {
+                log.info("=== Analysis Save Skip ===\n  LightContext ID:{}", con.id)
+                return commonLightContextSerialize(con)
             }
-            log.error("=== Analysis Save error ===\n  LightContext ID:{}", lightContext.id)
-            return commonLightContextSerialize(lightContext)
+            context = con
+        }
+
+        if (context.state == IsState.FAILING) {
+            lightContextRepository.save(context)
+            log.error("=== Analysis Save Error ===\n  LightContext ID:{}", context.id)
+            return commonLightContextSerialize(context)
         }
         return try {
 
-            // Проверяем: есть ли ошибки от предыдущих процессоров
-            if (context.errors.isNotEmpty()) {
-                log.error("Skipping save due to errors:\n{}",
-                    context.errors.map { "${it.code}: ${it.message}" }.joinToString("\n")
-                )
-                context.state = IsState.FAILING
-                contextRepository.saveUnsuspend(context)
-                return commonContextSerialize(context)
-            }
-
-            log.info("Received context for saving:\n" +
-                    " command: {}\n" +
-                    " compositionText: {}",
-                context.command,
-                context.analysisRequest.description.take(100) + "..."
-            )
-
-
             if (context.command == IsCommand.ANALYSIS_REGENERATE) {
-                context.analysisResponse.id = context.analysis.id
-                analysisRepository.saveAnalysisUnsuspend(context.analysisResponse)
+                context.analysis.id = context.regenerateId
+                saveAnalysis(context.analysis)
             } else {
                 // Идемпотентность
-                val existingAnalysis =
-                    analysisRepository.findAnalysisByCompositionIdUnsuspend(context.composition.id)
-
+                val existingAnalysis = findAnalysisByCompositionId(context.composition.id)
                 if (existingAnalysis != null) {
-                    context.analysisResponse = existingAnalysis
+                    context.analysis = existingAnalysis
                 } else {
-                    analysisRepository.saveAnalysisUnsuspend(context.analysisResponse)
+                    saveAnalysis(context.analysis)
                 }
             }
 
-
-            log.info("Analysis processed with ID: {}", context.analysisResponse)
-
-
             log.info("=== Analysis Save completed successfully ===")
             context.subCommand = IsSubCommand.READY
-            contextRepository.saveUnsuspend(context)
-            commonLightContextSerialize(context.toLightContext())
+            context.lightCommands.add(IsLightCommand.ANALYSIS_SAVE)
+            lightContextRepository.save(context)
+            commonLightContextSerialize(context)
 
         } catch (e: Exception) {
             log.error("Error during analysis save", e)
@@ -109,10 +73,20 @@ open class AnalysisSaveProcessor(
                         message = "Failed to save analysis: ${e.message}"
                     )
                 )
-
-            contextRepository.saveUnsuspend(context)
-            commonLightContextSerialize(context.toLightContext())
+            context.lightCommands.add(IsLightCommand.ANALYSIS_SAVE)
+            lightContextRepository.save(context)
+            commonLightContextSerialize(context)
         }
+    }
+
+    fun saveAnalysis(analysis: IsAnalysis) {
+        log.info("=== Analysis Save ===")
+        analysisRepository.saveAnalysisUnsuspend(analysis)
+    }
+
+    fun findAnalysisByCompositionId(id: IsCompositionId): IsAnalysis? {
+        log.info("=== Analysis Find ===")
+        return analysisRepository.findAnalysisByCompositionIdUnsuspend(id)
     }
 
 }

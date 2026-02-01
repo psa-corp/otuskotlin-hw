@@ -1,17 +1,10 @@
 package net.otuskotlin.ingredientscan.scanner.services.kafka.streams.processors
 
-import net.otuskotlin.ingredientscan.core.common.external.helpers.errorContext
-import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
-import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
-import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
-import net.otuskotlin.ingredientscan.core.common.external.models.IsError
-import net.otuskotlin.ingredientscan.core.common.external.models.IsState
+import net.otuskotlin.ingredientscan.core.common.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub
-import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
+import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryLightContextRepository
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
@@ -20,8 +13,9 @@ import org.springframework.stereotype.Component
 import java.util.UUID.randomUUID
 
 @Component
-open class AnalyzerProcessor(private val contextRepository: InMemoryContextRepository) {
-
+open class AnalyzerProcessor(
+    private val lightContextRepository: InMemoryLightContextRepository
+) {
     private val log = LoggerFactory.getLogger(AnalyzerProcessor::class.java)
 
     fun processAnalyzer(
@@ -29,26 +23,20 @@ open class AnalyzerProcessor(private val contextRepository: InMemoryContextRepos
         @Header(KafkaHeaders.RECEIVED_KEY, required = false) key: String?
     ): String {
         log.info("=== Analyzer started ===\nkey: {}", key)
-        val lightContext = commonLightContextDeserialize(json)
-        val context = contextRepository.findByIdUnsuspend(lightContext.id)
-        if (context == null || context.state == IsState.FAILING) {
-            if (context == null) {
-                lightContext.fail(
-                    errorContext(
-                        violationCode = "kafka-processor",
-                        message = "Context not found to Repos. id:${lightContext.id.asString()} : AnalyzerProcessor"
-                    )
-                )
-            } else {
-                lightContext.fail(
-                    errorContext(
-                        violationCode = "kafka-processor",
-                        message = "Context error state. id:${lightContext.id.asString()} : AnalyzerProcessor"
-                    )
-                )
+        var context = commonLightContextDeserialize(json)
+        val con = lightContextRepository.findById(context.id)
+        if (con != null) {
+            if (con.lightCommands.contains(IsLightCommand.ANALYZER)) {
+                log.info("=== Analyzer Skip ===\n  LightContext ID:{}", con.id)
+                return commonLightContextSerialize(con)
             }
-            log.error("=== Analyzer error ===\n  LightContext ID:{}", lightContext.id)
-            return commonLightContextSerialize(lightContext)
+            context = con
+        }
+
+        if (context.state == IsState.FAILING) {
+            lightContextRepository.save(context)
+            log.error("=== Analyzer Error ===\n  LightContext ID:{}", context.id)
+            return commonLightContextSerialize(context)
         }
         return try {
 
@@ -62,13 +50,12 @@ open class AnalyzerProcessor(private val contextRepository: InMemoryContextRepos
             // STUB: Распознавание текста
             val analysis = performAnalyzer(context.composition)
 
-
             // Добавляем распознанный текст в контекст
-            context.analysisResponse = analysis
+            context.analysis = analysis
             log.info("=== Analyzer completed ===\nanalysis: {}", analysis)
-
-            contextRepository.saveUnsuspend(context)
-            commonContextSerialize(context)
+            context.lightCommands.add(IsLightCommand.ANALYZER)
+            lightContextRepository.save(context)
+            commonLightContextSerialize(context)
 
         } catch (e: Exception) {
             log.error("Error during analyzer", e)
@@ -83,8 +70,9 @@ open class AnalyzerProcessor(private val contextRepository: InMemoryContextRepos
                 )
                 state = IsState.FAILING
             }
-            contextRepository.saveUnsuspend(context)
-            commonContextSerialize(errorContext)
+            context.lightCommands.add(IsLightCommand.ANALYZER)
+            lightContextRepository.save(context)
+            commonLightContextSerialize(errorContext)
         }
     }
 
