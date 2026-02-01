@@ -57,10 +57,10 @@ open class OcrRecognitionProcessor(private val contextRepository: InMemoryContex
             return commonLightContextSerialize(lightContext)
         }
 
-        val recognizedText = performOcrRecognition(context.scanRequest.files)
+        val recognizedText = performOcrRecognition(context.scan.files)
         log.info("OCR recognized text: {}", recognizedText)
 
-        context.compositionRequest.text = recognizedText
+        context.scan.text = recognizedText
 
 
         log.info("=== OCR Recognition completed ===\nRecognized text: {}", recognizedText)

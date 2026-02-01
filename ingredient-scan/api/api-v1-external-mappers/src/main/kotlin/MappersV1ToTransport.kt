@@ -43,7 +43,8 @@ fun IsContext.toTransportCompositionCreatePhotos() = CompositionCreateByPhotosRe
     responseType = "compositionCreateByPhotos",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
-    contextId = id.takeIf { it != IsContextId.NONE }?.asString()
+    contextId = id.takeIf { it != IsContextId.NONE }?.asString(),
+    composition = compositionResponse.takeIf { it != IsComposition.NONE }?.toTransport()
 )
 
 fun IsContext.toTransportCompositionContextGet() = CompositionContextGetResponse(

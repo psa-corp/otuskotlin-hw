@@ -492,6 +492,8 @@ components:
         - $ref: '#/components/schemas/IResponse'
         - type: object
           properties:
+            composition:
+              $ref: '#/components/schemas/Composition'
             contextId:
               type: string
               example: "context-123"
