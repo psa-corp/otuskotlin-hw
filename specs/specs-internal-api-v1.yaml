@@ -8,131 +8,313 @@ servers:
     description: Development server
 
 tags:
-  - name: component
-    description: Управление компонентами
-  - name: scan
-    description: Управление сканированиями
-  - name: uploader
-    description: Загрузка файлов
+  - name: analysis
+    description: Анализ состава продуктов
+  - name: composition
+    description: Управление составами продуктов
 
 paths:
-  /component/get/{id}:
+  /internal/analysis/find:
     post:
-      tags: [component]
-      summary: Получение компонента по ID
-      operationId: componentGet
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID компонента
-      responses:
-        '200':
-          description: Успешный ответ
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Component'
-        '404':
-          description: Компонент не найден
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /component/search:
-    post:
-      tags: [component]
-      summary: Поиск компонентов
-      operationId: componentSearch
+      tags: [internal]
+      summary: Получение анализа состава по ID
+      operationId: internalAnalysisFind
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ComponentFilter'
+              $ref: '#/components/schemas/InternalAnalysisFindRequest'
       responses:
         '200':
           description: Успешный ответ
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Component'
-        '400':
-          description: Неверные параметры поиска
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /scan/get/{id}:
-    post:
-      tags: [scan]
-      summary: Получение сканирования по ID
-      operationId: scanGet
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID сканирования
-      responses:
-        '200':
-          description: Успешный ответ
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Scan'
+                $ref: '#/components/schemas/InternalAnalysisFindResponse'
         '404':
-          description: Сканирование не найден
+          description: Анализ не найден
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/InternalErrorResponse'
 
-  /uploader/upload:
+  /internal/analysis/save:
     post:
-      tags: [uploader]
-      summary: Загрузка файлов
-      operationId: uploaderUpload
+      tags: [internal]
+      summary: Получение анализа состава по ID
+      operationId: internalAnalysisSave
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
-              type: object
-              properties:
-                path:
-                  type: string
-                  description: Путь для сохранения
-                files:
-                  type: array
-                  items:
-                    type: string
-                    format: binary
-                  description: Файлы для загрузки
+              $ref: '#/components/schemas/InternalAnalysisSaveRequest'
       responses:
         '200':
           description: Успешный ответ
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
-        '400':
-          description: Ошибка загрузки файлов
+                $ref: '#/components/schemas/InternalAnalysisSaveResponse'
+        '500':
+          description: Не удалось сохранить
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/InternalErrorResponse'
+
+
+  /internal/composition/find:
+    post:
+      tags: [internal]
+      summary: Получение анализа состава по ID
+      operationId: internalCompositionFind
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalCompositionFindRequest'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalCompositionFindResponse'
+        '404':
+          description: Анализ не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorResponse'
+
+  /internal/composition/save:
+    post:
+      tags: [internal]
+      summary: Получение анализа состава по ID
+      operationId: internalCompositionSave
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalCompositionSaveRequest'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalCompositionSaveResponse'
+        '500':
+          description: Не удалось сохранить
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalErrorResponse'
 
 components:
   schemas:
-    Component:
+    # --- Base Schemas ---
+    InternalResponseResult:
+      type: string
+      enum:
+        - success
+        - error
+
+    InternalError:
+      type: object
+      properties:
+        code:
+          type: string
+        group:
+          type: string
+        field:
+          type: string
+        message:
+          type: string
+
+    InternalRequest:
+      type: object
+      description: Базовый интерфейс для всех запросов
+      required: [requestType]
+      properties:
+        requestType:
+          type: string
+          description: Поле-дескриминатор для вычисления типа запроса
+      discriminator:
+        propertyName: requestType
+        mapping:
+          internalAnalysisFind: '#/components/schemas/InternalAnalysisFindRequest'
+          internalAnalysisSave: '#/components/schemas/InternalAnalysisSaveRequest'
+          internalCompositionFind: '#/components/schemas/InternalCompositionFindRequest'
+          internalCompositionSave: '#/components/schemas/InternalCompositionSaveRequest'
+
+    InternalResponse:
+      type: object
+      description: Базовый интерфейс для всех ответов
+      required: [responseType, result]
+      properties:
+        responseType:
+          type: string
+          description: Поле-дескриминатор для вычисления типа ответа
+        result:
+          $ref: '#/components/schemas/InternalResponseResult'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/InternalError'
+      discriminator:
+        propertyName: responseType
+        mapping:
+          internalAnalysisFind: '#/components/schemas/InternalAnalysisFindResponse'
+          internalAnalysisSave: '#/components/schemas/InternalAnalysisSaveResponse'
+          internalCompositionFind: '#/components/schemas/InternalCompositionFindResponse'
+          internalCompositionSave: '#/components/schemas/InternalCompositionSaveResponse'
+          error: '#/components/schemas/InternalErrorResponse'
+
+    # --- Wrapper Schemas (Requests) ---
+
+    InternalAnalysisFindRequest:
+      allOf:
+        - $ref: '#/components/schemas/InternalRequest'
+        - type: object
+          required:
+            - compositionId
+          properties:
+            compositionId:
+              type: string
+              description: ID состава для получения
+              example: "composition-123"
+              nullable: false
+
+    InternalAnalysisSaveRequest:
+      allOf:
+        - $ref: '#/components/schemas/InternalRequest'
+        - type: object
+          required:
+            - analysis
+          properties:
+            analysis:
+              $ref: '#/components/schemas/InternalAnalysis'
+
+    InternalCompositionFindRequest:
+      allOf:
+        - $ref: '#/components/schemas/InternalRequest'
+        - type: object
+          required:
+            - text
+          properties:
+            text:
+              type: string
+              description: Текст состава для получения
+              example: "Соль, сахар"
+              nullable: false
+
+    InternalCompositionSaveRequest:
+      allOf:
+        - $ref: '#/components/schemas/InternalRequest'
+        - type: object
+          required:
+            - composition
+          properties:
+            composition:
+              $ref: '#/components/schemas/InternalComposition'
+
+
+    # --- Wrapper Schemas (Responses) ---
+
+    InternalAnalysisFindResponse:
+      allOf:
+        - $ref: '#/components/schemas/InternalResponse'
+        - type: object
+          properties:
+            analysis:
+              $ref: '#/components/schemas/InternalAnalysis'
+
+    InternalAnalysisSaveResponse:
+      allOf:
+        - $ref: '#/components/schemas/InternalResponse'
+        - type: object
+          properties:
+            analysis:
+              $ref: '#/components/schemas/InternalAnalysis'
+
+    InternalCompositionFindResponse:
+      allOf:
+        - $ref: '#/components/schemas/InternalResponse'
+        - type: object
+          properties:
+            composition:
+              $ref: '#/components/schemas/InternalComposition'
+
+    InternalCompositionSaveResponse:
+      allOf:
+        - $ref: '#/components/schemas/InternalResponse'
+        - type: object
+          properties:
+            composition:
+              $ref: '#/components/schemas/InternalComposition'
+
+    InternalErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/InternalResponse'
+        - type: object
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+
+    # --- Original DTOs ---
+    InternalAnalysis:
+      type: object
+      required: [id, compositionId, createDate, description, rating, color, problematicComponent, safeComponent]
+      properties:
+        id:
+          type: string
+          example: "analysis_123"
+        compositionId:
+          type: string
+          example: "composition_123"
+        createDate:
+          type: string
+          format: date-time
+        description:
+          type: string
+        rating:
+          type: number
+          format: double
+          minimum: 1.0
+          maximum: 5.0
+        color:
+          $ref: '#/components/schemas/InternalColor'
+        problematicComponent:
+          type: array
+          items:
+            $ref: '#/components/schemas/InternalComponent'
+        safeComponent:
+          type: array
+          items:
+            $ref: '#/components/schemas/InternalComponent'
+
+    InternalComposition:
+      type: object
+      required: [id, createDate, createDate, text]
+      properties:
+        id:
+          type: string
+          example: "composition_123"
+        createDate:
+          type: string
+          format: date-time
+        text:
+          type: string
+          minLength: 10
+          maxLength: 5000
+
+    InternalComponent:
       type: object
       properties:
         id:
@@ -149,58 +331,18 @@ components:
         sources:
           type: string
         riskLevel:
-          $ref: '#/components/schemas/RiskLevel'
+          $ref: '#/components/schemas/InternalRiskLevel'
         healthRisks:
           type: string
 
-    ComponentFilter:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Название компонента для поиска
-
-    Scan:
-      type: object
-      properties:
-        id:
-          type: string
-        type:
-          $ref: '#/components/schemas/ScanType'
-        time:
-          type: string
-          format: date-time
-        data:
-          type: string
-        text:
-          type: string
-        ocr:
-          type: integer
-          format: int64
-        compositionId:
-          type: string
-        userId:
-          type: string
-        category:
-          type: string
-
-    ScanType:
-      type: string
-      enum: [MANUAL, PHOTO]
-
-    RiskLevel:
+    InternalRiskLevel:
       type: string
       enum: [MINIMAL, LOW, MEDIUM, HIGH, CRITICAL]
 
-    ErrorResponse:
-      type: object
-      properties:
-        code:
-          type: string
-          example: "NOT_FOUND"
-        message:
-          type: string
-          example: "Ресурс не найден"
-        timestamp:
-          type: string
-          format: date-time
+    InternalState:
+      type: string
+      enum: [NONE, RUNNING, FAILING, FINISHING]
+
+    InternalColor:
+      type: string
+      enum: [DARK_RED, RED, ORANGE, YELLOW, LIGHT_YELLOW, LIGHT_GREEN, GREEN, DARK_GREEN, NONE]

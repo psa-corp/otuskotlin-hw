@@ -32,6 +32,14 @@ enum class IsLightCommand {
     ANALYSIS_SAVE,
 }
 
+enum class InternalCommand {
+    NONE,
+    ANALYSIS_FIND,
+    ANALYSIS_SAVE,
+    COMPOSITION_FIND,
+    COMPOSITION_SAVE,
+}
+
 enum class IsState {
     NONE,
     RUNNING,
