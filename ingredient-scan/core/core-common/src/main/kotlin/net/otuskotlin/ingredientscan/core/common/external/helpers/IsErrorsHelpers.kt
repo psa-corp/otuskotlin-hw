@@ -1,6 +1,7 @@
 package net.otuskotlin.ingredientscan.core.common.external.helpers
 
 
+import net.otuskotlin.ingredientscan.core.common.external.InternalContext
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.IsLightContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
@@ -45,6 +46,20 @@ inline fun IsLightContext.fail(errors: Collection<IsError>) {
     addErrors(errors)
     state = IsState.FAILING
 }
+
+inline fun InternalContext.addError(error: IsError) = errors.add(error)
+inline fun InternalContext.addErrors(error: Collection<IsError>) = errors.addAll(error)
+
+inline fun InternalContext.fail(error: IsError) {
+    addError(error)
+    state = IsState.FAILING
+}
+
+inline fun InternalContext.fail(errors: Collection<IsError>) {
+    addErrors(errors)
+    state = IsState.FAILING
+}
+
 inline fun errorValidation(
     field: String,
     violationCode: String,

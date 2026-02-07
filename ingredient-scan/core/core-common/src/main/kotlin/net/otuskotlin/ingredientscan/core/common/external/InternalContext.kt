@@ -13,6 +13,13 @@ data class InternalContext(
     var requestId: IsRequestId = IsRequestId.NONE,
     var timeStart: LocalDateTime = LOCAL_DATE_TIME_NONE,
 
+    // Settings
+    var settings: IsCorSettings = IsCorSettings.NONE,
+
+    // Repo
+    var compositionRepo: IsCompositionRepository? = null,
+    var analysisRepo: IsAnalysisRepository? = null,
+
     // Request data
     var analysisRequest: IsAnalysis = IsAnalysis.NONE,
     var compositionRequest: IsComposition = IsComposition.NONE,
