@@ -14,7 +14,7 @@ import reactor.core.publisher.Flux
 
 @RequestMapping("/v1")
 @RestController
-class MediaController(private val bizService: BizService) : V1BaseController() {
+class MediaController(private val bizService: BizService) {
 
     @PostMapping(value = ["/media/composition/create/photos"], consumes = ["multipart/form-data"])
     suspend fun compositionCreateByPhotos(@RequestPart("photos") photos: Flux<FilePart>): CompositionCreateByPhotosResponse {

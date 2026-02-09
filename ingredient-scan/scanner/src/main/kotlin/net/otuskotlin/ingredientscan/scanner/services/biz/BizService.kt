@@ -9,12 +9,13 @@ import net.otuskotlin.ingredientscan.app.content.uploadHelper
 import net.otuskotlin.ingredientscan.biz.common.IsBizProcessor
 import net.otuskotlin.ingredientscan.biz.common.IsBizSubProcessor
 import net.otuskotlin.ingredientscan.core.common.external.IsCorSettings
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryAnalysisRepository
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryCompositionRepository
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisRepository
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionRepository
+import net.otuskotlin.ingredientscan.core.common.external.models.IsContextRepository
 import net.otuskotlin.ingredientscan.scanner.services.await.ContextAwaitService
 import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
@@ -23,9 +24,9 @@ import reactor.core.publisher.Flux
 @Service
 open class BizService(
     private val kafkaSender: BizKafkaSender,
-    private val compositionRepository: InMemoryCompositionRepository,
-    private val contextRepository: InMemoryContextRepository,
-    private val analysisRepository: InMemoryAnalysisRepository,
+    @Qualifier("memoryCompositionRepo") private val compositionRepository: IsCompositionRepository,
+    @Qualifier("memoryContextRepo") private val contextRepository: IsContextRepository,
+    @Qualifier("memoryAnalysisRepo") private val analysisRepository: IsAnalysisRepository,
     private val s3CloudService: S3CloudService,
     private val contextAwaitService: ContextAwaitService
 ) {

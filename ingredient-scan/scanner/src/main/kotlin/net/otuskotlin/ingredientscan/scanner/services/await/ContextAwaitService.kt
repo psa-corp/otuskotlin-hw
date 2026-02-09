@@ -9,9 +9,7 @@ import net.otuskotlin.ingredientscan.core.common.external.helpers.errorProcessin
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContextAwaitService
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContextId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsSubCommand
 import net.otuskotlin.ingredientscan.core.common.mappers.toLightContext
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
 import net.otuskotlin.ingredientscan.scanner.services.await.Constants.Companion.TASK_READY
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
@@ -22,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap
 @Service
 open class ContextAwaitService(
     private val appEventPublisher: ApplicationEventPublisher,
-    private val contextRepository: InMemoryContextRepository,
 ) : IsContextAwaitService {
 
     private val log = LoggerFactory.getLogger(ContextAwaitService::class.java)

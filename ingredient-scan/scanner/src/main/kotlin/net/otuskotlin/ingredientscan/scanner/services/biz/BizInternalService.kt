@@ -3,18 +3,19 @@ package net.otuskotlin.ingredientscan.scanner.services.biz
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalRequest
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalResponse
 import net.otuskotlin.ingredientscan.app.internal.IsInternalAppSettings
-import net.otuskotlin.ingredientscan.app.internal.submitHelper
+import net.otuskotlin.ingredientscan.app.internal.internalSubmitHelper
 import net.otuskotlin.ingredientscan.biz.common.IsBizInternalProcessor
 import net.otuskotlin.ingredientscan.core.common.external.IsCorSettings
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryAnalysisRepository
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryCompositionRepository
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisRepository
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionRepository
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 
 @Service
 open class BizInternalService(
-    private val compositionRepository: InMemoryCompositionRepository,
-    private val analysisRepository: InMemoryAnalysisRepository,
+    @Qualifier("memoryCompositionRepo") private val compositionRepository: IsCompositionRepository,
+    @Qualifier("memoryAnalysisRepo") private val analysisRepository: IsAnalysisRepository,
 ) {
     private val appSettings: IsInternalAppSettings
     private val log = LoggerFactory.getLogger(BizInternalService::class.java)
@@ -37,7 +38,7 @@ open class BizInternalService(
     }
 
     open suspend fun <R : InternalResponse> execute(request: InternalRequest, operation : String) : R {
-        return appSettings.submitHelper(request, this::class, operation)
+        return appSettings.internalSubmitHelper(request, this::class, operation)
     }
 
 }

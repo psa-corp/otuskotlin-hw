@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController
 
 
 @RestController
-class InternalController(private val bizInternalService: BizInternalService): V1BaseController(), InternalApi {
+open class InternalController(private val bizInternalService: BizInternalService): V1BaseController(), InternalApi {
     override suspend fun internalAnalysisFind(internalAnalysisFindRequest: InternalAnalysisFindRequest): InternalAnalysisFindResponse {
         return bizInternalService.execute(internalAnalysisFindRequest, "InternalAnalysisFind")
     }

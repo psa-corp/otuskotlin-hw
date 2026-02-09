@@ -7,16 +7,9 @@ interface IsCompositionRepository {
     suspend fun delete(id: IsCompositionId)
     suspend fun clear()
 
-    fun saveUnsuspend(composition: IsComposition)
-    fun findByTextUnsuspend(text: String): IsComposition?
-
     companion object {
         val NONE = object : IsCompositionRepository {
             override suspend fun save(composition: IsComposition) {
-                throw NotImplementedError("Must not be used")
-            }
-
-            override fun saveUnsuspend(composition: IsComposition) {
                 throw NotImplementedError("Must not be used")
             }
 
@@ -25,10 +18,6 @@ interface IsCompositionRepository {
             }
 
             override suspend fun findByText(text: String): IsComposition? {
-                throw NotImplementedError("Must not be used")
-            }
-
-            override fun findByTextUnsuspend(text: String): IsComposition? {
                 throw NotImplementedError("Must not be used")
             }
 

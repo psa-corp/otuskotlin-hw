@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository
 import java.time.Duration
 
 // Имитируем RocksDB
-@Repository
+@Repository("memoryContextRepo")
 open class InMemoryContextRepository: IsContextRepository {
 
     private val log = LoggerFactory.getLogger(InMemoryContextRepository::class.java)

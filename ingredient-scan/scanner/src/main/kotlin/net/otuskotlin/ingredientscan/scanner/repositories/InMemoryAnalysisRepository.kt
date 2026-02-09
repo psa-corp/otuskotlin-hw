@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 // Имитируем Elasticsearch или PostgreSQL
 
-@Repository
+@Repository("memoryAnalysisRepo")
 open class InMemoryAnalysisRepository : IsAnalysisRepository {
     private val log = LoggerFactory.getLogger(InMemoryAnalysisRepository::class.java)
 
@@ -50,13 +50,4 @@ open class InMemoryAnalysisRepository : IsAnalysisRepository {
         storeByComposition.clear()
     }
 
-    override fun findAnalysisByCompositionIdUnsuspend(id: IsCompositionId): IsAnalysis? {
-        return storeByComposition[id]
-    }
-
-    override fun saveAnalysisUnsuspend(analysis: IsAnalysis) {
-        storeByAnalysis[analysis.id] = analysis
-        storeByComposition[analysis.compositionId] = analysis
-        log.info("Saved analysis: $analysis.id")
-    }
 }

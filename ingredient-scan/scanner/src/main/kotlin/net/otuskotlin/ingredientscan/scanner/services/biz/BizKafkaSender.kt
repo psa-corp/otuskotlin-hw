@@ -3,7 +3,6 @@ package net.otuskotlin.ingredientscan.scanner.services.biz
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsMessageSender
 import net.otuskotlin.ingredientscan.core.common.external.models.IsSubCommand
-import net.otuskotlin.ingredientscan.core.common.mappers.commonContextSerialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
 import net.otuskotlin.ingredientscan.core.common.mappers.toLightContext
 import net.otuskotlin.ingredientscan.scanner.services.kafka.streams.config.KafkaTopicsConfig.Companion.ANALYSIS_CREATE_INPUT
