@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.mappers.v1
+package net.otuskotlin.ingredientscan.mappers.v1.external
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
@@ -11,7 +11,7 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsScanId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsScanType
 import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
 import net.otuskotlin.ingredientscan.core.common.external.IsStubs
-import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownRequestClass
+import net.otuskotlin.ingredientscan.mappers.v1.external.exceptions.UnknownRequestClass
 import java.util.UUID.randomUUID
 
 

@@ -5,15 +5,7 @@ import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalCompositionF
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalCompositionSaveRequest
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalResponseResult
 import net.otuskotlin.ingredientscan.core.common.external.InternalContext
-import net.otuskotlin.ingredientscan.core.common.external.models.InternalCommand
-import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsError
-import net.otuskotlin.ingredientscan.core.common.external.models.IsState
-import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
-import net.otuskotlin.ingredientscan.mappers.v1.toTransportInternalCompositionFind
-import net.otuskotlin.ingredientscan.mappers.v1.toTransportInternalCompositionSave
-import net.otuskotlin.ingredientscan.mappers.v1.toInternalTransport
+import net.otuskotlin.ingredientscan.core.common.external.models.*
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.test.Test
@@ -44,7 +36,7 @@ class InternalCompositionMapperTest {
         )
 
         val context = InternalContext()
-        context.fromTransport(req)
+        context.fromTransportInternal(req)
 
         assertEquals(InternalCommand.COMPOSITION_FIND, context.command)
         assertEquals("Water, Sugar", context.compositionTextRequest)
@@ -58,7 +50,7 @@ class InternalCompositionMapperTest {
         )
 
         val context = InternalContext()
-        context.fromTransport(req)
+        context.fromTransportInternal(req)
 
         assertEquals(InternalCommand.COMPOSITION_SAVE, context.command)
         assertEquals(TEST_INTERNAL_COMPOSITION.id, context.compositionRequest.id)

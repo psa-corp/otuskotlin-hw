@@ -1,22 +1,8 @@
 package net.otuskotlin.ingredientscan.mappers.v1.internal
 
-import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalAnalysis
-import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalAnalysisFindRequest
-import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalAnalysisSaveRequest
-import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalColor
-import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalResponseResult
+import net.otuskotlin.ingredientscan.api.v1.internal.models.*
 import net.otuskotlin.ingredientscan.core.common.external.InternalContext
-import net.otuskotlin.ingredientscan.core.common.external.models.InternalCommand
-import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
-import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsColor
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsError
-import net.otuskotlin.ingredientscan.core.common.external.models.IsState
-import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
-import net.otuskotlin.ingredientscan.mappers.v1.toTransportInternalAnalysisFind
-import net.otuskotlin.ingredientscan.mappers.v1.toTransportInternalAnalysisSave
-import net.otuskotlin.ingredientscan.mappers.v1.toInternalTransport
+import net.otuskotlin.ingredientscan.core.common.external.models.*
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.test.Test
@@ -55,7 +41,7 @@ class InternalAnalysisMapperTest {
         )
 
         val context = InternalContext()
-        context.fromTransport(req)
+        context.fromTransportInternal(req)
 
         assertEquals(InternalCommand.ANALYSIS_FIND, context.command)
         assertEquals(IsCompositionId("comp-123"), context.compositionIdRequest)
@@ -69,7 +55,7 @@ class InternalAnalysisMapperTest {
         )
 
         val context = InternalContext()
-        context.fromTransport(req)
+        context.fromTransportInternal(req)
 
         assertEquals(InternalCommand.ANALYSIS_SAVE, context.command)
         assertEquals(TEST_INTERNAL_ANALYSIS.id, context.analysisRequest.id)

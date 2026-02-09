@@ -1,9 +1,9 @@
-package net.otuskotlin.ingredientscan.mappers.v1
+package net.otuskotlin.ingredientscan.mappers.v1.external
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.*
-import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownIsCommand
+import net.otuskotlin.ingredientscan.mappers.v1.external.exceptions.UnknownIsCommand
 import java.time.ZoneOffset
 
 // --- Analysis Responses ---

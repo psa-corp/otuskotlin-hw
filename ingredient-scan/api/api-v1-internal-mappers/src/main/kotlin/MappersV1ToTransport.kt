@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.mappers.v1
+package net.otuskotlin.ingredientscan.mappers.v1.internal
 
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalAnalysis
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalAnalysisFindResponse
@@ -20,7 +20,7 @@ import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalError
 import net.otuskotlin.ingredientscan.core.common.external.InternalContext
 import net.otuskotlin.ingredientscan.core.common.external.models.InternalCommand
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
-import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownIsCommand
+import net.otuskotlin.ingredientscan.mappers.v1.internal.exceptions.UnknownIsCommand
 import java.time.ZoneOffset
 
 fun String?.toCompositionId() = this?.let { IsCompositionId(it) } ?: IsCompositionId.NONE
@@ -128,7 +128,7 @@ fun InternalContext.toTransportInternalCompositionSave() = InternalCompositionSa
     composition = compositionResponse.toInternalTransport()
 )
 
-fun InternalContext.toTransport() =
+fun InternalContext.toTransportInternal() =
     when (command) {
         InternalCommand.ANALYSIS_FIND -> toTransportInternalAnalysisFind()
         InternalCommand.ANALYSIS_SAVE -> toTransportInternalAnalysisSave()

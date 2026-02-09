@@ -1,10 +1,10 @@
-package net.otuskotlin.ingredientscan.mappers.v1
+package net.otuskotlin.ingredientscan.mappers.v1.external
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.Error as ExternalError
 import net.otuskotlin.ingredientscan.api.v1.external.models.ResponseResult
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
-import net.otuskotlin.ingredientscan.mappers.v1.models.DownloadErrorResponse
+import net.otuskotlin.ingredientscan.mappers.v1.external.models.DownloadErrorResponse
 
 fun IsContext.toDownloadFileErrorResponse(): DownloadErrorResponse {
     return DownloadErrorResponse(
