@@ -4,8 +4,8 @@ import net.otuskotlin.ingredientscan.core.common.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
-import net.otuskotlin.ingredientscan.analyzer.repositories.InMemoryLightContextRepository
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
 import org.springframework.messaging.handler.annotation.Payload
@@ -14,7 +14,7 @@ import java.util.UUID.randomUUID
 
 @Component
 open class AnalyzerProcessor(
-    private val lightContextRepository: InMemoryLightContextRepository
+    @Qualifier("memoryLightContextRepo") private val lightContextRepository: IsLightContextRepository
 ) {
     private val log = LoggerFactory.getLogger(AnalyzerProcessor::class.java)
 

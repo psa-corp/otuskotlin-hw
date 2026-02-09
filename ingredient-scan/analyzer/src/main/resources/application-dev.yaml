@@ -49,13 +49,18 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
 
-kafka:
-  topics:
-    bootstrap-servers: localhost:9092
-    partitions: 1
-    replication-factor: 1
-    auto-create: true
 
+app:
+  kafka:
+    topics:
+      bootstrap-servers: localhost:9092
+      partitions: 1
+      replication-factor: 1
+      auto-create: true
+  integration:
+    internal:
+      token: default-secret-123
+      url: http://localhost:8081/v1
 
 server:
   port: 8082

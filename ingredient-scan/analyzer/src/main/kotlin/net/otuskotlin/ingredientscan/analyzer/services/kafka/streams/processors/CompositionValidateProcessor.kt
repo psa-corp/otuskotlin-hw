@@ -5,8 +5,9 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsLightCommand
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
-import net.otuskotlin.ingredientscan.analyzer.repositories.InMemoryLightContextRepository
+import net.otuskotlin.ingredientscan.core.common.external.models.IsLightContextRepository
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
 import org.springframework.messaging.handler.annotation.Payload
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component
 
 @Component
 open class CompositionValidateProcessor(
-    private val lightContextRepository: InMemoryLightContextRepository
+    @Qualifier("memoryLightContextRepo") private val lightContextRepository: IsLightContextRepository
 ) {
     private val log = LoggerFactory.getLogger(CompositionValidateProcessor::class.java)
     fun processCompositionValidation(

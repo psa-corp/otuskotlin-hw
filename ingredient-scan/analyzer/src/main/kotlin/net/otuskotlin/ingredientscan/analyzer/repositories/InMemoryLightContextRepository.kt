@@ -2,7 +2,6 @@ package net.otuskotlin.ingredientscan.analyzer.repositories
 
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
-import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.IsLightContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContextId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsLightContextRepository
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Repository
 import java.time.Duration
 
 // Имитируем RocksDB
-@Repository
+@Repository("memoryLightContextRepo")
 open class InMemoryLightContextRepository: IsLightContextRepository {
 
     private val log = LoggerFactory.getLogger(InMemoryLightContextRepository::class.java)
