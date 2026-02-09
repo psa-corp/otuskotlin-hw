@@ -29,7 +29,7 @@ fun ICorChainDsl<IsContext>.repoReadAnalysis(title: String) = worker {
         }
     }
 }
-
+@JvmName("repoReadAnalysisByComposition")
 fun ICorChainDsl<IsContext>.repoReadAnalysisByComposition(title: String) = worker {
     this.title = title
     description = "Чтение состава из БД"
@@ -49,7 +49,7 @@ fun ICorChainDsl<IsContext>.repoReadAnalysisByComposition(title: String) = worke
         }
     }
 }
-
+@JvmName("repoReadAnalysisByCompositionInternal")
 fun ICorChainDsl<InternalContext>.repoReadAnalysisByComposition(title: String) = worker {
     this.title = title
     description = "Чтение состава из БД"

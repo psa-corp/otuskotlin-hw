@@ -11,6 +11,7 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsContextReposi
 import net.otuskotlin.ingredientscan.core.cor.ICorChainDsl
 import net.otuskotlin.ingredientscan.core.cor.worker
 
+@JvmName("initRepoComposition")
 fun ICorChainDsl<IsContext>.initRepoComposition(title: String) = worker {
     this.title = title
     description = """
@@ -26,7 +27,7 @@ fun ICorChainDsl<IsContext>.initRepoComposition(title: String) = worker {
         )
     }
 }
-
+@JvmName("initRepoCompositionInternal")
 fun ICorChainDsl<InternalContext>.initRepoComposition(title: String) = worker {
     this.title = title
     description = """
@@ -59,6 +60,7 @@ fun ICorChainDsl<IsContext>.initRepoContext(title: String) = worker {
     }
 }
 
+@JvmName("initRepoAnalysis")
 fun ICorChainDsl<IsContext>.initRepoAnalysis(title: String) = worker {
     this.title = title
     description = """
@@ -75,7 +77,7 @@ fun ICorChainDsl<IsContext>.initRepoAnalysis(title: String) = worker {
     }
 }
 
-
+@JvmName("initRepoAnalysisInternal")
 fun ICorChainDsl<InternalContext>.initRepoAnalysis(title: String) = worker {
     this.title = title
     description = """

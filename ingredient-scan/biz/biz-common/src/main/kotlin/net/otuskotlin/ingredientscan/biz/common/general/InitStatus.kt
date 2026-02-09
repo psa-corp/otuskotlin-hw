@@ -6,6 +6,7 @@ import net.otuskotlin.ingredientscan.core.cor.worker
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 
+@JvmName("initStatus")
 fun ICorChainDsl<IsContext>.initStatus(title: String) = worker() {
     this.title = title
     this.description = """
@@ -15,6 +16,7 @@ fun ICorChainDsl<IsContext>.initStatus(title: String) = worker() {
     handle { state = IsState.RUNNING }
 }
 
+@JvmName("initStatusInternal")
 fun ICorChainDsl<InternalContext>.initStatus(title: String) = worker() {
     this.title = title
     this.description = """

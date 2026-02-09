@@ -6,6 +6,7 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.cor.ICorChainDsl
 import net.otuskotlin.ingredientscan.core.cor.worker
 
+@JvmName("prepareResult")
 fun ICorChainDsl<IsContext>.prepareResult(title: String) = worker {
     this.title = title
     description = "Подготовка данных для ответа клиенту на запрос"
@@ -18,6 +19,7 @@ fun ICorChainDsl<IsContext>.prepareResult(title: String) = worker {
     }
 }
 
+@JvmName("prepareResultInternal")
 fun ICorChainDsl<InternalContext>.prepareResult(title: String) = worker {
     this.title = title
     description = "Подготовка данных для ответа клиенту на запрос"
