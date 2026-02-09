@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.mappers.v1.models
+package net.otuskotlin.ingredientscan.mappers.v1.external.models
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.IResponse
 import net.otuskotlin.ingredientscan.api.v1.external.models.ResponseResult

@@ -7,12 +7,12 @@ import net.otuskotlin.ingredientscan.core.common.external.InternalContext
 
 import net.otuskotlin.ingredientscan.core.common.external.helpers.asIsError
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
-import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
-import net.otuskotlin.ingredientscan.mappers.v1.toTransport
+import net.otuskotlin.ingredientscan.mappers.v1.internal.fromTransportInternal
+import net.otuskotlin.ingredientscan.mappers.v1.internal.toTransportInternal
 import java.time.LocalDateTime
 import kotlin.reflect.KClass
 
-suspend inline fun <R : InternalResponse> IsInternalAppSettings.submitHelper(
+suspend inline fun <R : InternalResponse> IsInternalAppSettings.internalSubmitHelper(
     request: InternalRequest,
     clazz: KClass<*>,
     logId: String,
@@ -23,7 +23,7 @@ suspend inline fun <R : InternalResponse> IsInternalAppSettings.submitHelper(
         state = IsState.RUNNING
     )
     return try {
-        context.fromTransport(request)
+        context.fromTransportInternal(request)
         logger.info(
             msg = "Request $logId started for ${clazz.simpleName}",
             marker = "BIZ",
@@ -36,7 +36,7 @@ suspend inline fun <R : InternalResponse> IsInternalAppSettings.submitHelper(
             marker = "BIZ",
             data = context.toLog(logId)
         )
-        context.toTransport() as R
+        context.toTransportInternal() as R
 
     } catch (e: Throwable) {
         logger.error(
@@ -47,6 +47,6 @@ suspend inline fun <R : InternalResponse> IsInternalAppSettings.submitHelper(
         )
         context.state = IsState.FAILING
         context.errors.add(e.asIsError())
-        context.toTransport() as R
+        context.toTransportInternal() as R
     }
 }

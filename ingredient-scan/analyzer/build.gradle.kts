@@ -14,20 +14,14 @@ description = "Spring ingredient-scan analyzer"
 dependencies {
 	implementation(kotlin("stdlib"))
 	implementation(projects.api.apiLog1)
-	implementation(projects.api.apiV1ExternalJackson)
-	implementation(projects.api.apiV1ExternalMappers)
+	implementation(projects.api.apiV1InternalJackson)
+	implementation(projects.api.apiV1InternalMappers)
 	implementation(projects.core.coreCommon)
 	implementation(projects.core.coreStubs)
-	implementation(projects.biz.bizCommon)
-	implementation(projects.biz.bizCommon)
-	implementation(projects.app.appCommon)
-	implementation(projects.app.appContent)
 
-//	implementation(libs.spring.boot.starter.web)
 	implementation(libs.spring.boot.starter.webflux)
 	implementation(libs.spring.boot.starter.actuator)
 	implementation(libs.spring.boot.starter.validation)
-//	implementation(libs.spring.boot.docker.compose)
 	implementation(libs.coroutines.reactor)
 	implementation(libs.coroutines.core)
 

@@ -6,8 +6,8 @@ import net.otuskotlin.ingredientscan.api.v1.external.models.IResponse
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.helpers.asIsError
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
-import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
-import net.otuskotlin.ingredientscan.mappers.v1.toTransport
+import net.otuskotlin.ingredientscan.mappers.v1.external.fromTransport
+import net.otuskotlin.ingredientscan.mappers.v1.external.toTransport
 import java.time.LocalDateTime
 import kotlin.reflect.KClass
 
