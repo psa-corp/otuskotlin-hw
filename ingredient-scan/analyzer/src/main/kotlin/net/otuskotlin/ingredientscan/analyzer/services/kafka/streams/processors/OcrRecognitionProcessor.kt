@@ -5,7 +5,6 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
-import net.otuskotlin.ingredientscan.analyzer.repositories.InMemoryLightContextRepository
 import net.otuskotlin.ingredientscan.core.common.external.models.IsLightContextRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
