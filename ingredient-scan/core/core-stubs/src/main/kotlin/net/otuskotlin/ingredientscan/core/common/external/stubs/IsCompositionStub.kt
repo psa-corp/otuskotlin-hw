@@ -11,13 +11,13 @@ import java.time.LocalDateTime
 class IsCompositionStub {
     companion object {
         val STUB_COMPOSITION: IsComposition = IsComposition(
-            id = IsCompositionId("comp-test-456"),
+            id = IsCompositionId("composition-test456"),
             createDate = LocalDateTime.of(2025, 12, 18, 12, 0, 0),
             text = "молоко, сахар, консервант E202",
         )
 
         val STUB_COMPOSITION_CONTEXT_FINISHING: IsCompositionContext = IsCompositionContext(
-            id = IsContextId("context_5678"),
+            id = IsContextId("context-5678"),
             state = IsState.FINISHING,
             errors = mutableListOf(),
             timeStart = LocalDateTime.of(2025, 12, 18, 12, 0, 0),
@@ -25,7 +25,7 @@ class IsCompositionStub {
         )
 
         val STUB_COMPOSITION_CONTEXT_FAILING: IsCompositionContext = IsCompositionContext(
-            id = IsContextId("context_error"),
+            id = IsContextId("context-error"),
             state = IsState.FAILING,
             errors = mutableListOf(
                 IsError(

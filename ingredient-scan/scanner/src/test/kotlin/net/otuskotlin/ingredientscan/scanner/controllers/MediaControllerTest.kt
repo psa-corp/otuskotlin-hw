@@ -1,45 +1,80 @@
 package net.otuskotlin.ingredientscan.scanner.controllers
 
-import io.mockk.coEvery
-import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import net.otuskotlin.ingredientscan.api.v1.external.models.*
+import net.otuskotlin.ingredientscan.core.common.external.models.*
+import net.otuskotlin.ingredientscan.scanner.filters.InternalApiFilter
+import net.otuskotlin.ingredientscan.scanner.services.await.ContextAwaitService
+import net.otuskotlin.ingredientscan.scanner.services.biz.BizKafkaSender
 import net.otuskotlin.ingredientscan.scanner.services.biz.BizService
-import org.junit.jupiter.api.BeforeEach
+import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.FilterType
 import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
+import org.springframework.http.codec.multipart.FilePart
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import org.springframework.web.reactive.function.BodyInserters
+import reactor.core.publisher.Flux
 
+@WebFluxTest(
+    controllers = [MediaController::class],
+    excludeFilters = [ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE,
+        classes = [InternalApiFilter::class]
+    )]
+)
 class MediaControllerTest {
 
-    private val bizService: BizService = mockk()
+    @Autowired
     private lateinit var webTestClient: WebTestClient
 
-    @BeforeEach
-    fun setUp() {
-        val controller = MediaController(bizService)
+    @MockitoBean
+    private lateinit var bizService: BizService
 
-        webTestClient = WebTestClient.bindToController(controller)
-            .configureClient()
-            .build()
-    }
+    @MockitoBean
+    private lateinit var kafkaSender: BizKafkaSender
+
+    @MockitoBean
+    private lateinit var compositionRepository: IsCompositionRepository
+
+    @MockitoBean
+    private lateinit var contextRepository: IsContextRepository
+
+    @MockitoBean
+    private lateinit var analysisRepository: IsAnalysisRepository
+
+    @MockitoBean
+    private lateinit var s3CloudService: S3CloudService
+
+    @MockitoBean
+    private lateinit var contextAwaitService: ContextAwaitService
 
     @Test
-    fun `compositionCreateByPhotos returns successful response`() = runTest {
-        val response = CompositionCreateByPhotosResponse(
+    fun `compositionCreateByPhotos returns successful response`(): Unit = runBlocking {
+        // Arrange
+        val expectedResponse = CompositionCreateByPhotosResponse(
             responseType = "compositionCreateByPhotos",
             result = ResponseResult.SUCCESS,
-            contextId = "context_5678"
+            contextId = "context-5678"
         )
 
-        coEvery {
-            bizService.execute(any(), any())
-        } returns response
+        doReturn(expectedResponse)
+            .`when`(bizService)
+            .execute<CompositionCreateByPhotosResponse>(
+                any<CompositionCreateByPhotosRequest>(),
+                any<Flux<FilePart>>(),
+                eq("CompositionCreateByPhotos")
+            )
 
         val builder = MultipartBodyBuilder().apply {
+
             part("photos", "photo".toByteArray())
                 .filename("photo1.jpg")
                 .contentType(MediaType.IMAGE_JPEG)
@@ -53,7 +88,7 @@ class MediaControllerTest {
             ).contentType(MediaType.APPLICATION_JSON)
         }
 
-        // Отправка запроса и проверка ответа
+        // Act & Assert
         webTestClient.post()
             .uri("/v1/media/composition/create/photos")
             .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -61,10 +96,16 @@ class MediaControllerTest {
             .exchange()
             .expectStatus().isOk
             .expectBody<CompositionCreateByPhotosResponse>()
-            .value {
-                assert(it.result == ResponseResult.SUCCESS)
-                assert(it.contextId == "context_5678")
+            .value { response ->
+                assert(response.result == ResponseResult.SUCCESS)
+                assert(response.contextId == "context-5678")
+                assert(response.responseType == "compositionCreateByPhotos")
             }
-    }
 
+        verify(bizService).execute<CompositionCreateByPhotosResponse>(
+            any<CompositionCreateByPhotosRequest>(),
+            any<Flux<FilePart>>(),
+            eq("CompositionCreateByPhotos")
+        )
+    }
 }
