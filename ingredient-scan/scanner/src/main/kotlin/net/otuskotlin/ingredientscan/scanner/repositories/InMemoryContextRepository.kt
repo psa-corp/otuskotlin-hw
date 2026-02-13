@@ -33,7 +33,7 @@ open class InMemoryContextRepository: IsContextRepository {
     }
 
     override suspend fun clear() {
-        store.cleanUp()
+        store.invalidateAll()
     }
 
     override fun saveUnsuspend(context: IsContext) {
