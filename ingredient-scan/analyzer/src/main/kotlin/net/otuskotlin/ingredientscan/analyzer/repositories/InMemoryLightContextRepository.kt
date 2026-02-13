@@ -33,6 +33,6 @@ open class InMemoryLightContextRepository: IsLightContextRepository {
     }
 
     override fun clear() {
-        store.cleanUp()
+        store.invalidateAll()
     }
 }
