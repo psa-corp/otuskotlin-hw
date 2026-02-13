@@ -24,8 +24,6 @@ open class KafkaStreamsConfig(
 
         if (topologyConfigurers.isEmpty()) {
             log.error("CRITICAL: No topology configurers found. Streams will fail!")
-            // Чтобы не падало, если пусто:
-            // builder.stream<String, String>("dummy-topic")
         }
 
         topologyConfigurers.forEach { configurer ->
