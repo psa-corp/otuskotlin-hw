@@ -5,6 +5,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.IsLightContext
+import net.otuskotlin.ingredientscan.core.common.external.exceptions.TimeoutException
 import net.otuskotlin.ingredientscan.core.common.external.helpers.errorProcessing
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContextAwaitService
@@ -26,7 +27,6 @@ open class ContextAwaitService(
 
     private val awaitingContexts = ConcurrentHashMap<IsContextId, ContextAwait>()
     private val mutex = Mutex()
-    // Создаем CoroutineScope для запуска корутин
     private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     override suspend fun await(context: IsContext, timeout: Long): IsLightContext {
@@ -46,7 +46,6 @@ open class ContextAwaitService(
                 delay(contextAwait.timeout)
                 handleTimeout(context)
             } catch (e: CancellationException) {
-                // Корректная обработка отмены
                 log.debug("Timeout job cancelled for context ${context.id}")
             }
         }
@@ -58,14 +57,28 @@ open class ContextAwaitService(
             }
             completedContext
         } catch (e: Exception) {
-            context.fail(
-                errorProcessing(
-                    field = "context",
-                    violationCode = "exception",
-                    id = context.id.asString(),
-                    e = e,
-                )
-            )
+            when (e) {
+                is TimeoutException -> {
+                    context.fail(
+                        errorProcessing(
+                            field = "context",
+                            violationCode = "timeout",
+                            id = context.id.asString(),
+                            timeout = e.timeoutMs
+                        )
+                    )
+                }
+                else -> {
+                    context.fail(
+                        errorProcessing(
+                            field = "context",
+                            violationCode = "exception",
+                            id = context.id.asString(),
+                            e = e,
+                        )
+                    )
+                }
+            }
             context.toLightContext()
         } finally {
             mutex.withLock {
@@ -78,22 +91,12 @@ open class ContextAwaitService(
         }
     }
 
-    // Обработка таймаута
     private suspend fun handleTimeout(context: IsContext) {
         mutex.withLock {
             val contextAwait = awaitingContexts.remove(context.id)
             contextAwait?.let {
-                it.deferred.cancel(CancellationException("Context processing timeout"))
+                it.deferred.completeExceptionally(TimeoutException(it.timeout))
                 log.warn("Context ${it.id} timeout after ${it.timeout}ms")
-
-                context.fail(
-                    errorProcessing(
-                        field = "context",
-                        violationCode = "timeout",
-                        id = it.id.asString(),
-                        timeout = it.timeout
-                    )
-                )
             }
         }
     }
@@ -106,7 +109,6 @@ open class ContextAwaitService(
 
         log.info("Received context ready event for ${event.context.id}")
 
-        // 1. Ищем ожидающий запрос
         val contextAwait = mutex.withLock {
             awaitingContexts.remove(event.context.id)
         }
@@ -119,7 +121,5 @@ open class ContextAwaitService(
                 log.error("Failed to complete deferred for ${event.context.id}", e)
             }
         }
-
     }
-
 }

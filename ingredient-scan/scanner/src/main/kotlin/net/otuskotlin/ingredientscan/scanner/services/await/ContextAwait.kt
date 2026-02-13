@@ -1,7 +1,6 @@
 package net.otuskotlin.ingredientscan.scanner.services.await
 
 import kotlinx.coroutines.CompletableDeferred
-import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.IsLightContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContextId
 import java.time.LocalDateTime
