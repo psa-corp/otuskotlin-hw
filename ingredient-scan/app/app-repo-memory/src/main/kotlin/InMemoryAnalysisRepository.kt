@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.scanner.repositories
+package net.otuskotlin.ingredientscan.app.repo.memory
 
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
@@ -49,5 +49,4 @@ open class InMemoryAnalysisRepository : IsAnalysisRepository {
         storeByAnalysis.clear()
         storeByComposition.clear()
     }
-
 }

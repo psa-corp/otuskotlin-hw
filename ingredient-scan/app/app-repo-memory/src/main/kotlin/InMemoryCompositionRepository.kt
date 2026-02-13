@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.analyzer.repositories
+package net.otuskotlin.ingredientscan.app.repo.memory
 
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId

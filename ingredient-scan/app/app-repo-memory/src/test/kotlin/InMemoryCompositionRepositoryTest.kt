@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.scanner.repositories
+package net.otuskotlin.ingredientscan.app.repo.memory
 
 import kotlinx.coroutines.test.runTest
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition

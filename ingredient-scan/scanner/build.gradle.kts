@@ -25,6 +25,7 @@ dependencies {
 	implementation(projects.app.appCommon)
 	implementation(projects.app.appContent)
 	implementation(projects.app.appInternal)
+	implementation(projects.app.appRepoMemory)
 
 //	implementation(libs.spring.boot.starter.web)
 	implementation(libs.spring.boot.starter.webflux)
