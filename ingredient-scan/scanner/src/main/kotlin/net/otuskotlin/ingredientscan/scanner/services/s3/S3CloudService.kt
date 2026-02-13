@@ -34,8 +34,6 @@ import java.util.zip.ZipOutputStream
 class S3CloudService(
     private val s3AsyncClient: S3AsyncClient,
     private val s3TransferManager: S3TransferManager,
-//    private val s3Template: S3Template,
-//    private val s3Client: S3Client,
     @Value("\${spring.cloud.aws.s3.bucket.name:photos}")
     private val bucketName: String,
     @Value("\${app.upload.max-files:5}")
@@ -43,14 +41,6 @@ class S3CloudService(
 ) : IsContentProvider {
 
     private val log = LoggerFactory.getLogger(S3CloudService::class.java)
-
-    companion object {
-
-        fun chunks(path: String, filename: String, hasLength: Boolean): Array<String> {
-            val p = if (hasLength) filename.substring(path.length) else filename
-            return p.split("/").toTypedArray()
-        }
-    }
 
     override suspend fun upload(context: IsContext, files: Any, prefix: String?): List<String> {
         @Suppress("UNCHECKED_CAST")
@@ -61,7 +51,6 @@ class S3CloudService(
     }
 
     suspend fun uploadFiles(context: IsContext, files: Flux<FilePart>, prefix: String?): Mono<List<String>> {
-        val ii: Int = 0
         return files
             .take(maxFiles.toLong() + 1)
             .index()
@@ -239,108 +228,4 @@ class S3CloudService(
             Mono.just(Pair(cleanedName, fileStream))
         }
     }
-
-
-//    override suspend fun download(context: IsContext, fileName: String) : Any {
-//        return get(context ,fileName);
-//    }
-
-//    suspend fun get(context: IsContext, fileName: String) : ResponseEntity<Resource> {
-//        val cleanedFileName = fileName.removePrefix("/")
-//        val metadata = getObjectMetadata(context, cleanedFileName)
-//        val resource = downloadFileAsResource(context, cleanedFileName)
-//
-//        if (context.errors.isEmpty() && metadata != null && resource != null) {
-//            val fileNameForHeader = cleanedFileName.substringAfterLast("/")
-//
-//            val contentDisposition = ContentDisposition.inline()
-//                .filename(fileNameForHeader, StandardCharsets.UTF_8)
-//                .build()
-//
-//            return ResponseEntity.ok()
-//                .header(HttpHeaders.CONTENT_TYPE, metadata.contentType())
-//                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
-//                .body(resource)
-//        }
-//
-//        if (context.errors.isEmpty()) {
-//            context.errors.add(IsError(code = "FILE_NOT_FOUND", group = "s3", field = "", message = "File not found: $cleanedFileName"))
-//        }
-//
-//        val errorResponse = context.toDownloadFileErrorResponse()
-//        val jsonResource = JsonErrorResource(errorResponse)
-//
-//        val status = when (context.errors.firstOrNull()?.code) {
-//            "FILE_NOT_FOUND" -> HttpStatus.NOT_FOUND
-//            "STORE_NOT_FOUND" -> HttpStatus.NOT_FOUND
-//            else -> HttpStatus.INTERNAL_SERVER_ERROR
-//        }
-//
-//        return ResponseEntity.status(status)
-//            .contentType(MediaType.APPLICATION_JSON)
-//            .body(jsonResource)
-//    }
-//
-//    fun getObjectMetadata(context: IsContext, fileName: String): HeadObjectResponse? {
-//        try {
-//            val request = HeadObjectRequest.builder()
-//                .bucket(bucketName)
-//                .key(fileName)
-//                .build()
-//
-//            return s3Client.headObject(request)
-//        } catch (e: S3Exception) {
-//            context.errors.add(createError("STORE_NOT_FOUND", "Storage not found or unavailable: $fileName"))
-//            return null
-//        }
-//    }
-//
-//
-//
-//    fun fileExists(fileKey: String): Boolean {
-//        return s3Template.objectExists(bucketName, fileKey)
-//    }
-//
-//    fun downloadFileAsResource(context: IsContext, fileName: String): Resource? {
-//        try {
-//            if (!fileExists(fileName)) {
-//                context.errors.add(createError("FILE_NOT_FOUND", "File not found: $fileName"))
-//                return null
-//            }
-//
-//            return s3Template.download(bucketName, fileName)
-//        } catch (e: Exception) {
-//            context.errors.add(createError("STORE_NOT_FOUND", "Storage not found or unavailable: $fileName"))
-//            return null
-//        }
-//    }
-//
-//    fun deleteFile(context: IsContext, fileName: String): Boolean {
-//        try {
-//            if (!fileExists(fileName)) {
-//                context.errors.add(createError("FILE_NOT_FOUND", "File not found: $fileName"))
-//                return false
-//            }
-//
-//            s3Client.deleteObject(
-//                DeleteObjectRequest.builder()
-//                    .bucket(bucketName)
-//                    .key(fileName)
-//                    .build()
-//            )
-//            return true
-//        } catch (e: Exception) {
-//            context.errors.add(createError("STORE_NOT_FOUND", "Storage not found or unavailable: $fileName"))
-//            return false
-//        }
-//    }
-//
-//    private fun createError(code: String, message: String): IsError {
-//        return IsError(
-//            code = code,
-//            group = "s3",
-//            field = "",
-//            message = message
-//        )
-//    }
 }
