@@ -36,11 +36,4 @@ open class InMemoryContextRepository: IsContextRepository {
         store.invalidateAll()
     }
 
-    override fun saveUnsuspend(context: IsContext) {
-        store.put(context.id.asString(), context)
-    }
-
-    override fun findByIdUnsuspend(id: IsContextId): IsContext? {
-        return store.getIfPresent(id.asString())
-    }
 }

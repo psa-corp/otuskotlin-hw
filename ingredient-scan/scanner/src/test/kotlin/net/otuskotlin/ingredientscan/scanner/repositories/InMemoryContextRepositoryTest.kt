@@ -65,21 +65,6 @@ class InMemoryContextRepositoryTest {
         assertNull(repository.findById(context2.id))
     }
 
-    @Test
-    fun `saveUnsuspend and findByIdUnsuspend`() = runTest {
-        val context = createContext()
-        repository.saveUnsuspend(context)
-
-        val found = repository.findByIdUnsuspend(context.id)
-        assertEquals(context, found)
-    }
-
-    @Test
-    fun `findByIdUnsuspend returns null for non-existent`() {
-        val found = repository.findByIdUnsuspend(IsContextId("missing"))
-        assertNull(found)
-    }
-
     private fun createContext(): IsContext = IsContext(
         id = IsContextId(UUID.randomUUID().toString())
     )
