@@ -8,6 +8,7 @@ spring:
     multipart:
       max-in-memory-size: 256KB
       max-disk-usage-per-part: 1GB
+      max-parts: 10
   jackson:
     property-naming-strategy: SNAKE_CASE
     default-property-inclusion: NON_NULL
@@ -15,31 +16,28 @@ spring:
   cloud:
     aws:
       credentials:
-        access-key: minioadmin
-        secret-key: minioadminpassword
+        access-key: ${SPRING_CLOUD_AWS_CREDENTIALS_ACCESS_KEY:minioadmin}
+        secret-key: ${SPRING_CLOUD_AWS_CREDENTIALS_SECRET_KEY:minioadminpassword}
       region:
-        static: us-east-1
-      endpoint: http://minio:9000  # ← Docker hostname
-
+        static: ${SPRING_CLOUD_AWS_REGION_STATIC:us-east-1}
+      endpoint: ${SPRING_CLOUD_AWS_ENDPOINT:http://minio:9000}
       s3:
-        endpoint: http://minio:9000
+        endpoint: ${SPRING_CLOUD_AWS_ENDPOINT:http://minio:9000}
         path-style-access-enabled: true
         bucket:
-          name: photos
+          name: ${SPRING_CLOUD_AWS_S3_BUCKET_NAME:photos}
 
   docker:
     compose:
-      enabled: false
+      enabled: false   # отключаем встроенный compose в prod
 
   kafka:
-    streams:
-      auto-startup: false
-    bootstrap-servers: kafka:9093
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9093}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
     consumer:
-      group-id: ingredient-scanner-group
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:ingredient-scanner-group}
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
@@ -53,13 +51,21 @@ logging:
     root: INFO
     org.springframework.web: WARN
     org.springframework.boot: INFO
-    org.springframework.boot.autoconfigure: WARN
     net.otuskotlin.ingredientscan: INFO
     org.apache.kafka: WARN
 
 app:
   upload:
     max-files: 5
+  security:
+    internal:
+      token: ${INTERNAL_API_TOKEN:default-secret-123}   # единый токен для internal API
+      prefix: /v1/internal
+  kafka:
+    topics:
+      bootstrap-servers: ${APP_KAFKA_TOPICS_BOOTSTRAP_SERVERS:${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9093}}
+      partitions: 1
+      replication-factor: 1
 
 management:
   endpoints:
@@ -69,7 +75,8 @@ management:
       base-path: /actuator
   endpoint:
     health:
-      show-details: when-authorized
+      show-details: always
+#      show-details: when-authorized
   health:
     livenessState:
       enabled: true

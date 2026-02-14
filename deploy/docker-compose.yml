@@ -1,11 +1,10 @@
 # Production Docker Compose
-# Для Ingredient Scan Production
+# Для Ingredient Scan Production (scanner + analyzer)
 
 name: ingredient-scanner-prod
 
 services:
   # ========== ИНФРАСТРУКТУРА ==========
-
   postgres:
     image: postgres:17.7
     container_name: postgres
@@ -60,7 +59,6 @@ services:
     restart: unless-stopped
 
   # ========== STORAGE (S3) ==========
-
   minio:
     image: minio/minio:latest
     container_name: minio_server
@@ -83,7 +81,6 @@ services:
     restart: unless-stopped
 
   # ========== MESSAGE BROKER (Kafka) ==========
-
   zookeeper:
     image: zookeeper:3.8
     container_name: zookeeper
@@ -113,11 +110,9 @@ services:
       - "9093:9093"  # Internal listener (в Docker сети)
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      # Настройка листенеров
-      KAFKA_LISTENERS: INTERNAL://:9093,EXTERNAL://:9092
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9093,EXTERNAL://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-      # Дополнительные настройки
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
@@ -139,7 +134,6 @@ services:
     restart: unless-stopped
 
   # ========== LOGGING & MONITORING ==========
-
   opensearch:
     image: opensearchproject/opensearch:latest
     container_name: opensearch
@@ -202,18 +196,15 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # ========== APPLICATION ==========
-
-  ingredient-scan-app:
+  # ========== APPLICATION (SCANNER) ==========
+  ingredient-scan-scanner:
     image: darthchain/ingredient-scan-scan-hw:latest
-    container_name: ingredient-scan-app
+    container_name: ingredient-scan-scanner
     pull_policy: always
-
     environment:
       # SPRING PROFILE
       - SPRING_PROFILES_ACTIVE=prod
-
-      # ОТКЛЮЧАЕМ DOCKER COMPOSE SUPPORT ДЛЯ PROD!
+      # ОТКЛЮЧАЕМ ВСТРОЕННЫЙ DOCKER COMPOSE
       - SPRING_BOOT_DOCKER_COMPOSE_ENABLED=false
 
       # KEYCLOAK
@@ -226,19 +217,24 @@ services:
       - SPRING_DATASOURCE_USERNAME=ingredient_user
       - SPRING_DATASOURCE_PASSWORD=ingredient_pass
 
-      # MINIO - minio:9000
+      # MINIO
       - SPRING_CLOUD_AWS_CREDENTIALS_ACCESS_KEY=minioadmin
       - SPRING_CLOUD_AWS_CREDENTIALS_SECRET_KEY=minioadminpassword
       - SPRING_CLOUD_AWS_REGION_STATIC=us-east-1
       - SPRING_CLOUD_AWS_ENDPOINT=http://minio:9000
       - SPRING_CLOUD_AWS_S3_BUCKET_NAME=photos
 
-      # KAFKA - kafka:9093
+      # KAFKA
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9093
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=ingredient-scanner-group   # можно задать явно
+      - APP_KAFKA_TOPICS_BOOTSTRAP_SERVERS=kafka:9093   # для создания топиков
+
+      # ВНУТРЕННИЙ ТОКЕН (должен совпадать с analyzer)
+      - INTERNAL_API_TOKEN=${INTERNAL_API_TOKEN:-default-secret-123}
 
     ports:
+      # Проброс порта наружу для отладки. В production закомментировать, если не нужен внешний доступ.
       - "8081:8080"
-
     depends_on:
       keycloak:
         condition: service_healthy
@@ -248,19 +244,67 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
-
-    # ✅ ДОБАВИЛ HEALTH CHECK
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 120s
+      start_period: 180s
+    restart: unless-stopped
 
+  # ========== APPLICATION (ANALYZER) ==========
+  ingredient-scan-analyzer:
+    image: darthchain/ingredient-scan-analyzer-hw:latest
+    container_name: ingredient-scan-analyzer
+    pull_policy: always
+    environment:
+      # SPRING PROFILE
+      - SPRING_PROFILES_ACTIVE=prod
+      # ОТКЛЮЧАЕМ ВСТРОЕННЫЙ DOCKER COMPOSE
+      - SPRING_BOOT_DOCKER_COMPOSE_ENABLED=false
+
+      # MINIO (аналогично scanner)
+      - SPRING_CLOUD_AWS_CREDENTIALS_ACCESS_KEY=minioadmin
+      - SPRING_CLOUD_AWS_CREDENTIALS_SECRET_KEY=minioadminpassword
+      - SPRING_CLOUD_AWS_REGION_STATIC=us-east-1
+      - SPRING_CLOUD_AWS_ENDPOINT=http://minio:9000
+      - SPRING_CLOUD_AWS_S3_BUCKET_NAME=photos
+
+      # KAFKA (можно использовать другую group-id)
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9093
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=ingredient-analyzer-group
+      - APP_KAFKA_TOPICS_BOOTSTRAP_SERVERS=kafka:9093   # для создания топиков
+
+      # ВНУТРЕННИЙ ТОКЕН (должен совпадать со scanner)
+      - INTERNAL_API_TOKEN=${INTERNAL_API_TOKEN:-default-secret-123}
+
+      # АДРЕС SCANNER ДЛЯ ВНУТРЕННИХ ВЫЗОВОВ
+      - SCANNER_INTERNAL_URL=http://ingredient-scan-scanner:8080/v1/
+
+      # (Опционально) если analyzer будет работать с БД – раскомментировать
+      # - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ingredient_scan
+      # - SPRING_DATASOURCE_USERNAME=ingredient_user
+      # - SPRING_DATASOURCE_PASSWORD=ingredient_pass
+
+    ports:
+      # Проброс порта наружу для отладки. В production закомментировать.
+      - "8082:8080"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      ingredient-scan-scanner:
+        condition: service_started   # analyzer зависит от scanner (если вызывает его API)
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 240s
     restart: unless-stopped
 
   # ========== API GATEWAY ==========
-
   envoy:
     image: envoyproxy/envoy:v1.29.0
     container_name: envoy
@@ -270,7 +314,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      ingredient-scan-app:
+      ingredient-scan-scanner:
         condition: service_started
     restart: unless-stopped
 
