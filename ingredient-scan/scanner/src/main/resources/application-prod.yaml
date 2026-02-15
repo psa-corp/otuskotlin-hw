@@ -42,6 +42,42 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
 
+  r2dbc:
+    url: r2dbc:postgresql://postgres:5432/ingredient_scan
+    username: ingredient_user
+    password: ${DB_PASSWORD:ingredient_pass}
+    pool:
+      max-size: 10
+      initial-size: 2
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/ingredient_scan
+    username: ingredient_user
+    password: ${DB_PASSWORD:ingredient_pass}
+    driver-class-name: org.postgresql.Driver
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    url: jdbc:postgresql://postgres:5432/ingredient_scan
+    user: ingredient_user
+    password: ${DB_PASSWORD:ingredient_pass}
+    driver-class-name: org.postgresql.Driver
+    default-schema: public
+
+app:
+  upload:
+    max-files: 5
+  security:
+    internal:
+      token: ${INTERNAL_API_TOKEN:default-secret-123}
+      prefix: /v1/internal
+  kafka:
+    topics:
+      bootstrap-servers: ${APP_KAFKA_TOPICS_BOOTSTRAP_SERVERS:${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9093}}
+      partitions: 1
+      replication-factor: 1
+
 server:
   port: 8080
   shutdown: graceful
@@ -53,19 +89,6 @@ logging:
     org.springframework.boot: INFO
     net.otuskotlin.ingredientscan: INFO
     org.apache.kafka: WARN
-
-app:
-  upload:
-    max-files: 5
-  security:
-    internal:
-      token: ${INTERNAL_API_TOKEN:default-secret-123}   # единый токен для internal API
-      prefix: /v1/internal
-  kafka:
-    topics:
-      bootstrap-servers: ${APP_KAFKA_TOPICS_BOOTSTRAP_SERVERS:${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9093}}
-      partitions: 1
-      replication-factor: 1
 
 management:
   endpoints:

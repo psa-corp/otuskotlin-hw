@@ -212,10 +212,18 @@ services:
       - KEYCLOAK_REALM=ingredient-scan
       - KEYCLOAK_CLIENT_ID=ingredient-scan-service
 
-      # DATABASE
-      - DATABASE_URL=jdbc:postgresql://postgres:5432/ingredient_scan
+      # R2DBC (для работы приложения)
+      - SPRING_R2DBC_URL=r2dbc:postgresql://postgres:5432/ingredient_scan
+      - SPRING_R2DBC_USERNAME=ingredient_user
+      - SPRING_R2DBC_PASSWORD=ingredient_pass
+
+      # JDBC & Liquibase (для миграций)
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ingredient_scan
       - SPRING_DATASOURCE_USERNAME=ingredient_user
       - SPRING_DATASOURCE_PASSWORD=ingredient_pass
+      - SPRING_LIQUIBASE_URL=jdbc:postgresql://postgres:5432/ingredient_scan
+      - SPRING_LIQUIBASE_USER=ingredient_user
+      - SPRING_LIQUIBASE_PASSWORD=ingredient_pass
 
       # MINIO
       - SPRING_CLOUD_AWS_CREDENTIALS_ACCESS_KEY=minioadmin
@@ -290,6 +298,8 @@ services:
       # Проброс порта наружу для отладки. В production закомментировать.
       - "8082:8080"
     depends_on:
+      postgres:
+        condition: service_healthy
       kafka:
         condition: service_healthy
       minio:
