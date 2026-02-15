@@ -12,24 +12,20 @@ import net.otuskotlin.ingredientscan.core.cor.worker
 fun ICorChainDsl<IsContext>.validateIdProperFormatComposition(title: String, prefix: String) = worker {
     this.title = title
 
-    // Разрешаем два формата:
-    // 1. prefix_custom-id (буквы, цифры, дефисы)
-    // 2. prefix_uuid (где uuid - валидный UUID)
-    val customIdRegExp = Regex("^${Regex.escape(prefix)}-[0-9a-zA-Z-]+\$")
-    val uuidRegExp = Regex("^${Regex.escape(prefix)}-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\$")
+    val idPattern = Regex("^${Regex.escape(prefix)}-[0-9a-zA-Z-]{1,100}$")
     on { validateCompositionId != IsCompositionId.NONE
-            && !validateCompositionId.asString().matches(customIdRegExp)
-            && !validateCompositionId.asString().matches(uuidRegExp)
+            && !validateCompositionId.asString().matches(idPattern)
     }
     handle {
         val encodedId = validateCompositionId.asString()
             .replace("<", "&lt;")
             .replace(">", "&gt;")
+        val idStr = validateCompositionId.asString()
         fail(
             errorValidation(
                 field = "id",
                 violationCode = "badFormat",
-                description = "value $encodedId must contain only letters and numbers"
+                description = "ID '$idStr' must start with '$prefix-' and contain only hex/letters/numbers/dashes"
             )
         )
     }
@@ -39,28 +35,21 @@ fun ICorChainDsl<IsContext>.validateIdProperFormatComposition(title: String, pre
 fun ICorChainDsl<IsContext>.validateIdProperFormatContext(title: String, prefix: String) = worker {
     this.title = title
 
-    // Разрешаем два формата:
-    // 1. prefix_custom-id (буквы, цифры, дефисы)
-    // 2. prefix_uuid (где uuid - валидный UUID)
-    val customIdRegExp = Regex("^${Regex.escape(prefix)}-[0-9a-zA-Z-]+\$")
-    val uuidRegExp = Regex("^${Regex.escape(prefix)}-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\$")
+    val idPattern = Regex("^${Regex.escape(prefix)}-[0-9a-zA-Z-]{1,100}$")
 
     on { validateContextId != IsContextId.NONE
-            && !validateContextId.asString().matches(customIdRegExp)
-            && !validateContextId.asString().matches(uuidRegExp)
+            && !validateContextId.asString().matches(idPattern)
     }
     handle {
         val encodedId = validateContextId.asString()
             .replace("<", "&lt;")
             .replace(">", "&gt;")
-
+        val idStr = validateCompositionId.asString()
         fail(
             errorValidation(
                 field = "id",
                 violationCode = "badFormat",
-                description = "value $encodedId must be either: " +
-                        "1. ${prefix}_[letters-numbers-dashes] " +
-                        "2. ${prefix}_uuid (where uuid is in format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)"
+                description = "ID '$idStr' must start with '$prefix-' and contain only hex/letters/numbers/dashes"
             )
         )
     }
@@ -70,28 +59,21 @@ fun ICorChainDsl<IsContext>.validateIdProperFormatContext(title: String, prefix:
 fun ICorChainDsl<IsContext>.validateIdProperFormatAnalysis(title: String, prefix: String) = worker {
     this.title = title
 
-    // Разрешаем два формата:
-    // 1. prefix_custom-id (буквы, цифры, дефисы)
-    // 2. prefix_uuid (где uuid - валидный UUID)
-    val customIdRegExp = Regex("^${Regex.escape(prefix)}-[0-9a-zA-Z-]+\$")
-    val uuidRegExp = Regex("^${Regex.escape(prefix)}-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\$")
+    val idPattern = Regex("^${Regex.escape(prefix)}-[0-9a-zA-Z-]{1,100}$")
 
     on { validateAnalysisId != IsAnalysisId.NONE
-            && !validateAnalysisId.asString().matches(customIdRegExp)
-            && !validateAnalysisId.asString().matches(uuidRegExp)
+            && !validateAnalysisId.asString().matches(idPattern)
     }
     handle {
         val encodedId = validateAnalysisId.asString()
             .replace("<", "&lt;")
             .replace(">", "&gt;")
-
+        val idStr = validateCompositionId.asString()
         fail(
             errorValidation(
                 field = "id",
                 violationCode = "badFormat",
-                description = "value $encodedId must be either: " +
-                        "1. ${prefix}_[letters-numbers-dashes] " +
-                        "2. ${prefix}_uuid (where uuid is in format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)"
+                description = "ID '$idStr' must start with '$prefix-' and contain only hex/letters/numbers/dashes"
             )
         )
     }
