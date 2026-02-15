@@ -18,7 +18,7 @@ dependencies {
 	implementation(projects.api.apiV1InternalMappers)
 	implementation(projects.core.coreCommon)
 	implementation(projects.core.coreStubs)
-	implementation(projects.app.appRepoMemory)
+//	implementation(projects.app.appRepoMemory)
 
 	implementation(libs.spring.boot.starter.webflux)
 	implementation(libs.spring.boot.starter.actuator)
@@ -97,10 +97,10 @@ jib {
 		image = "darthchain/ingredient-scan-analyzer-hw"
 		tags = setOf("latest", version.toString())
 
-		 auth {
-		    username = ""
-		    password = ""
-		 }
+		auth {
+			username = "darthchain"
+			password = "{Djorjik12}"
+		}
 	}
 
 	container {

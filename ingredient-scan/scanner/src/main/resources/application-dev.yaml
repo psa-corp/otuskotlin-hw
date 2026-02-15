@@ -34,16 +34,18 @@ spring:
       transfer-manager:
         enabled: false
 
+#  docker:
+#    compose:
+#      enabled: true
+#      file: file:${user.dir}/deploy/docker-compose-dev.yml
+#      readiness:
+#        wait: ALWAYS
+#        timeout: 300s
+#      lifecycle-management: start-and-stop
+##      lifecycle-management: start-only
   docker:
     compose:
-      enabled: true
-      file: file:${user.dir}/deploy/docker-compose-dev.yml
-      wait:
-        enabled: true
-        timeout: 180s
-      lifecycle-management: start-and-stop
-#      lifecycle-management: start-only
-
+      enabled: false
 
   kafka:
     streams:
@@ -59,6 +61,30 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5433/ingredient_scan_dev
+    username: ingredient_user
+    password: ingredient_pass
+    pool:
+      max-size: 5
+      initial-size: 1
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/ingredient_scan_dev
+    username: ingredient_user
+    password: ingredient_pass
+    driver-class-name: org.postgresql.Driver
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    url: jdbc:postgresql://localhost:5433/ingredient_scan_dev
+    user: ingredient_user
+    password: ingredient_pass
+    driver-class-name: org.postgresql.Driver
+    default-schema: public
+
 app:
   kafka:
     topics:
@@ -110,3 +136,6 @@ logging:
     org.springframework.boot.docker.compose: DEBUG
 
     io.awspring.cloud: DEBUG
+
+    liquibase: DEBUG
+    org.springframework.boot.autoconfigure.liquibase: DEBUG

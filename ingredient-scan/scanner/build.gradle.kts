@@ -26,8 +26,8 @@ dependencies {
 	implementation(projects.app.appContent)
 	implementation(projects.app.appInternal)
 	implementation(projects.app.appRepoMemory)
+//	implementation(projects.app.appRepoPostgres)
 
-//	implementation(libs.spring.boot.starter.web)
 	implementation(libs.spring.boot.starter.webflux)
 	implementation(libs.spring.boot.starter.actuator)
 	implementation(libs.spring.boot.starter.validation)
@@ -37,6 +37,23 @@ dependencies {
 
 	implementation(libs.spring.kafka)
 	implementation(libs.kafka.streams)
+	implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+
+	implementation("org.postgresql:r2dbc-postgresql")
+	runtimeOnly("org.postgresql:postgresql")
+
+	implementation("io.r2dbc:r2dbc-pool")
+
+	implementation("org.liquibase:liquibase-core")
+	implementation("org.springframework.boot:spring-boot-starter-jdbc")
+
+	implementation(libs.jackson.kotlin)
+	implementation(libs.jackson.datatype)
+
+	implementation(libs.coroutines.core)
+	implementation(libs.coroutines.reactor)
+	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+
 
 	implementation(libs.springdoc.openapi)
 	implementation(libs.spring.cloud.aws)
@@ -74,6 +91,7 @@ dependencies {
 	testImplementation(libs.kafka.streams.test)
 	testImplementation(libs.projectreactor.reactor.test)
 	testImplementation(libs.mockk.mockk)
+
 
 }
 

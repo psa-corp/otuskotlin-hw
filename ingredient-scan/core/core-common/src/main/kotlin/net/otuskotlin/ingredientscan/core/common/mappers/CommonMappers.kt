@@ -7,6 +7,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.IsLightContext
+import net.otuskotlin.ingredientscan.core.common.external.models.IsComponent
+import com.fasterxml.jackson.module.kotlin.readValue
 
 val commonContextMapper: JsonMapper = JsonMapper.builder().run {
     configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -30,3 +32,10 @@ fun commonLightContextSerialize(request: IsLightContext): String = commonContext
 @Suppress("UNCHECKED_CAST", "unused")
 fun commonLightContextDeserialize(json: String): IsLightContext =
     commonContextMapper.readValue(json, IsLightContext::class.java) as IsLightContext
+
+@Suppress("unused")
+fun commonListComponentsSerialize(request: List<IsComponent>): String = commonContextMapper.writeValueAsString(request)
+
+@Suppress("UNCHECKED_CAST", "unused")
+fun commonListComponentsDeserialize(json: String): List<IsComponent> =
+    commonContextMapper.readValue(json)

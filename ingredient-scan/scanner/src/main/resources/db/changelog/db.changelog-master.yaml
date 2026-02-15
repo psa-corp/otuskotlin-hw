@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260216-init
+      author: scanner
+      runInTransaction: false
+      changes:
+        - sqlFile:
+            path: 20260216-init.sql
+            relativeToChangelogFile: true

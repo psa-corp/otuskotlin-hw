@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service
 
 @Service
 open class BizInternalService(
-    @Qualifier("memoryCompositionRepo") private val compositionRepository: IsCompositionRepository,
-    @Qualifier("memoryAnalysisRepo") private val analysisRepository: IsAnalysisRepository,
+    @Qualifier("postgresCompositionRepo") private val compositionRepository: IsCompositionRepository,
+    @Qualifier("postgresAnalysisRepo") private val analysisRepository: IsAnalysisRepository,
 ) {
     private val appSettings: IsInternalAppSettings
     private val log = LoggerFactory.getLogger(BizInternalService::class.java)

@@ -24,9 +24,9 @@ import reactor.core.publisher.Flux
 @Service
 open class BizService(
     private val kafkaSender: BizKafkaSender,
-    @Qualifier("memoryCompositionRepo") private val compositionRepository: IsCompositionRepository,
+    @Qualifier("postgresCompositionRepo") private val compositionRepository: IsCompositionRepository,
+    @Qualifier("postgresAnalysisRepo") private val analysisRepository: IsAnalysisRepository,
     @Qualifier("memoryContextRepo") private val contextRepository: IsContextRepository,
-    @Qualifier("memoryAnalysisRepo") private val analysisRepository: IsAnalysisRepository,
     private val s3CloudService: S3CloudService,
     private val contextAwaitService: ContextAwaitService
 ) {

@@ -71,3 +71,25 @@ services:
       retries: 15
       start_period: 45s
     restart: unless-stopped
+
+  postgres:
+    image: postgres:17.7
+    container_name: postgres_dev
+    environment:
+      POSTGRES_DB: ingredient_scan_dev
+      POSTGRES_USER: ingredient_user
+      POSTGRES_PASSWORD: ingredient_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ingredient_user -d ingredient_scan_dev"]
+      interval: 15s
+      timeout: 20s
+      retries: 15
+      start_period: 45s
+    restart: unless-stopped
+
+volumes:
+  postgres_dev_data:
