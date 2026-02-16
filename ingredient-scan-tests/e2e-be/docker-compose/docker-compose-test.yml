@@ -1,13 +1,11 @@
-# Test Docker Compose - Minimal версия для тестов
-# Запускается автоматически через Spring Boot Docker Compose Support
-
+# Test Docker Compose - для автотестов (Spring Boot Docker Compose Support)
 name: ingredient-scanner-test
 
 services:
   # ========== STORAGE (S3) ==========
   minio:
     image: minio/minio:latest
-    container_name: minio_test
+    container_name: minio_server
     ports:
       - "9000:9000"  # S3 API
       - "9001:9001"  # Web Console
@@ -16,8 +14,14 @@ services:
       MINIO_ROOT_PASSWORD: minioadminpassword
       MINIO_DEFAULT_BUCKETS: photos
     volumes:
-      - ./volumes/minio_data_test:/data
+      - ./volumes/minio_data:/data
     command: server /data --console-address :9001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
 
   # ========== MESSAGE BROKER (Kafka) ==========
@@ -34,21 +38,25 @@ services:
     volumes:
       - zookeeper_data_test:/var/lib/zookeeper/data
       - zookeeper_datalog_test:/var/lib/zookeeper/datalog
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc -w 2 localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     restart: unless-stopped
 
   kafka:
     image: confluentinc/cp-kafka:7.6.1
     container_name: kafka_test
     ports:
-      - "9092:9092"  # External listener (от хоста)
-      - "9093:9093"  # Internal listener (в Docker сети)
+      - "9092:9092"
+      - "9093:9093"
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      # Настройка листенеров
-      KAFKA_LISTENERS: INTERNAL://:9093,EXTERNAL://:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper_test:2181  # ← ИСПРАВЛЕНО!
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9093,EXTERNAL://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-      # Дополнительные настройки
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
@@ -57,34 +65,91 @@ services:
       KAFKA_LOG4J_ROOT_LOGLEVEL: WARN
       KAFKA_BROKER_ID: 1
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     volumes:
       - kafka_data_test:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list 2>/dev/null || exit 0"]
+      interval: 15s
+      timeout: 20s
+      retries: 10
+      start_period: 40s
     restart: unless-stopped
 
-  # ========== TEST APPLICATION ==========
-  ingredient-scan-app:
+  # ========== TEST SCANNER ==========
+  ingredient-scan-scanner-test:
     image: darthchain/ingredient-scan-scan-hw:latest
-    container_name: ingredient-scan-app-test
+    container_name: ingredient-scan-scanner-test
     pull_policy: always
     environment:
-      # SPRING PROFILE - используем PROD
       - SPRING_PROFILES_ACTIVE=test
-      # ОТКЛЮЧАЕМ DOCKER COMPOSE SUPPORT ДЛЯ КОНТЕЙНЕРА!
       - SPRING_BOOT_DOCKER_COMPOSE_ENABLED=false
-      # MINIO - minio:9000
+      - SPRING_DOCKER_COMPOSE_ENABLED=false
+      - SPRING_DOCKER_COMPOSE_LIFECYCLE_MANAGEMENT=none
+      # MINIO
       - SPRING_CLOUD_AWS_CREDENTIALS_ACCESS_KEY=minioadmin
       - SPRING_CLOUD_AWS_CREDENTIALS_SECRET_KEY=minioadminpassword
       - SPRING_CLOUD_AWS_REGION_STATIC=us-east-1
       - SPRING_CLOUD_AWS_ENDPOINT=http://minio:9000
       - SPRING_CLOUD_AWS_S3_BUCKET_NAME=photos
-      # KAFKA - kafka:9093
+      # KAFKA - синхронно с продом
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9093
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=ingredient-scanner-test-group
+      - APP_KAFKA_TOPICS_BOOTSTRAP_SERVERS=kafka:9093
+      # INTERNAL TOKEN (для тестов analyzer)
+      - INTERNAL_API_TOKEN=test-secret-123
     ports:
       - "8081:8080"
     depends_on:
-      - kafka
-      - minio
+      minio:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    restart: unless-stopped
+
+  # ========== TEST ANALYZER ==========
+  ingredient-scan-analyzer-test:
+    image: darthchain/ingredient-scan-analyzer-hw:latest
+    container_name: ingredient-scan-analyzer-test
+    pull_policy: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=test
+      - SPRING_BOOT_DOCKER_COMPOSE_ENABLED=false
+      # MINIO
+      - SPRING_CLOUD_AWS_CREDENTIALS_ACCESS_KEY=minioadmin
+      - SPRING_CLOUD_AWS_CREDENTIALS_SECRET_KEY=minioadminpassword
+      - SPRING_CLOUD_AWS_REGION_STATIC=us-east-1
+      - SPRING_CLOUD_AWS_ENDPOINT=http://minio:9000
+      - SPRING_CLOUD_AWS_S3_BUCKET_NAME=photos
+      # KAFKA
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9093
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=ingredient-analyzer-test-group
+      - APP_KAFKA_TOPICS_BOOTSTRAP_SERVERS=kafka:9093
+      # SCANNER URL
+      - SCANNER_INTERNAL_URL=http://ingredient-scan-scanner-test:8080/v1/
+      - INTERNAL_API_TOKEN=test-secret-123
+    ports:
+      - "8082:8080"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      ingredient-scan-scanner-test:
+        condition: service_started  # ← Как в проде!
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
     restart: unless-stopped
 
 volumes:

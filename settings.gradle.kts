@@ -9,4 +9,4 @@ rootProject.name = "otuskotlin"
 includeBuild("plugins")
 includeBuild("ingredient-scan")
 //includeBuild("ingredient-scan-libs")
-//includeBuild("ingredient-scan-tests")
+includeBuild("ingredient-scan-tests")

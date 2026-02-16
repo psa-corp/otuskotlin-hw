@@ -121,6 +121,11 @@ testcontainers-core = { module = "org.testcontainers:testcontainers", version.re
 testcontainers-junit = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
 testcontainers-minio = { module = "org.testcontainers:minio", version.ref = "testcontainers" }
 testcontainers-docker-compose = { module = "org.testcontainers:docker-compose", version.ref = "testcontainers" }
+testcontainers-bom = { module = "org.testcontainers:testcontainers-bom", version.ref = "testcontainers" }
+testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainers" }
+testcontainers-toxiproxy = { module = "org.testcontainers:toxiproxy", version.ref = "testcontainers" }
+
 # HTTP CLIENT
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 
@@ -167,6 +172,8 @@ github-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.r
 testcontainers = [
     "testcontainers-core",
     "testcontainers-junit",
+    "testcontainers-postgresql",
+    "testcontainers-kafka"
 ]
 
 fluent-logging = [
