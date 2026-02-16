@@ -119,7 +119,7 @@ class ControllerTest : BaseInfrastructureTest() {
             )
             val response3: AnalysisCreateResponse = apiClient.post(request3, "/v1/analysis/create")
             assertThat(response3.result).isEqualTo(ResponseResult.SUCCESS)
-//            assertThat(response3.contextId).isNotEmpty()
+            assertThat(response3.contextId).isNotEmpty()
             assertThat(response3.analysis).isNotNull
             assertThat(response3.analysis?.id).isNotNull
             assertThat(response3.analysis?.compositionId).isEqualTo(response.composition?.id)
@@ -130,7 +130,7 @@ class ControllerTest : BaseInfrastructureTest() {
             )
             val response4: AnalysisGetResponse = apiClient.post(request4, "/v1/analysis/get")
             assertThat(response4.result).isEqualTo(ResponseResult.SUCCESS)
-//            assertThat(response3.contextId).isNotEmpty()
+            assertThat(response4.contextId).isNotEmpty()
             assertThat(response4.analysis).isNotNull
             assertThat(response4.analysis?.id).isNotNull
             assertThat(response4.analysis?.id).isEqualTo(response3.analysis?.id)

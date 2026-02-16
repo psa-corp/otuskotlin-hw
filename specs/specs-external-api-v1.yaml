@@ -459,6 +459,9 @@ components:
           properties:
             analysis:
               $ref: '#/components/schemas/Analysis'
+            contextId:
+              type: string
+              example: "context-123"
 
     AnalysisRegenerateResponse:
       allOf:
@@ -467,6 +470,9 @@ components:
           properties:
             analysis:
               $ref: '#/components/schemas/Analysis'
+            contextId:
+              type: string
+              example: "context-123"
 
     AnalysisCreateResponse:
       allOf:
@@ -475,6 +481,9 @@ components:
           properties:
             analysis:
               $ref: '#/components/schemas/Analysis'
+            contextId:
+              type: string
+              example: "context-123"
 
     CompositionCreateByManualResponse:
       allOf:

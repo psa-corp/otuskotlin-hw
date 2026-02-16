@@ -18,6 +18,8 @@ import net.otuskotlin.ingredientscan.scanner.services.await.ContextAwaitService
 import net.otuskotlin.ingredientscan.scanner.services.biz.BizKafkaSender
 import net.otuskotlin.ingredientscan.scanner.services.biz.BizService
 import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
+import net.otuskotlin.ingredientscan.scanner.utils.ControllerUtil.Companion.CONTEXT_ID
+import net.otuskotlin.ingredientscan.scanner.utils.ControllerUtil.Companion.createStubContext
 import net.otuskotlin.ingredientscan.scanner.utils.ControllerUtil.Companion.testStub
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -71,14 +73,9 @@ class AnalysisControllerTest {
             requestType = "analysisGet",
             analysisId = "analysis-test123"
         )
+        val expectedResponse = createStubContext(request, CONTEXT_ID,null).toTransport()
 
-        val response = AnalysisGetResponse(
-            responseType = "analysisGet",
-            result = ResponseResult.SUCCESS,
-            analysis = STUB_ANALYSIS.toTransport()
-        )
-
-        doReturn(response)
+        doReturn(expectedResponse)
             .`when`(bizService)
             .execute<AnalysisGetResponse>(
                 request = any<AnalysisGetRequest>(),
@@ -86,7 +83,7 @@ class AnalysisControllerTest {
             )
 
         // Act & Assert
-        testStub(webTestClient, request, "/v1/analysis/get")
+        testStub(webTestClient, request, "/v1/analysis/get", CONTEXT_ID)
         verify(bizService).execute<AnalysisGetResponse>(any(), eq("AnalysisGet"))
     }
 
@@ -97,21 +94,16 @@ class AnalysisControllerTest {
             requestType = "analysisRegenerate",
             analysisId = "analysis-test123"
         )
+        val expectedResponse = createStubContext(request, CONTEXT_ID,null).toTransport()
 
-        val response = AnalysisRegenerateResponse(
-            responseType = "analysisRegenerate",
-            result = ResponseResult.SUCCESS,
-            analysis = STUB_ANALYSIS.toTransport()
-        )
-
-        doReturn(response)
+        doReturn(expectedResponse)
             .`when`(bizService)
             .execute<AnalysisRegenerateResponse>(
                 request = any<AnalysisRegenerateRequest>(),
                 operation = eq("AnalysisRegenerate")
             )
         // Act & Assert
-        testStub(webTestClient, request, "/v1/analysis/regenerate")
+        testStub(webTestClient, request, "/v1/analysis/regenerate", CONTEXT_ID)
         verify(bizService).execute<AnalysisRegenerateResponse>(any(), eq("AnalysisRegenerate"))
     }
 
@@ -121,21 +113,16 @@ class AnalysisControllerTest {
             requestType = "analysisCreate",
             compositionId = "composition-test123"
         )
+        val expectedResponse = createStubContext(request, CONTEXT_ID,null).toTransport()
 
-        val response = AnalysisCreateResponse(
-            responseType = "analysisCreate",
-            result = ResponseResult.SUCCESS,
-            analysis = STUB_ANALYSIS.toTransport()
-        )
-
-        doReturn(response)
+        doReturn(expectedResponse)
             .`when`(bizService)
             .execute<AnalysisCreateResponse>(
                 request = any<AnalysisCreateRequest>(),
-                operation = eq("AnalysisCreate")   // ← исправлено: большая буква
+                operation = eq("AnalysisCreate")
             )
 
-        testStub(webTestClient, request, "/v1/analysis/create")
+        testStub(webTestClient, request, "/v1/analysis/create", CONTEXT_ID)
         verify(bizService).execute<AnalysisCreateResponse>(any(), eq("AnalysisCreate"))
     }
 }

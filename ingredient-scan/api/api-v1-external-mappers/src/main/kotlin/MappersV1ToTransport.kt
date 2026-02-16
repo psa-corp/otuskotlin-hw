@@ -12,6 +12,7 @@ fun IsContext.toTransportAnalysisGet() = AnalysisGetResponse(
     responseType = "analysisGet",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
+    contextId = id.takeIf { it != IsContextId.NONE }?.asString(),
     analysis = analysisResponse.toTransport()
 )
 
@@ -19,6 +20,7 @@ fun IsContext.toTransportAnalysisCreate() = AnalysisCreateResponse(
     responseType = "analysisCreate",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
+    contextId = id.takeIf { it != IsContextId.NONE }?.asString(),
     analysis = analysisResponse.toTransport()
 )
 
@@ -26,6 +28,7 @@ fun IsContext.toTransportAnalysisRegenerate() = AnalysisRegenerateResponse(
     responseType = "analysisRegenerate",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
+    contextId = id.takeIf { it != IsContextId.NONE }?.asString(),
     analysis = analysisResponse.toTransport()
 )
 

@@ -26,6 +26,8 @@ import net.otuskotlin.ingredientscan.mappers.v1.internal.toTransportInternal
 
 open class ControllerUtil {
     companion object {
+        val CONTEXT_ID = IsContextId("context-fad8a9a5")
+
         fun serializeRequest(request: IRequest): String = apiV1ExternalRequestSerialize(request)
 
         fun createStubContext(request: IRequest, contextId: IsContextId, photo: MutableList<String>?): IsContext {

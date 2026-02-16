@@ -9,6 +9,7 @@ import net.otuskotlin.ingredientscan.scanner.services.await.ContextAwaitService
 import net.otuskotlin.ingredientscan.scanner.services.biz.BizKafkaSender
 import net.otuskotlin.ingredientscan.scanner.services.biz.BizService
 import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
+import net.otuskotlin.ingredientscan.scanner.utils.ControllerUtil.Companion.CONTEXT_ID
 import net.otuskotlin.ingredientscan.scanner.utils.ControllerUtil.Companion.createStubContext
 import net.otuskotlin.ingredientscan.scanner.utils.ControllerUtil.Companion.testStub
 import org.junit.jupiter.api.Test
@@ -56,8 +57,6 @@ class CompositionControllerTest {
     @MockitoBean
     private lateinit var contextAwaitService: ContextAwaitService
 
-    private val contextId = IsContextId("context-fad8a9a5")
-
     @Test
     fun `compositionCreateByManual returns successful response`(): Unit = runBlocking {
         val request = CompositionCreateByManualRequest(
@@ -91,7 +90,7 @@ class CompositionControllerTest {
             compositionId = "composition-123"
         )
 
-        val expectedResponse = createStubContext(request, contextId, null).toTransport()
+        val expectedResponse = createStubContext(request, CONTEXT_ID, null).toTransport()
 
         doReturn(expectedResponse)
             .`when`(bizService)
@@ -100,7 +99,7 @@ class CompositionControllerTest {
                 operation = eq("CompositionGet")
             )
 
-        testStub(webTestClient, request, "/v1/composition/get", contextId)
+        testStub(webTestClient, request, "/v1/composition/get", CONTEXT_ID)
         verify(bizService).execute<CompositionGetResponse>(
             request = any<CompositionGetRequest>(),
             operation = eq("CompositionGet")
@@ -113,7 +112,7 @@ class CompositionControllerTest {
             requestType = "compositionContextGet",
             contextId = "context-5678"
         )
-        val expectedResponse = createStubContext(request, contextId,null).toTransport()
+        val expectedResponse = createStubContext(request, CONTEXT_ID,null).toTransport()
 
         doReturn(expectedResponse)
             .`when`(bizService)
@@ -122,7 +121,7 @@ class CompositionControllerTest {
                 operation = eq("CompositionContextGet")
             )
 
-        testStub(webTestClient, request, "/v1/composition/context/get", contextId)
+        testStub(webTestClient, request, "/v1/composition/context/get", CONTEXT_ID)
         verify(bizService).execute<CompositionContextGetResponse>(
             request = any<CompositionContextGetRequest>(),
             operation = eq("CompositionContextGet")
