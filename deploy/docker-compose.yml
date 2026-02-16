@@ -287,7 +287,7 @@ services:
       - INTERNAL_API_TOKEN=${INTERNAL_API_TOKEN:-default-secret-123}
 
       # АДРЕС SCANNER ДЛЯ ВНУТРЕННИХ ВЫЗОВОВ
-      - SCANNER_INTERNAL_URL=http://ingredient-scan-scanner:8080/v1/
+      - SCANNER_INTERNAL_URL=http://ingredient-scan-scanner:8080/v1
 
       # (Опционально) если analyzer будет работать с БД – раскомментировать
       # - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ingredient_scan
