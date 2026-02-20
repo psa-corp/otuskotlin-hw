@@ -26,14 +26,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AnalysisGetRequest' # Используем Request Wrapper
+              $ref: '#/components/schemas/AnalysisGetRequest'
       responses:
         '200':
           description: Успешный ответ
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AnalysisGetResponse' # Используем Response Wrapper
+                $ref: '#/components/schemas/AnalysisGetResponse'
         '404':
           description: Анализ не найден
           content:
@@ -78,6 +78,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /analysis/create:
+    post:
+      tags: [analysis]
+      summary: Создание анализа состава
+      operationId: analysisCreate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalysisCreateRequest'
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisCreateResponse'
+        '400':
+          description: Неверные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Превышен лимит перегенераций
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /composition/create/manual:
     post:
       tags: [composition]
@@ -95,7 +126,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompositionCreateByManualResponse' # JSON с compositionId
+                $ref: '#/components/schemas/CompositionCreateByManualResponse'
         '400':
           description: Неверные данные запроса
           content:
@@ -130,14 +161,14 @@ paths:
                     format: binary
                     x-content-type: application/octet-stream
                 scan:
-                  $ref: '#/components/schemas/CompositionCreateByPhotosRequest' # Используем Request Wrapper
+                  $ref: '#/components/schemas/CompositionCreateByPhotosRequest'
       responses:
         '200':
           description: Успешный ответ
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CompositionCreateByPhotosResponse' # JSON с compositionId
+                $ref: '#/components/schemas/CompositionCreateByPhotosResponse'
         '400':
           description: Неверные данные или размер файла
           content:
@@ -284,6 +315,7 @@ components:
         mapping:
           analysisGet: '#/components/schemas/AnalysisGetRequest'
           analysisRegenerate: '#/components/schemas/AnalysisRegenerateRequest'
+          analysisCreate: '#/components/schemas/AnalysisCreateRequest'
           compositionCreateByManual: '#/components/schemas/CompositionCreateByManualRequest'
           compositionCreateByPhotos: '#/components/schemas/CompositionCreateByPhotosRequest'
           compositionGet: '#/components/schemas/CompositionGetRequest'
@@ -309,6 +341,7 @@ components:
         mapping:
           analysisGet: '#/components/schemas/AnalysisGetResponse'
           analysisRegenerate: '#/components/schemas/AnalysisRegenerateResponse'
+          analysisCreate: '#/components/schemas/AnalysisCreateResponse'
           compositionCreateByManual: '#/components/schemas/CompositionCreateByManualResponse'
           compositionCreateByPhotos: '#/components/schemas/CompositionCreateByPhotosResponse'
           compositionGet: '#/components/schemas/CompositionGetResponse'
@@ -329,7 +362,7 @@ components:
             analysisId:
               type: string
               description: ID анализа для получения
-              example: "analysis_123"
+              example: "analysis-123"
               nullable: false
 
     AnalysisRegenerateRequest:
@@ -346,6 +379,20 @@ components:
               description: ID анализа для получения
               example: "analysis_123"
               nullable: false
+
+    AnalysisCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - type: object
+          required:
+            - compositionId
+          properties:
+            debug:
+              $ref: '#/components/schemas/RequestDebug'
+            compositionId:
+              type: string
+              description: ID состава
+              example: "composition-123"
 
     CompositionCreateByManualRequest:
       allOf:
@@ -381,7 +428,7 @@ components:
             compositionId:
               type: string
               description: ID состава
-              example: "composition_123"
+              example: "composition-123"
 
     CompositionContextGetRequest:
       allOf:
@@ -393,7 +440,7 @@ components:
             contextId:
               type: string
               description: ID контекста
-              example: "context_123"
+              example: "context-123"
 
     DownloadFileRequest:
       allOf:
@@ -412,6 +459,9 @@ components:
           properties:
             analysis:
               $ref: '#/components/schemas/Analysis'
+            contextId:
+              type: string
+              example: "context-123"
 
     AnalysisRegenerateResponse:
       allOf:
@@ -420,24 +470,42 @@ components:
           properties:
             analysis:
               $ref: '#/components/schemas/Analysis'
+            contextId:
+              type: string
+              example: "context-123"
+
+    AnalysisCreateResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - type: object
+          properties:
+            analysis:
+              $ref: '#/components/schemas/Analysis'
+            contextId:
+              type: string
+              example: "context-123"
 
     CompositionCreateByManualResponse:
       allOf:
         - $ref: '#/components/schemas/IResponse'
         - type: object
           properties:
+            composition:
+              $ref: '#/components/schemas/Composition'
             contextId:
               type: string
-              example: "context_123"
+              example: "context-123"
 
     CompositionCreateByPhotosResponse:
       allOf:
         - $ref: '#/components/schemas/IResponse'
         - type: object
           properties:
+            composition:
+              $ref: '#/components/schemas/Composition'
             contextId:
               type: string
-              example: "context_123"
+              example: "context-123"
 
     CompositionGetResponse:
       allOf:
@@ -446,6 +514,9 @@ components:
           properties:
             composition:
               $ref: '#/components/schemas/Composition'
+            contextId:
+              type: string
+              example: "context-123"
 
     CompositionContextGetResponse:
       allOf:
@@ -541,7 +612,7 @@ components:
         id:
           type: string
           description: ID контекста
-          example: "context_123"
+          example: "context-123"
         state:
           $ref: '#/components/schemas/State'
         errors:

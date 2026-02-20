@@ -16,19 +16,43 @@ dependencies {
 	implementation(projects.api.apiLog1)
 	implementation(projects.api.apiV1ExternalJackson)
 	implementation(projects.api.apiV1ExternalMappers)
+	implementation(projects.api.apiV1InternalJackson)
+	implementation(projects.api.apiV1InternalMappers)
 	implementation(projects.core.coreCommon)
 	implementation(projects.core.coreStubs)
 	implementation(projects.biz.bizCommon)
+	implementation(projects.biz.bizCommon)
+	implementation(projects.app.appCommon)
+	implementation(projects.app.appContent)
+	implementation(projects.app.appInternal)
+	implementation(projects.app.appRepoMemory)
 
-//	implementation(libs.spring.boot.starter.web)
 	implementation(libs.spring.boot.starter.webflux)
 	implementation(libs.spring.boot.starter.actuator)
 	implementation(libs.spring.boot.starter.validation)
 	implementation(libs.spring.boot.docker.compose)
 	implementation(libs.coroutines.reactor)
+	implementation(libs.coroutines.core)
 
 	implementation(libs.spring.kafka)
 	implementation(libs.kafka.streams)
+	implementation(libs.spring.boot.starter.r2dbc)
+
+	implementation("org.postgresql:r2dbc-postgresql")
+	runtimeOnly("org.postgresql:postgresql")
+
+	implementation("io.r2dbc:r2dbc-pool")
+
+	implementation("org.liquibase:liquibase-core")
+	implementation(libs.spring.boot.starter.jdbc)
+
+	implementation(libs.jackson.kotlin)
+	implementation(libs.jackson.datatype)
+
+	implementation(libs.coroutines.core)
+	implementation(libs.coroutines.reactor)
+	implementation(libs.projectreactor.reactor.kotlin.extensions)
+
 
 	implementation(libs.springdoc.openapi)
 	implementation(libs.spring.cloud.aws)
@@ -38,6 +62,9 @@ dependencies {
 
 	implementation(libs.software.amazon)
 	implementation(libs.software.amazon.client)
+	implementation(libs.software.amazon.transfer.manager)
+	implementation(libs.software.amazon.aws.crt)
+
 
 	implementation(libs.swagger.core)
 
@@ -63,6 +90,8 @@ dependencies {
 	testImplementation(libs.kafka.streams.test)
 	testImplementation(libs.projectreactor.reactor.test)
 	testImplementation(libs.mockk.mockk)
+
+	testImplementation(libs.spring.boot.starter.r2dbc)
 
 }
 

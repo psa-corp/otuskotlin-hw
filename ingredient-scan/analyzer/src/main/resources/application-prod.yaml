@@ -1,0 +1,72 @@
+spring:
+  application:
+    name: ingredient-scan-analyzer
+  mandatory-file-encoding: UTF-8
+  main:
+    banner-mode: off
+
+  cloud:
+    aws:
+      credentials:
+        access-key: ${SPRING_CLOUD_AWS_CREDENTIALS_ACCESS_KEY:minioadmin}
+        secret-key: ${SPRING_CLOUD_AWS_CREDENTIALS_SECRET_KEY:minioadminpassword}
+      region:
+        static: ${SPRING_CLOUD_AWS_REGION_STATIC:us-east-1}
+      endpoint: ${SPRING_CLOUD_AWS_ENDPOINT:http://minio:9000}
+      s3:
+        endpoint: ${SPRING_CLOUD_AWS_ENDPOINT:http://minio:9000}
+        path-style-access-enabled: true
+        bucket:
+          name: ${SPRING_CLOUD_AWS_S3_BUCKET_NAME:photos}
+
+  docker:
+    compose:
+      enabled: false
+
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9093}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:ingredient-analyzer-group}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+
+server:
+  port: 8080
+  shutdown: graceful
+
+logging:
+  level:
+    root: INFO
+    net.otuskotlin.ingredientscan: INFO
+    org.apache.kafka: WARN
+
+app:
+  integration:
+    internal:
+      token: ${INTERNAL_API_TOKEN:default-secret-123}
+      url: ${SCANNER_INTERNAL_URL:http://ingredient-scan-scanner:8080/v1}
+  kafka:
+    topics:
+      bootstrap-servers: ${APP_KAFKA_TOPICS_BOOTSTRAP_SERVERS:${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9093}}
+      partitions: 1
+      replication-factor: 1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+#      show-details: when-authorized
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true

@@ -1,24 +1,9 @@
-package net.otuskotlin.ingredientscan.mappers.v1
+package net.otuskotlin.ingredientscan.mappers.v1.external
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
-import net.otuskotlin.ingredientscan.core.common.external.LOCAL_DATE_TIME_NONE
-import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
-import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsColor
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
-import net.otuskotlin.ingredientscan.core.common.external.models.IsComponent
-import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionContext
-import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsContextId
-import net.otuskotlin.ingredientscan.core.common.external.models.IsError
-import net.otuskotlin.ingredientscan.core.common.external.models.IsRiskLevel
-import net.otuskotlin.ingredientscan.core.common.external.models.IsState
-import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub.Companion.STUB_ANALYSIS
-import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownIsCommand
-import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownRequestClass
-import java.time.LocalDateTime
+import net.otuskotlin.ingredientscan.core.common.external.models.*
+import net.otuskotlin.ingredientscan.mappers.v1.external.exceptions.UnknownIsCommand
 import java.time.ZoneOffset
 
 // --- Analysis Responses ---
@@ -27,6 +12,15 @@ fun IsContext.toTransportAnalysisGet() = AnalysisGetResponse(
     responseType = "analysisGet",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
+    contextId = id.takeIf { it != IsContextId.NONE }?.asString(),
+    analysis = analysisResponse.toTransport()
+)
+
+fun IsContext.toTransportAnalysisCreate() = AnalysisCreateResponse(
+    responseType = "analysisCreate",
+    result = state.toResult(),
+    errors = errors.toTransportErrors(),
+    contextId = id.takeIf { it != IsContextId.NONE }?.asString(),
     analysis = analysisResponse.toTransport()
 )
 
@@ -34,6 +28,7 @@ fun IsContext.toTransportAnalysisRegenerate() = AnalysisRegenerateResponse(
     responseType = "analysisRegenerate",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
+    contextId = id.takeIf { it != IsContextId.NONE }?.asString(),
     analysis = analysisResponse.toTransport()
 )
 
@@ -43,14 +38,16 @@ fun IsContext.toTransportCompositionCreateManual() = CompositionCreateByManualRe
     responseType = "compositionCreateByManual",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
-    contextId = id.takeIf { it != IsContextId.NONE }?.asString()
+    contextId = id.takeIf { it != IsContextId.NONE }?.asString(),
+    composition = compositionResponse.takeIf { it != IsComposition.NONE }?.toTransport()
 )
 
 fun IsContext.toTransportCompositionCreatePhotos() = CompositionCreateByPhotosResponse(
     responseType = "compositionCreateByPhotos",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
-    contextId = id.takeIf { it != IsContextId.NONE }?.asString()
+    contextId = id.takeIf { it != IsContextId.NONE }?.asString(),
+    composition = compositionResponse.takeIf { it != IsComposition.NONE }?.toTransport()
 )
 
 fun IsContext.toTransportCompositionContextGet() = CompositionContextGetResponse(
@@ -60,24 +57,18 @@ fun IsContext.toTransportCompositionContextGet() = CompositionContextGetResponse
     context = compositionContextResponse.toTransport()
 )
 
-fun IsContext.toCompositionContext() = IsCompositionContext(
-    id = id,
-    state = state,
-    errors = errors,
-    timeStart = timeStart,
-    composition = compositionResponse
-)
-
 fun IsContext.toTransportCompositionGet() = CompositionGetResponse(
     responseType = "compositionGet",
     result = state.toResult(),
     errors = errors.toTransportErrors(),
-    composition = compositionResponse.toTransport()
+    composition = compositionResponse.toTransport(),
+    contextId = id.takeIf { it != IsContextId.NONE }?.asString()
 )
 
 fun IsContext.toTransport() =
     when (command) {
         IsCommand.ANALYSIS_GET -> toTransportAnalysisGet()
+        IsCommand.ANALYSIS_CREATE -> toTransportAnalysisCreate()
         IsCommand.ANALYSIS_REGENERATE -> toTransportAnalysisRegenerate()
         IsCommand.COMPOSITION_CONTEXT_GET -> toTransportCompositionContextGet()
         IsCommand.COMPOSITION_CREATE_MANUAL -> toTransportCompositionCreateManual()

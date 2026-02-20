@@ -3,7 +3,9 @@ package net.otuskotlin.ingredientscan.api.log1.mapper
 import java.time.Instant
 import java.time.ZoneOffset
 import net.otuskotlin.ingredientscan.api.log1.models.*
+import net.otuskotlin.ingredientscan.core.common.external.InternalContext
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.models.InternalCommand
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysis
 import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsColor
@@ -22,10 +24,43 @@ fun IsContext.toLog(logId: String) = CommonLogModel(
     errors = errors.map { it.toLog() }.takeIf { it.isNotEmpty() },
     performance = null
 )
+
+
+fun InternalContext.toLog(logId: String) = CommonLogModel(
+    messageTime = Instant.now().atOffset(ZoneOffset.UTC),
+    logId = logId,
+    source = CommonLogModel.Source.INTERNAL_API,
+    scan = toIsScanLog(),
+    errors = errors.map { it.toLog() }.takeIf { it.isNotEmpty() },
+    performance = null
+)
+
+private fun InternalCommand.toLogOperation(): ScanLogOperation? =
+    ScanLogOperation.entries.firstOrNull { it.value.equals(this.name.lowercase(), ignoreCase = true) }
+
+
 private fun IsCommand.toLogOperation(): ScanLogOperation? =
     ScanLogOperation.entries.firstOrNull { it.value.equals(this.name.lowercase(), ignoreCase = true) }
 
 private fun IsContext.toIsScanLog(): IngredientScanLogModel? {
+    val analysisNone = IsAnalysis.NONE
+    val compositionNone = IsComposition.NONE
+
+    return IngredientScanLogModel(
+        requestId = requestId.takeIf { it != IsRequestId.NONE }?.asString(),
+        operation = command.toLogOperation(),
+
+        // Request
+        requestAnalysis = analysisRequest.takeIf { it != analysisNone }?.toLog(),
+        requestComposition = compositionRequest.takeIf { it != compositionNone }?.toLog(),
+
+        // Response
+        responseAnalysis = analysisResponse.takeIf { it != analysisNone }?.toLog(),
+        responseComposition = compositionResponse.takeIf { it != compositionNone }?.toLog(),
+    ).takeIf { it != IngredientScanLogModel() }
+}
+
+private fun InternalContext.toIsScanLog(): IngredientScanLogModel? {
     val analysisNone = IsAnalysis.NONE
     val compositionNone = IsComposition.NONE
 

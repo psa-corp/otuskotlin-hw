@@ -29,10 +29,18 @@ rootProject.name = "ingredient-scan"
 
 include(":core:core-common")
 include(":core:core-stubs")
+include(":core:core-cor")
 include(":api:api-v1-external-jackson")
 include(":api:api-v1-external-mappers")
+include(":api:api-v1-internal-jackson")
+include(":api:api-v1-internal-mappers")
 include(":api:api-log1")
+include(":app:app-common")
+include(":app:app-content")
+include(":app:app-internal")
+include(":app:app-repo-memory")
 include(":scanner")
+include(":analyzer")
 include(":biz:biz-common")
 
 

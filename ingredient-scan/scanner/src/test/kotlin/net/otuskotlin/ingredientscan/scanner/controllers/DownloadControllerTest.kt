@@ -1,30 +1,38 @@
 package net.otuskotlin.ingredientscan.scanner.controllers
 
 import kotlinx.coroutines.runBlocking
-import net.otuskotlin.ingredientscan.core.common.external.IsContext
-import net.otuskotlin.ingredientscan.core.common.external.models.IsError
-import net.otuskotlin.ingredientscan.mappers.v1.toDownloadFileErrorResponse
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryCompositionRepository
-import net.otuskotlin.ingredientscan.scanner.repositories.InMemoryContextRepository
+import net.otuskotlin.ingredientscan.core.common.external.models.IsAnalysisRepository
+import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionRepository
+import net.otuskotlin.ingredientscan.core.common.external.models.IsContextRepository
+import net.otuskotlin.ingredientscan.scanner.filters.InternalApiFilter
+import net.otuskotlin.ingredientscan.scanner.services.await.ContextAwaitService
+import net.otuskotlin.ingredientscan.scanner.services.biz.BizKafkaSender
 import net.otuskotlin.ingredientscan.scanner.services.biz.BizService
-import net.otuskotlin.ingredientscan.scanner.services.s3.JsonErrorResource
 import net.otuskotlin.ingredientscan.scanner.services.s3.S3CloudService
 import net.otuskotlin.ingredientscan.scanner.utils.ControllerUtil.Companion.testDownload
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.eq
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
-import org.springframework.core.io.ByteArrayResource
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.FilterType
+import org.springframework.core.io.buffer.DataBufferFactory
+import org.springframework.core.io.buffer.DefaultDataBufferFactory
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.WebTestClient
-import software.amazon.awssdk.services.s3.model.HeadObjectResponse
-import org.springframework.http.HttpStatus
+import reactor.core.publisher.Flux
+import java.nio.charset.StandardCharsets
 
-@WebFluxTest(DownloadController::class)
+@WebFluxTest(
+    controllers = [DownloadController::class],
+    excludeFilters = [ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE,
+        classes = [InternalApiFilter::class]
+    )]
+)
 class DownloadControllerTest {
 
     @Autowired
@@ -34,84 +42,82 @@ class DownloadControllerTest {
     private lateinit var bizService: BizService
 
     @MockitoBean
-    private lateinit var s3Service: S3CloudService
+    private lateinit var kafkaSender: BizKafkaSender
 
     @MockitoBean
-    private lateinit var kafkaTemplate: KafkaTemplate<String, String>
+    private lateinit var compositionRepository: IsCompositionRepository
 
     @MockitoBean
-    private lateinit var compositionRepository: InMemoryCompositionRepository
+    private lateinit var contextRepository: IsContextRepository
 
     @MockitoBean
-    private lateinit var contextRepository: InMemoryContextRepository
+    private lateinit var analysisRepository: IsAnalysisRepository
+
+    @MockitoBean
+    private lateinit var s3CloudService: S3CloudService
+
+    @MockitoBean
+    private lateinit var contextAwaitService: ContextAwaitService
+
+    private val dataBufferFactory: DataBufferFactory = DefaultDataBufferFactory()
 
     @Test
-    fun `download file returns successful response with correct content type`(): Unit = runBlocking {
+    fun `downloadAll returns zip file with correct headers and content`(): Unit = runBlocking {
         // Arrange
-        val fileContent = "test file content"
-        val fileName = "test.jpg"
-        val mockResource = ByteArrayResource(fileContent.toByteArray())
-        val mockMetadata = HeadObjectResponse.builder()
-            .contentType("image/jpeg")
-            .contentLength(fileContent.length.toLong())
-            .build()
+        val fileNames = listOf("photo1.jpg", "photo2.jpg")
+        val zipContent = "mock zip content".toByteArray(StandardCharsets.UTF_8)
+        val zipDataBuffer = dataBufferFactory.wrap(zipContent)
 
-        whenever(bizService.get(any())).thenReturn(
-            ResponseEntity.ok()
-                .header("Content-Type", "image/jpeg")
-                .body(mockResource)
-        )
+        doReturn(Flux.just(zipDataBuffer))
+            .`when`(bizService)
+            .execute(eq(fileNames), eq("DownloadFile"))
 
         // Act & Assert
-        testDownload(webTestClient, "/v1/download/file/{fileName}", fileName, false)
+        testDownload(
+            client = webTestClient,
+            fileNames = fileNames,
+            expectedStatus = HttpStatus.OK,
+            expectedContentType = "application/zip",
+            expectedContentDisposition = "attachment; filename=\"images.zip\""
+        )
     }
 
     @Test
-    fun `download file returns not found when file does not exist`(): Unit = runBlocking {
+    fun `downloadAll returns error when file not found`(): Unit = runBlocking {
         // Arrange
-        val fileName = "nonexistent.jpg"
-        val context = IsContext()
+        val fileNames = listOf("nonexistent.jpg")
 
-        context.errors.add(
-            IsError(
-                code = "FILE_NOT_FOUND",
-                group = "s3",
-                field = "",
-                message = "File not found: $fileName"
-            )
-        )
-
-        val errorResponse = context.toDownloadFileErrorResponse()
-        val jsonResource = JsonErrorResource(errorResponse)
-
-        whenever(bizService.get(any())).thenReturn(
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(jsonResource)
-        )
+        doThrow(RuntimeException("File not found"))
+            .`when`(bizService)
+            .execute(eq(fileNames), eq("DownloadFile"))
 
         // Act & Assert
-        testDownload(webTestClient, "/v1/download/file/{fileName}", fileName, true)
+        testDownload(
+            client = webTestClient,
+            fileNames = fileNames,
+            expectedStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+            expectedContentType = "application/zip"
+        )
     }
 
     @Test
-    fun `download file with special characters in filename returns successful response`(): Unit = runBlocking {
+    fun `downloadAll with special characters in filenames works`(): Unit = runBlocking {
         // Arrange
-        val fileName = "test file (1).jpg"
-        val fileContent = "content"
-        val mockResource = ByteArrayResource(fileContent.toByteArray())
-        val mockMetadata = HeadObjectResponse.builder()
-            .contentType("image/jpeg")
-            .contentLength(fileContent.length.toLong())
-            .build()
+        val fileNames = listOf("test file (1).jpg", "фото.jpg")
+        val zipContent = "zip content".toByteArray(StandardCharsets.UTF_8)
+        val zipDataBuffer = dataBufferFactory.wrap(zipContent)
 
-        whenever(bizService.get(any())).thenReturn(
-            ResponseEntity.ok()
-                .header("Content-Type", "image/jpeg")
-                .body(mockResource)
-        )
+        doReturn(Flux.just(zipDataBuffer))
+            .`when`(bizService)
+            .execute(eq(fileNames), eq("DownloadFile"))
 
         // Act & Assert
-        testDownload(webTestClient, "/v1/download/file/{fileName}", fileName, false)
+        testDownload(
+            client = webTestClient,
+            fileNames = fileNames,
+            expectedStatus = HttpStatus.OK,
+            expectedContentType = "application/zip",
+            expectedContentDisposition = "attachment; filename=\"images.zip\""
+        )
     }
 }

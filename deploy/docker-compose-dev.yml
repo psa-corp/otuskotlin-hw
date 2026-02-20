@@ -72,20 +72,24 @@ services:
       start_period: 45s
     restart: unless-stopped
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka_ui
-    ports:
-      - "8080:8080"
+  postgres:
+    image: postgres:17.7
+    container_name: postgres_dev
     environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
-      # Настройки для отладки
-      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: PLAINTEXT
-      KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: PLAIN
-      KAFKA_CLUSTERS_0_METRICS_PORT: 9997
-    depends_on:
-      - kafka
-      - zookeeper
+      POSTGRES_DB: ingredient_scan_dev
+      POSTGRES_USER: ingredient_user
+      POSTGRES_PASSWORD: ingredient_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ingredient_user -d ingredient_scan_dev"]
+      interval: 15s
+      timeout: 20s
+      retries: 15
+      start_period: 45s
     restart: unless-stopped
+
+volumes:
+  postgres_dev_data:

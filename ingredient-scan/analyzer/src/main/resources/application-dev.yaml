@@ -1,0 +1,103 @@
+spring:
+  application:
+    name: ingredient-scan-analyzer
+#  lifecycle:
+#    timeout-per-shutdown-phase: "3m"
+  mandatory-file-encoding: UTF-8
+  main:
+    banner-mode: off
+  webflux:
+    multipart:
+      max-in-memory-size: 256KB
+      max-disk-usage-per-part: 1GB
+      max-parts: 10
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: NON_NULL
+#    deserialization:
+#      accept-single-value-as-array: true
+  cloud:
+    aws:
+      credentials:
+        access-key: minioadmin
+        secret-key: minioadminpassword
+      region:
+        static: us-east-1
+      endpoint: http://localhost:9000
+      s3:
+        enabled: false
+        # Ключевой параметр для MinIO
+        endpoint: http://localhost:9000
+        path-style-access-enabled: true
+        bucket:
+          name: photos # Имя вашего бакета в MinIO
+      transfer-manager:
+        enabled: false
+
+  kafka:
+    streams:
+      auto-startup: true
+    admin:
+      auto-create: true
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ingredient-analyzer-group_dev
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+
+
+app:
+  kafka:
+    topics:
+      bootstrap-servers: localhost:9092
+      partitions: 1
+      replication-factor: 1
+      auto-create: true
+  integration:
+    internal:
+      token: default-secret-123
+      url: http://localhost:8081/v1
+
+server:
+  port: 8082
+#  shutdown: graceful
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+logging:
+  level:
+    # Для отслеживания запросов
+    org.springframework.web: DEBUG
+    org.springframework.web.servlet: DEBUG
+
+    # Для отслеживания регистрации контроллеров
+    org.springframework.boot.autoconfigure: DEBUG
+    org.springframework.context.annotation.ClassPathBeanDefinitionScanner: DEBUG
+
+    # Ваши пакеты
+    net.otuskotlin.ingredientscan: DEBUG
+
+    # Spring MVC
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
+
+    org.springframework.boot.docker.compose: DEBUG
+
+    io.awspring.cloud: DEBUG

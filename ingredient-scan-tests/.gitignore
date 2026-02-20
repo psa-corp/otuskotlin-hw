@@ -3,6 +3,6 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+minio_data/
 /.idea/
 /kotlin-js-store/

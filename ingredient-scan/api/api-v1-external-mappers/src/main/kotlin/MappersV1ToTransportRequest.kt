@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.mappers.v1
+package net.otuskotlin.ingredientscan.mappers.v1.external
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.ScanManualDto
 import net.otuskotlin.ingredientscan.api.v1.external.models.ScanPhotosDto

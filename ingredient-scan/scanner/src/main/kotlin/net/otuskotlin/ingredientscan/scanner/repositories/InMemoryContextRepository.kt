@@ -3,13 +3,14 @@ package net.otuskotlin.ingredientscan.scanner.repositories
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
+import net.otuskotlin.ingredientscan.core.common.external.models.IsContextId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsContextRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
 import java.time.Duration
 
 // Имитируем RocksDB
-@Repository
+@Repository("memoryContextRepo")
 open class InMemoryContextRepository: IsContextRepository {
 
     private val log = LoggerFactory.getLogger(InMemoryContextRepository::class.java)
@@ -19,22 +20,20 @@ open class InMemoryContextRepository: IsContextRepository {
         .expireAfterAccess(Duration.ofMinutes(30))
         .build()
 
-    override fun save(context: IsContext): IsContext {
-        store.put(context.id.toString(), context)
-        log.info("Context saved/updated for key: ${context.id} (State: ${context.state})")
-        return context
+    override suspend fun save(context: IsContext) {
+        store.put(context.id.asString(), context)
     }
 
-    override fun findById(id: String): IsContext? {
-        return store.getIfPresent(id)
+    override suspend fun findById(id: IsContextId): IsContext? {
+        return store.getIfPresent(id.asString())
     }
 
-    override fun delete(key: String) {
-        store.invalidate(key)
+    override suspend fun delete(id: IsContextId) {
+        store.invalidate(id.asString())
     }
 
-    override fun clear() {
-        store.cleanUp()
+    override suspend fun clear() {
+        store.invalidateAll()
     }
 
 }

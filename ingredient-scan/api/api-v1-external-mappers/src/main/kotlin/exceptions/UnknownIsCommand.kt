@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.mappers.v1.exceptions
+package net.otuskotlin.ingredientscan.mappers.v1.external.exceptions
 
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCommand
 

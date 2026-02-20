@@ -3,9 +3,9 @@ import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub.Companion.STUB_ANALYSIS
 import net.otuskotlin.ingredientscan.core.common.external.IsStubs
-import net.otuskotlin.ingredientscan.mappers.v1.fromTransport
-import net.otuskotlin.ingredientscan.mappers.v1.toTransport
-import net.otuskotlin.ingredientscan.mappers.v1.toTransportAnalysisGet
+import net.otuskotlin.ingredientscan.mappers.v1.external.fromTransport
+import net.otuskotlin.ingredientscan.mappers.v1.external.toTransport
+import net.otuskotlin.ingredientscan.mappers.v1.external.toTransportAnalysisGet
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -28,7 +28,7 @@ class AnalysisMapperTest {
 
         assertEquals(IsStubs.SUCCESS, context.stubCase)
         assertEquals(IsWorkMode.STUB, context.workMode)
-        assertEquals(STUB_ANALYSIS.id, context.analysisRequest.id)
+        assertEquals(STUB_ANALYSIS.id, context.analysisIdRequest)
         assertEquals(IsCommand.ANALYSIS_GET, context.command)
     }
 

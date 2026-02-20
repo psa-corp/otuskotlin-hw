@@ -1,4 +1,4 @@
-package net.otuskotlin.ingredientscan.mappers.v1
+package net.otuskotlin.ingredientscan.mappers.v1.external
 
 import net.otuskotlin.ingredientscan.api.v1.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
@@ -11,7 +11,8 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsScanId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsScanType
 import net.otuskotlin.ingredientscan.core.common.external.models.IsWorkMode
 import net.otuskotlin.ingredientscan.core.common.external.IsStubs
-import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownRequestClass
+import net.otuskotlin.ingredientscan.mappers.v1.external.exceptions.UnknownRequestClass
+import java.util.UUID.randomUUID
 
 
 // --- Analysis Mappers ---
@@ -19,7 +20,16 @@ import net.otuskotlin.ingredientscan.mappers.v1.exceptions.UnknownRequestClass
 fun IsContext.fromTransport(request: AnalysisGetRequest) {
     command = IsCommand.ANALYSIS_GET
 
-    analysisRequest.id = request.analysisId.toAnalysisId()
+    analysisIdRequest = request.analysisId.toAnalysisId()
+
+    workMode = request.debug.transportToWorkMode()
+    stubCase = request.debug.transportToStubCase()
+}
+
+fun IsContext.fromTransport(request: AnalysisCreateRequest) {
+    command = IsCommand.ANALYSIS_CREATE
+
+    compositionIdRequest = IsCompositionId(request.compositionId)
 
     workMode = request.debug.transportToWorkMode()
     stubCase = request.debug.transportToStubCase()
@@ -28,7 +38,7 @@ fun IsContext.fromTransport(request: AnalysisGetRequest) {
 fun IsContext.fromTransport(request: AnalysisRegenerateRequest) {
     command = IsCommand.ANALYSIS_REGENERATE
 
-    analysisRequest.id = request.analysisId.toAnalysisId()
+    analysisIdRequest = request.analysisId.toAnalysisId()
 
     workMode = request.debug.transportToWorkMode()
     stubCase = request.debug.transportToStubCase()
@@ -40,7 +50,7 @@ fun IsContext.fromTransport(request: CompositionCreateByManualRequest) {
     command = IsCommand.COMPOSITION_CREATE_MANUAL
 
     // Маппим входящие данные сканирования
-    scanRequest = request.scan?.toInternal() ?: IsScan()
+    scanRequest = request.scan.toInternal()
 
     workMode = request.debug.transportToWorkMode()
     stubCase = request.debug.transportToStubCase()
@@ -84,6 +94,7 @@ fun IsContext.fromTransport(request: IRequest, photos: MutableList<String>) = wh
 
 fun IsContext.fromTransport(request: IRequest) = when (request) {
     is AnalysisGetRequest -> fromTransport(request)
+    is AnalysisCreateRequest -> fromTransport(request)
     is AnalysisRegenerateRequest -> fromTransport(request)
     is CompositionCreateByManualRequest -> fromTransport(request)
     is CompositionContextGetRequest -> fromTransport(request)
@@ -95,13 +106,13 @@ fun IsContext.fromTransport(request: IRequest) = when (request) {
 // --- Helpers ---
 
 fun ScanManualDto.toInternal(): IsScan = IsScan(
-    id = this.id.toScanId(),
-    text = this.text ?: "",
+    id = IsScanId("scan-${randomUUID()}"),
+    text = this.text,
     type = this.type.toInternal()
 )
 
 fun ScanPhotosDto.toInternal(photos : MutableList<String>): IsScan = IsScan(
-    id = this.id.toScanId(),
+    id = IsScanId("scan-${randomUUID()}"),
     files = photos,
     type = this.type.toInternal()
 )

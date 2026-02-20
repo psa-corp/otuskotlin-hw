@@ -8,4 +8,6 @@ dependencies {
     implementation(libs.jackson.datatype)
     implementation(projects.core.coreCommon)
     implementation(projects.core.coreStubs)
+    implementation(projects.core.coreCor)
+
 }

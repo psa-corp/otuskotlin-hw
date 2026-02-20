@@ -9,7 +9,7 @@ data class IsAnalysis(
     var compositionId: IsCompositionId = IsCompositionId.NONE,
     var createDate: LocalDateTime = LOCAL_DATE_TIME_NONE,
     var description: String = "",
-    var rating: Double = 0.0,
+    var rating: Double = -1.0,
     var color: IsColor = IsColor.NONE,
     var problematicComponents: MutableList<IsComponent> = mutableListOf(),
     var safeComponents: MutableList<IsComponent> = mutableListOf(),
