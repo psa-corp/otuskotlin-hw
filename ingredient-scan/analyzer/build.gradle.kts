@@ -98,8 +98,8 @@ jib {
 		tags = setOf("latest", version.toString())
 
 		auth {
-			username = "darthchain"
-			password = "{Djorjik12}"
+			username = ""
+			password = ""
 		}
 	}
 
