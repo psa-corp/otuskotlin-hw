@@ -1,0 +1,29 @@
+[project]
+name = "ingredient-scan-ai"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "torch==2.10.0+cu126",
+    "torchvision==0.25.0+cu126",
+    "torchaudio==2.10.0+cu126",
+    "fastapi",
+    "uvicorn",
+    "transformers",
+    "bitsandbytes",
+    "accelerate",
+    "pillow",
+    "requests"
+]
+
+[tool.uv]
+extra-build-dependencies = {}
+
+[[tool.uv.index]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch" }
+torchvision = { index = "pytorch" }
+torchaudio = { index = "pytorch" }
