@@ -12,7 +12,8 @@ dependencies = [
     "bitsandbytes",
     "accelerate",
     "pillow",
-    "requests"
+    "requests",
+    "json-repair"
 ]
 
 [tool.uv]

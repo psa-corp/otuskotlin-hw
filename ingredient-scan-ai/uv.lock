@@ -376,6 +376,7 @@ dependencies = [
     { name = "accelerate" },
     { name = "bitsandbytes" },
     { name = "fastapi" },
+    { name = "json-repair" },
     { name = "pillow" },
     { name = "requests" },
     { name = "torch" },
@@ -390,6 +391,7 @@ requires-dist = [
     { name = "accelerate" },
     { name = "bitsandbytes" },
     { name = "fastapi" },
+    { name = "json-repair" },
     { name = "pillow" },
     { name = "requests" },
     { name = "torch", specifier = "==2.10.0+cu126", index = "https://download.pytorch.org/whl/cu126" },
@@ -409,6 +411,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz", hash = "sha256:0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d", size = 245115, upload-time = "2025-03-05T20:05:02.478Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/62/a1/3d680cbfd5f4b8f15abc1d571870c5fc3e594bb582bc3b64ea099db13e56/jinja2-3.1.6-py3-none-any.whl", hash = "sha256:85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67", size = 134899, upload-time = "2025-03-05T20:05:00.369Z" },
+]
+
+[[package]]
+name = "json-repair"
+version = "0.58.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/0c/9b/2a1500e587fd7c33f10dc90d4e26a6ad421bdfbc7ab84c244279b2515e42/json_repair-0.58.0.tar.gz", hash = "sha256:8465fe2f8b7515d1cbf262a2608630e73d9498598bd42330c89f59923c50d0e4", size = 57425, upload-time = "2026-02-17T12:30:29.797Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1a/35/006b1625a645556f0d18247694c3f278eb122526fca2766ab2e8fba997e7/json_repair-0.58.0-py3-none-any.whl", hash = "sha256:54c31d22a47d5d4a52c4b022604d73f64bc5b01211f3422f0a671b1cc4ccfe3c", size = 40024, upload-time = "2026-02-17T12:30:28.601Z" },
 ]
 
 [[package]]
