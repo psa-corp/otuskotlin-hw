@@ -12,11 +12,11 @@ open class AIApiConfig(private val aiApiProperties: AIApiProperties) {
     @Bean("aiWebClient")
     open fun internalWebClient(
         builder: WebClient.Builder,
-        internalApiProperties: AIApiProperties
+        aiApiProperties: AIApiProperties
     ): WebClient {
         return builder
-            .baseUrl(internalApiProperties.url)
-            .defaultHeader(internalApiProperties.header, internalApiProperties.token)
+            .baseUrl(aiApiProperties.url)
+            .defaultHeader(aiApiProperties.header, aiApiProperties.token)
             .build()
     }
 }

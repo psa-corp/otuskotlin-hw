@@ -61,6 +61,9 @@ app:
     internal:
       token: default-secret-123
       url: http://localhost:8081/v1
+    ai:
+      token: default-secret-123
+      url: http://localhost:5000/v1
 
 server:
   port: 8082

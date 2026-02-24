@@ -3,7 +3,6 @@ package net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.processors
 import kotlinx.coroutines.runBlocking
 import net.otuskotlin.ingredientscan.analyzer.services.integration.ai.AIApiService
 import net.otuskotlin.ingredientscan.core.common.external.models.*
-import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
 import org.slf4j.LoggerFactory
@@ -12,7 +11,6 @@ import org.springframework.kafka.support.KafkaHeaders
 import org.springframework.messaging.handler.annotation.Header
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.stereotype.Component
-import java.util.UUID.randomUUID
 
 @Component
 open class AnalyzerProcessor(

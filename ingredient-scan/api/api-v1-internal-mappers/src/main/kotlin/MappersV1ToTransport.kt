@@ -19,7 +19,6 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalError
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalRiskLevel
-import net.otuskotlin.ingredientscan.core.common.ai.AiComponent
 import net.otuskotlin.ingredientscan.core.common.external.InternalContext
 import net.otuskotlin.ingredientscan.core.common.external.models.InternalCommand
 import net.otuskotlin.ingredientscan.core.common.external.models.IsComponent

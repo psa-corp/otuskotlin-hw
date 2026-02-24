@@ -26,7 +26,7 @@ class AIApiService(private val aIApiClient: AIApiClient) {
 
         log.info("Analyzer on composition: response: {}", response)
 
-        var analysis = IsAnalysis(
+        val analysis = IsAnalysis(
             id = IsAnalysisId("analysis-${randomUUID()}"),
             compositionId = context.composition.id,
             createDate = LocalDateTime.now(),
