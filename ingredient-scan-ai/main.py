@@ -12,17 +12,17 @@ from enum import Enum
 from pydantic import BaseModel
 from json_repair import repair_json
 
-"__________ FastAPI __________"
+# "__________ FastAPI __________"
+
+HF_TOKEN = ""
 app = FastAPI(title="Qwen3 Ingredient Scanner")
 
 bnb_config = BitsAndBytesConfig(
     load_in_8bit=True,
     llm_int8_threshold=6.0,
-    # llm_int8_skip_modules=["visual"],  # раскомментируй после проверки
+    llm_int8_skip_modules=["visual", "lm_head"],
     torch_dtype=torch.float16
 )
-
-HF_TOKEN = ""
 
 MODEL_ID = "Qwen/Qwen3-VL-4B-Instruct"
 
@@ -34,6 +34,7 @@ model = Qwen3VLForConditionalGeneration.from_pretrained(
     device_map="auto",
     trust_remote_code=True,
     attn_implementation="sdpa",
+    torch_dtype=torch.float16,
     token=HF_TOKEN
 )
 
@@ -44,7 +45,7 @@ print(f"Allocated: {torch.cuda.memory_allocated()/1024**3:.2f} GB")
 print(f"Reserved:  {torch.cuda.memory_reserved()/1024**3:.2f} GB")
 print(f"Free (approx): {(torch.cuda.get_device_properties(0).total_memory - torch.cuda.memory_reserved())/1024**3:.2f} GB")
 
-"__________ ENUMS __________"
+# "__________ ENUMS __________"
 class IsRiskLevel(str, Enum):
     NONE = "NONE"
     MINIMAL = "MINIMAL"
@@ -76,12 +77,6 @@ class IsColor(str, Enum):
     FRESH_GREEN = "FRESH_GREEN"
     BRILLIANT_GREEN = "BRILLIANT_GREEN"
 
-class IsState(str, Enum):
-    NONE = "NONE"
-    RUNNING = "RUNNING"
-    FAILING = "FAILING"
-    FINISHING = "FINISHING"
-
 class IsLogLevel(str, Enum):
     DEBUG = "DEBUG"
     INFO = "INFO"
@@ -96,11 +91,19 @@ class IsError(BaseModel):
     level: IsLogLevel = IsLogLevel.ERROR
     exception: Optional[str] = None  
 
+class Component(BaseModel):
+    name: str = ""
+    scientific_name: str = ""
+    description: str = ""
+    sources: str = ""
+    risk_level: str = ""
+    health_risks: str = ""
+
 class AiAnalysis(BaseModel):
     description: str = ""
     rating: float = -1.0
     color: IsColor = IsColor.NONE
-    state: IsState = IsState.NONE
+    components: List[Component] = []
     errors: List[IsError] = []
 
     def is_empty(self) -> bool:
@@ -111,7 +114,7 @@ class AiAnalysis(BaseModel):
 
 AI_ANALYSIS_NONE = AiAnalysis()
 
-"__________ API __________"
+# "__________ API __________"
 def rating_to_color(rating: float) -> IsColor:
     if rating < 0 or rating > 10:
         return IsColor.NONE
@@ -160,7 +163,7 @@ async def analyze_safety(composition: str = Body(..., embed=True)):
     Всю информацию представь в виде JSON со следующими полями:
     - rating (число от 0.0 до 10.0)
     - description (строка с подробным текстовым анализом)
-    - components (список объектов, каждый с полями: name, scientificName, description, sources, riskLevel, healthRisks)
+    - components (список объектов, каждый с полями: name, scientific_name, description, sources, risk_level, health_risks)
 
     Пример структуры:
     {{
@@ -169,11 +172,11 @@ async def analyze_safety(composition: str = Body(..., embed=True)):
     "components": [
         {{
         "name": "Аспартам",
-        "scientificName": "E951",
+        "scientific_name": "E951",
         "description": "Искусственный подсластитель",
         "sources": "Диетические напитки, жевательная резинка",
-        "riskLevel": "MEDIUM",
-        "healthRisks": "Фенилкетонурия, возможные неврологические эффекты при чрезмерном употреблении"
+        "risk_level": "MEDIUM",
+        "health_risks": "Фенилкетонурия, возможные неврологические эффекты при чрезмерном употреблении"
         }}
     ]
     }}
@@ -209,6 +212,10 @@ async def analyze_safety(composition: str = Body(..., embed=True)):
         output_ids[len(input_ids):] for input_ids, output_ids in zip(inputs.input_ids, output)
     ]
     response_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0].strip()
+ 
+    print("=== Сырой ответ модели ===")
+    print(response_text)
+    print("===========================")
 
     json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
     if not json_match:
@@ -223,7 +230,7 @@ async def analyze_safety(composition: str = Body(..., embed=True)):
         data = json.loads(json_match.group())
     except json.JSONDecodeError as e:
         try:
-            repaired_json_str = json_repair.repair_json(json_match.group(), return_objects=False)
+            repaired_json_str = repair_json(json_match.group(), return_objects=False)
             data = json.loads(repaired_json_str)
             print("JSON успешно восстановлен")
         except Exception as repair_error:
@@ -239,6 +246,23 @@ async def analyze_safety(composition: str = Body(..., embed=True)):
             print("===========================")
             return AiAnalysis(errors=[error])
 
+
+ 
+    components_data = data.get("components", [])
+    components_list = []
+    for comp in components_data:
+        component = Component(
+            name=comp.get("name", ""),
+            scientific_name=comp.get("scientific_name", ""),
+            description=comp.get("description", ""),
+            sources=comp.get("sources", ""),
+            risk_level=comp.get("risk_level", "NONE"),
+            health_risks=comp.get("health_risks", "")
+        )
+        components_list.append(component)
+
+    description = data.get("description", "").strip()
+
     # Валидация полей
     rating = data.get("rating", -1.0)
     if not isinstance(rating, (int, float)) or rating < 0 or rating > 10:
@@ -246,24 +270,12 @@ async def analyze_safety(composition: str = Body(..., embed=True)):
 
     color_str = data.get("color", "NONE")
     color = rating_to_color(rating) if rating >= 0 else IsColor.NONE
-
-    description = data.get("description", "")
-    if not description and "components" in data:
-        # Формируем описание из компонентов
-        lines = ["Анализ состава:"]
-        for comp in data["components"]:
-            lines.append(
-                f"- {comp.get('name', 'Неизвестно')} (научное: {comp.get('scientificName', '—')}): "
-                f"{comp.get('description', '')} Риск: {comp.get('riskLevel', 'NONE')}. "
-                f"Риски для здоровья: {comp.get('healthRisks', '')}"
-            )
-        description = "\n".join(lines)
-
+ 
     result = AiAnalysis(
         description=description,
         rating=rating,
         color=color,
-        state=IsState.NONE,
+        components=components_list,
         errors=[]
     )
 
