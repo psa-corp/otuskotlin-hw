@@ -1,5 +1,7 @@
 package net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.processors
 
+import kotlinx.coroutines.runBlocking
+import net.otuskotlin.ingredientscan.analyzer.services.integration.ai.AIApiService
 import net.otuskotlin.ingredientscan.core.common.external.models.*
 import net.otuskotlin.ingredientscan.core.common.external.stubs.IsAnalysisStub
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextDeserialize
@@ -14,7 +16,8 @@ import java.util.UUID.randomUUID
 
 @Component
 open class AnalyzerProcessor(
-    @Qualifier("memoryLightContextRepo") private val lightContextRepository: IsLightContextRepository
+    @Qualifier("memoryLightContextRepo") private val lightContextRepository: IsLightContextRepository,
+    private val aIApiService: AIApiService
 ) {
     private val log = LoggerFactory.getLogger(AnalyzerProcessor::class.java)
 
@@ -47,12 +50,14 @@ open class AnalyzerProcessor(
                 context.composition
             )
 
-            // STUB: Распознавание текста
-            val analysis = performAnalyzer(context.composition)
-
+            // Используем runBlocking, так как листенер Kafka работает в блокирующем режиме.
+            // Поток потребителя (Consumer Thread) будет ожидать завершения обработки,
+            // прежде чем закоммитить оффсет и перейти к следующему сообщению.
+            runBlocking {
+                context = aIApiService.aiAnalyzeCreate(context)
+            }
             // Добавляем распознанный текст в контекст
-            context.analysis = analysis
-            log.info("=== Analyzer completed ===\nanalysis: {}", analysis)
+            log.info("=== Analyzer completed ===\nanalysis: {}, errors: {}", context.analysis, context.errors)
             context.lightCommands.add(IsLightCommand.ANALYZER)
             lightContextRepository.save(context)
             commonLightContextSerialize(context)
@@ -76,15 +81,4 @@ open class AnalyzerProcessor(
         }
     }
 
-    private fun performAnalyzer(composition: IsComposition): IsAnalysis {
-        log.debug("Performing Analyzer on composition: {}", composition)
-
-        // STUB DATA - тестовый текст состава
-        val stub = IsAnalysisStub.STUB_ANALYSIS
-        stub.id = IsAnalysisId("analysis-${randomUUID()}")
-        stub.compositionId = composition.id
-
-        log.info("Analyzer STUB: returning analysis")
-        return stub
-    }
 }

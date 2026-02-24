@@ -290,11 +290,7 @@ components:
           maximum: 5.0
         color:
           $ref: '#/components/schemas/InternalColor'
-        problematicComponent:
-          type: array
-          items:
-            $ref: '#/components/schemas/InternalComponent'
-        safeComponent:
+        components:
           type: array
           items:
             $ref: '#/components/schemas/InternalComponent'
@@ -317,13 +313,8 @@ components:
     InternalComponent:
       type: object
       properties:
-        id:
-          type: string
         name:
           type: string
-        createDate:
-          type: string
-          format: date-time
         scientificName:
           type: string
         description:
@@ -345,4 +336,4 @@ components:
 
     InternalColor:
       type: string
-      enum: [DARK_RED, RED, ORANGE, YELLOW, LIGHT_YELLOW, LIGHT_GREEN, GREEN, DARK_GREEN, NONE]
+      enum: [NONE,VERY_DARK_RED,DARK_RED,DEEP_RED,RED,LIGHT_RED,RED_ORANGE,ORANGE,LIGHT_ORANGE,DARK_YELLOW,YELLOW,LIGHT_YELLOW,YELLOW_GREEN,PALE_GREEN,LIGHT_GREEN,GREEN,MEDIUM_GREEN,BRIGHT_GREEN,VIBRANT_GREEN,FRESH_GREEN,BRILLIANT_GREEN]

@@ -56,6 +56,10 @@ open class CompositionSaveProcessor(
             val textToSave = context.scan.text
 
             var existingComposition: IsComposition = IsComposition.NONE
+
+            // Используем runBlocking, так как листенер Kafka работает в блокирующем режиме.
+            // Поток потребителя (Consumer Thread) будет ожидать завершения обработки,
+            // прежде чем закоммитить оффсет и перейти к следующему сообщению.
             runBlocking {
                 // Идемпотентность
                 existingComposition = findOrCreateComposition(textToSave)

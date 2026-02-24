@@ -9,5 +9,5 @@ data class ContextAwait(
     val deferred: CompletableDeferred<IsLightContext>,
     val id: IsContextId,
     val created: LocalDateTime = LocalDateTime.now(),
-    val timeout: Long = 300000L // Millis
+    val timeout: Long = 600000L // Millis
 ){}

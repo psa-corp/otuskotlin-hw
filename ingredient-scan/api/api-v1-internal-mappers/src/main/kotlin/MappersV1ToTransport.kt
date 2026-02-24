@@ -5,6 +5,7 @@ import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalAnalysisFind
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalAnalysisSaveResponse
 
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalColor
+import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalComponent
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalComposition
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalCompositionFindResponse
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalCompositionSaveResponse
@@ -17,8 +18,12 @@ import net.otuskotlin.ingredientscan.core.common.external.models.IsComposition
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionId
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
 import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalError
+import net.otuskotlin.ingredientscan.api.v1.internal.models.InternalRiskLevel
+import net.otuskotlin.ingredientscan.core.common.ai.AiComponent
 import net.otuskotlin.ingredientscan.core.common.external.InternalContext
 import net.otuskotlin.ingredientscan.core.common.external.models.InternalCommand
+import net.otuskotlin.ingredientscan.core.common.external.models.IsComponent
+import net.otuskotlin.ingredientscan.core.common.external.models.IsRiskLevel
 import net.otuskotlin.ingredientscan.core.common.external.models.IsState
 import net.otuskotlin.ingredientscan.mappers.v1.internal.exceptions.UnknownIsCommand
 import java.time.ZoneOffset
@@ -33,6 +38,16 @@ fun InternalAnalysis.toInternal(): IsAnalysis = IsAnalysis(
     description = description,
     rating = rating,
     color = color.toInternal(),
+    components = components?.map { it.toTransport() }?.toMutableList() ?: mutableListOf()
+)
+
+fun InternalComponent.toTransport(): IsComponent = IsComponent(
+    name = name?: "",
+    scientificName = scientificName?: "",
+    description = description?: "",
+    sources = sources?: "",
+    riskLevel = riskLevel?.toTransport() ?: IsRiskLevel.NONE,
+    healthRisks = healthRisks?: ""
 )
 
 fun InternalComposition.toInternal(): IsComposition = IsComposition(
@@ -42,14 +57,26 @@ fun InternalComposition.toInternal(): IsComposition = IsComposition(
 )
 
 fun InternalColor.toInternal(): IsColor = when (this) {
+    InternalColor.VERY_DARK_RED -> IsColor.VERY_DARK_RED
     InternalColor.DARK_RED -> IsColor.DARK_RED
+    InternalColor.DEEP_RED -> IsColor.DEEP_RED
     InternalColor.RED -> IsColor.RED
+    InternalColor.LIGHT_RED -> IsColor.LIGHT_RED
+    InternalColor.RED_ORANGE -> IsColor.RED_ORANGE
     InternalColor.ORANGE -> IsColor.ORANGE
+    InternalColor.LIGHT_ORANGE -> IsColor.LIGHT_ORANGE
+    InternalColor.DARK_YELLOW -> IsColor.DARK_YELLOW
     InternalColor.YELLOW -> IsColor.YELLOW
     InternalColor.LIGHT_YELLOW -> IsColor.LIGHT_YELLOW
+    InternalColor.YELLOW_GREEN -> IsColor.YELLOW_GREEN
+    InternalColor.PALE_GREEN -> IsColor.PALE_GREEN
     InternalColor.LIGHT_GREEN -> IsColor.LIGHT_GREEN
     InternalColor.GREEN -> IsColor.GREEN
-    InternalColor.DARK_GREEN -> IsColor.DARK_GREEN
+    InternalColor.MEDIUM_GREEN -> IsColor.MEDIUM_GREEN
+    InternalColor.BRIGHT_GREEN -> IsColor.BRIGHT_GREEN
+    InternalColor.VIBRANT_GREEN -> IsColor.VIBRANT_GREEN
+    InternalColor.FRESH_GREEN -> IsColor.FRESH_GREEN
+    InternalColor.BRILLIANT_GREEN -> IsColor.BRILLIANT_GREEN
     InternalColor.NONE -> IsColor.NONE
 }
 
@@ -72,14 +99,26 @@ fun IsError.toInternalTransport() = InternalError(
 )
 
 fun IsColor.toInternalTransport(): InternalColor? = when (this) {
+    IsColor.VERY_DARK_RED -> InternalColor.VERY_DARK_RED
     IsColor.DARK_RED -> InternalColor.DARK_RED
+    IsColor.DEEP_RED -> InternalColor.DEEP_RED
     IsColor.RED -> InternalColor.RED
+    IsColor.LIGHT_RED -> InternalColor.LIGHT_RED
+    IsColor.RED_ORANGE -> InternalColor.RED_ORANGE
     IsColor.ORANGE -> InternalColor.ORANGE
+    IsColor.LIGHT_ORANGE -> InternalColor.LIGHT_ORANGE
+    IsColor.DARK_YELLOW -> InternalColor.DARK_YELLOW
     IsColor.YELLOW -> InternalColor.YELLOW
     IsColor.LIGHT_YELLOW -> InternalColor.LIGHT_YELLOW
+    IsColor.YELLOW_GREEN -> InternalColor.YELLOW_GREEN
+    IsColor.PALE_GREEN -> InternalColor.PALE_GREEN
     IsColor.LIGHT_GREEN -> InternalColor.LIGHT_GREEN
     IsColor.GREEN -> InternalColor.GREEN
-    IsColor.DARK_GREEN -> InternalColor.DARK_GREEN
+    IsColor.MEDIUM_GREEN -> InternalColor.MEDIUM_GREEN
+    IsColor.BRIGHT_GREEN -> InternalColor.BRIGHT_GREEN
+    IsColor.VIBRANT_GREEN -> InternalColor.VIBRANT_GREEN
+    IsColor.FRESH_GREEN -> InternalColor.FRESH_GREEN
+    IsColor.BRILLIANT_GREEN -> InternalColor.BRILLIANT_GREEN
     IsColor.NONE -> InternalColor.NONE
 }
 
@@ -90,8 +129,16 @@ fun IsAnalysis.toInternalTransport(): InternalAnalysis? = if (this.id == IsAnaly
     description = description,
     rating = rating,
     color = color.toInternalTransport() ?: InternalColor.NONE,
-    problematicComponent = mutableListOf(),
-    safeComponent = mutableListOf()
+    components = components.map { it.toInternalTransport() }.toMutableList()
+)
+
+fun IsComponent.toInternalTransport(): InternalComponent = InternalComponent(
+    name = name.takeIf { it.isNotBlank() },
+    scientificName = scientificName.takeIf { it.isNotBlank() },
+    description = description.takeIf { it.isNotBlank() },
+    sources = sources.takeIf { it.isNotBlank() },
+    riskLevel = riskLevel.toTransport(),
+    healthRisks = healthRisks.takeIf { it.isNotBlank() }
 )
 
 fun IsComposition.toInternalTransport(): InternalComposition? = if (this.id == IsCompositionId.NONE) null else InternalComposition(
@@ -136,3 +183,20 @@ fun InternalContext.toTransportInternal() =
         InternalCommand.COMPOSITION_SAVE -> toTransportInternalCompositionSave()
         else -> throw UnknownIsCommand(command)
     }
+
+fun IsRiskLevel.toTransport(): InternalRiskLevel? = when (this) {
+    IsRiskLevel.CRITICAL -> InternalRiskLevel.CRITICAL
+    IsRiskLevel.HIGH -> InternalRiskLevel.HIGH
+    IsRiskLevel.MEDIUM -> InternalRiskLevel.MEDIUM
+    IsRiskLevel.LOW -> InternalRiskLevel.LOW
+    IsRiskLevel.MINIMAL -> InternalRiskLevel.MINIMAL
+    IsRiskLevel.NONE -> null
+}
+
+fun InternalRiskLevel.toTransport(): IsRiskLevel = when (this) {
+    InternalRiskLevel.CRITICAL -> IsRiskLevel.CRITICAL
+    InternalRiskLevel.HIGH -> IsRiskLevel.HIGH
+    InternalRiskLevel.MEDIUM -> IsRiskLevel.MEDIUM
+    InternalRiskLevel.LOW -> IsRiskLevel.LOW
+    InternalRiskLevel.MINIMAL -> IsRiskLevel.MINIMAL
+}

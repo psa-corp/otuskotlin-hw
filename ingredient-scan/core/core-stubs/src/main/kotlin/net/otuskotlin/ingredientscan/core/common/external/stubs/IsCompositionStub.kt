@@ -38,6 +38,12 @@ class IsCompositionStub {
             timeStart = LocalDateTime.of(2025, 12, 18, 12, 0, 0),
             composition = IsComposition(),
         )
+
+        val STUB_COMPOSITION_COLA_DOBRA: IsComposition = IsComposition(
+            id = IsCompositionId("composition-dobra456"),
+            createDate = LocalDateTime.of(2026, 2, 24, 0, 0, 0),
+            text = "Очищенная вода, краситель сахарный колер IV, регуляторы кислотности (ортофосфорная кислота, цитрат натрия 3-замещенный), подсластители (натриевая соль цикламовой кислоты, ацесульфам калия, аспартам), натуральный ароматизатор, кофеин (менее 150 мг/л). Содержит источник фенилаланина.",
+        )
     }
 
 }

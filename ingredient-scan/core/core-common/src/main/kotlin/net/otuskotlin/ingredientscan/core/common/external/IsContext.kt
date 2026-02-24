@@ -39,7 +39,6 @@ data class IsContext(
     // Request data
     var analysisRequest: IsAnalysis = IsAnalysis.NONE,
     var compositionRequest: IsComposition = IsComposition.NONE,
-    var componentRequest: IsComponent = IsComponent.NONE,
     var scanRequest: IsScan = IsScan(),
     var filterRequest: IsComponentFilter = IsComponentFilter(),
     var compositionIdRequest: IsCompositionId = IsCompositionId.NONE,

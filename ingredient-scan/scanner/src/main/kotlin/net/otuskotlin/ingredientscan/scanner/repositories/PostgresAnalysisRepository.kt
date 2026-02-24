@@ -24,16 +24,16 @@ open class PostgresAnalysisRepository(
     private val log = LoggerFactory.getLogger(PostgresAnalysisRepository::class.java)
 
     override suspend fun saveAnalysis(analysis: IsAnalysis) {
-        val problematicJson = commonListComponentsSerialize(analysis.problematicComponents)
-        val safeJson = commonListComponentsSerialize(analysis.safeComponents)
+        val components = commonListComponentsSerialize(analysis.components)
+
 
         val sql = """
             INSERT INTO analysis (
                 id, composition_id, create_date, description, rating, color,
-                problematic_components, safe_components
+                components
             ) VALUES (
                 :id, :compositionId, :createDate, :description, :rating, :color,
-                cast(:problematicJson AS jsonb), cast(:safeJson AS jsonb)
+                cast(:components AS jsonb)
             )
             ON CONFLICT (id) DO UPDATE SET
                 composition_id = EXCLUDED.composition_id,
@@ -41,19 +41,17 @@ open class PostgresAnalysisRepository(
                 description = EXCLUDED.description,
                 rating = EXCLUDED.rating,
                 color = EXCLUDED.color,
-                problematic_components = EXCLUDED.problematic_components,
-                safe_components = EXCLUDED.safe_components
+                components = EXCLUDED.components
         """.trimIndent()
 
         db.sql(sql)
             .bind("id", analysis.id.asString())
             .bind("compositionId", analysis.compositionId.asString())
             .bind("createDate", analysis.createDate)
-            .bind("description", analysis.description)
+            .bind("description", prepareDescription(analysis.description))
             .bind("rating", analysis.rating)
             .bind("color", analysis.color.name)
-            .bind("problematicJson", problematicJson)
-            .bind("safeJson", safeJson)
+            .bind("components", components)
             .fetch()
             .rowsUpdated()
             .awaitFirstOrNull()
@@ -63,7 +61,7 @@ open class PostgresAnalysisRepository(
     override suspend fun findAnalysisById(id: IsAnalysisId): IsAnalysis? {
         val sql = """
             SELECT id, composition_id, create_date, description, rating, color,
-                   problematic_components, safe_components
+                   components
             FROM analysis
             WHERE id = :id
         """.trimIndent()
@@ -78,7 +76,7 @@ open class PostgresAnalysisRepository(
     override suspend fun findAnalysisByCompositionId(id: IsCompositionId): IsAnalysis? {
         val sql = """
             SELECT id, composition_id, create_date, description, rating, color,
-                   problematic_components, safe_components
+                   components
             FROM analysis
             WHERE composition_id = :compositionId
         """.trimIndent()
@@ -110,15 +108,14 @@ open class PostgresAnalysisRepository(
         val id = IsAnalysisId(row.get("id", String::class.java)!!)
         val compositionId = IsCompositionId(row.get("composition_id", String::class.java)!!)
         val createDate = row.get("create_date", LocalDateTime::class.java)!!
-        val description = row.get("description", String::class.java) ?: ""
+        val description = prepareDescription(row.get("description", String::class.java) ?: "")
         val rating = row.get("rating", Double::class.java) ?: -1.0
         val color = row.get("color", String::class.java)?.let { IsColor.valueOf(it) } ?: IsColor.NONE
 
-        val problematicJson = row.get("problematic_components", String::class.java) ?: "[]"
-        val safeJson = row.get("safe_components", String::class.java) ?: "[]"
+        val componentsJson = row.get("components", String::class.java) ?: "[]"
 
-        val problematicComponents = commonListComponentsDeserialize(problematicJson).toMutableList()
-        val safeComponents = commonListComponentsDeserialize(safeJson).toMutableList()
+        val components = commonListComponentsDeserialize(componentsJson).toMutableList()
+
 
         return IsAnalysis(
             id = id,
@@ -127,8 +124,11 @@ open class PostgresAnalysisRepository(
             description = description,
             rating = rating,
             color = color,
-            problematicComponents = problematicComponents,
-            safeComponents = safeComponents
+            components = components,
         )
+    }
+
+    fun prepareDescription(description: String): String {
+        return description.replace("\\\\n", "\\n")
     }
 }

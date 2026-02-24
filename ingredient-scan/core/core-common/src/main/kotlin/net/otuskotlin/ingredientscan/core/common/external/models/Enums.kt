@@ -70,12 +70,24 @@ enum class IsRiskLevel {
 
 enum class IsColor {
     NONE,
+    VERY_DARK_RED,
     DARK_RED,
+    DEEP_RED,
     RED,
+    LIGHT_RED,
+    RED_ORANGE,
     ORANGE,
+    LIGHT_ORANGE,
+    DARK_YELLOW,
     YELLOW,
     LIGHT_YELLOW,
+    YELLOW_GREEN,
+    PALE_GREEN,
     LIGHT_GREEN,
     GREEN,
-    DARK_GREEN
+    MEDIUM_GREEN,
+    BRIGHT_GREEN,
+    VIBRANT_GREEN,
+    FRESH_GREEN,
+    BRILLIANT_GREEN
 }

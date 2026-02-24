@@ -20,6 +20,11 @@ import net.otuskotlin.ingredientscan.core.cor.rootChain
 import net.otuskotlin.ingredientscan.core.cor.worker
 
 class IsBizSubProcessor(private val settings: IsCorSettings) {
+
+    companion object {
+        const val TIMEOUT: Long = 600_000
+    }
+
     suspend fun exec(context: IsContext) {
         if (!context.errors.isEmpty()) {
             return
@@ -48,7 +53,7 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
                 worker("Копируем scan request в validateScan") { scan = validatedScan }
                 repoSaveContext("Сохранение контекста в БД")
                 sendContext("Отправляем сообщение для ИИ валидации текста и создания состава")
-                awaitContext("Ожидание выполнения задачи", 300_000)
+                awaitContext("Ожидание выполнения задачи", TIMEOUT)
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.COMPOSITION_VALIDATE }
                 repoSaveContext("Сохранение контекста в БД")
             }
@@ -66,7 +71,7 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
                 worker("Копируем validateScan в scan") { scan = validatedScan }
                 repoSaveContext("Сохранение контекста в БД")
                 sendContext("Отправляем сообщение для получения текста из фото, ИИ валидации текста и создания состава")
-                awaitContext("Ожидание выполнения задачи", 300_000)
+                awaitContext("Ожидание выполнения задачи", TIMEOUT)
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.COMPOSITION_VALIDATE }
                 repoSaveContext("Сохранение контекста в БД")
             }
@@ -109,7 +114,7 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
                 worker("Стираем analysis") { analysis = IsAnalysis.NONE }
                 repoSaveContext("Сохранение контекста в БД")
                 sendContext("Отправляем сообщение для создания анализа")
-                awaitContext("Ожидание выполнения задачи", 300_000)
+                awaitContext("Ожидание выполнения задачи", TIMEOUT)
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.ANALYSIS_VALIDATE }
                 repoSaveContext("Сохранение контекста в БД")
             }
@@ -136,7 +141,7 @@ class IsBizSubProcessor(private val settings: IsCorSettings) {
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.ANALYSIS_CREATE }
                 repoSaveContext("Сохранение контекста в БД")
                 sendContext("Отправляем сообщение для создания анализа")
-                awaitContext("Ожидание выполнения задачи", 300_000)
+                awaitContext("Ожидание выполнения задачи", TIMEOUT)
                 worker("Отправляем на валидацию перед ответом") { subCommand = IsSubCommand.ANALYSIS_VALIDATE }
                 repoSaveContext("Сохранение контекста в БД")
             }

@@ -1,11 +1,14 @@
 package net.otuskotlin.ingredientscan.core.common.mappers
 
+import net.otuskotlin.ingredientscan.core.common.ai.AiComponent
 import net.otuskotlin.ingredientscan.core.common.external.IsContext
 import net.otuskotlin.ingredientscan.core.common.external.IsLightContext
 import net.otuskotlin.ingredientscan.core.common.external.helpers.errorContext
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
+import net.otuskotlin.ingredientscan.core.common.external.models.IsComponent
 import net.otuskotlin.ingredientscan.core.common.external.models.IsCompositionContext
 import net.otuskotlin.ingredientscan.core.common.external.models.IsError
+import net.otuskotlin.ingredientscan.core.common.external.models.IsRiskLevel
 
 fun IsContext.toCompositionContext() = IsCompositionContext(
     id = id,
@@ -52,3 +55,12 @@ fun IsContext.update() {
         }
     }
 }
+
+fun AiComponent.toTransport(): IsComponent = IsComponent(
+    name = name,
+    scientificName = scientific_name,
+    description = description,
+    sources = sources,
+    riskLevel = IsRiskLevel.entries.find { it.name.equals(risk_level, ignoreCase = true) } ?: IsRiskLevel.NONE,
+    healthRisks = health_risks
+)

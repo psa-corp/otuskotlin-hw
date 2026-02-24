@@ -42,6 +42,9 @@ open class AnalysisSaveProcessor(
             return commonLightContextSerialize(context)
         }
         return try {
+            // Используем runBlocking, так как листенер Kafka работает в блокирующем режиме.
+            // Поток потребителя (Consumer Thread) будет ожидать завершения обработки,
+            // прежде чем закоммитить оффсет и перейти к следующему сообщению.
             runBlocking {
                 if (context.command == IsCommand.ANALYSIS_REGENERATE) {
                     context.analysis.id = context.regenerateId

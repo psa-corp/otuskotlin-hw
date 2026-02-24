@@ -29,8 +29,7 @@ class InternalAnalysisMapperTest {
         description = "Test Description",
         rating = 4.5,
         color = InternalColor.GREEN,
-        problematicComponent = mutableListOf(),
-        safeComponent = mutableListOf()
+        components = mutableListOf()
     )
 
     @Test

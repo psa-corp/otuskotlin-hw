@@ -11,8 +11,7 @@ data class IsAnalysis(
     var description: String = "",
     var rating: Double = -1.0,
     var color: IsColor = IsColor.NONE,
-    var problematicComponents: MutableList<IsComponent> = mutableListOf(),
-    var safeComponents: MutableList<IsComponent> = mutableListOf(),
+    var components: MutableList<IsComponent> = mutableListOf(),
 ) {
     fun isEmpty() = this == NONE
 

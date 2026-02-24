@@ -156,10 +156,8 @@ components:
           format: double
         color:
           type: string
-          enum: [dark_red, red, orange, yellow, light_yellow, light_green, green, dark_green]
-        problematicComponentsCount:
-          type: integer
-        safeComponentsCount:
+          enum: [NONE,VERY_DARK_RED,DARK_RED,DEEP_RED,RED,LIGHT_RED,RED_ORANGE,ORANGE,LIGHT_ORANGE,DARK_YELLOW,YELLOW,LIGHT_YELLOW,YELLOW_GREEN,PALE_GREEN,LIGHT_GREEN,GREEN,MEDIUM_GREEN,BRIGHT_GREEN,VIBRANT_GREEN,FRESH_GREEN,BRILLIANT_GREEN]
+        componentsCount:
           type: integer
         regenerationCount:
           type: integer

@@ -10,7 +10,6 @@ import kotlin.test.assertIs
 
 
 private val TEST_COMPONENT = Component(
-    id = "comp-001",
     name = "Пальмовое масло",
     riskLevel = RiskLevel.CRITICAL,
     healthRisks = "Сердечно-сосудистые заболевания, канцероген"
@@ -23,8 +22,7 @@ private val TEST_ANALYSIS = Analysis(
     description = "Высокий риск. Продукт содержит критические компоненты.",
     rating = 1.2,
     color = Color.DARK_RED,
-    problematicComponent = listOf(TEST_COMPONENT),
-    safeComponent = emptyList(),
+    components = listOf(TEST_COMPONENT),
 )
 
 private val TEST_COMPOSITION = Composition(

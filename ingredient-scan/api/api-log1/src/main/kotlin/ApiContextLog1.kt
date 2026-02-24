@@ -90,8 +90,7 @@ private fun IsAnalysis.toLog(): AnalysisLog? {
         compositionId = compositionId.takeIf { it != IsCompositionId.NONE }?.asString(),
         rating = rating.takeIf { it > 0 }?.toDouble(),
         color = color.toLogColor(),
-        problematicComponentsCount = problematicComponents.size.takeIf { it > 0 },
-        safeComponentsCount = safeComponents.size.takeIf { it > 0 },
+        componentsCount = components.size.takeIf { it > 0 },
         regenerationCount = null
     )
 }
@@ -113,14 +112,26 @@ private fun IsError.toLog() = ErrorLogModel(
 )
 
 private fun IsColor.toLogColor(): AnalysisLog.Color? = when (this) {
+    IsColor.VERY_DARK_RED -> AnalysisLog.Color.VERY_DARK_RED
     IsColor.DARK_RED -> AnalysisLog.Color.DARK_RED
+    IsColor.DEEP_RED -> AnalysisLog.Color.DEEP_RED
     IsColor.RED -> AnalysisLog.Color.RED
+    IsColor.LIGHT_RED -> AnalysisLog.Color.LIGHT_RED
+    IsColor.RED_ORANGE -> AnalysisLog.Color.RED_ORANGE
     IsColor.ORANGE -> AnalysisLog.Color.ORANGE
+    IsColor.LIGHT_ORANGE -> AnalysisLog.Color.LIGHT_ORANGE
+    IsColor.DARK_YELLOW -> AnalysisLog.Color.DARK_YELLOW
     IsColor.YELLOW -> AnalysisLog.Color.YELLOW
     IsColor.LIGHT_YELLOW -> AnalysisLog.Color.LIGHT_YELLOW
+    IsColor.YELLOW_GREEN -> AnalysisLog.Color.YELLOW_GREEN
+    IsColor.PALE_GREEN -> AnalysisLog.Color.PALE_GREEN
     IsColor.LIGHT_GREEN -> AnalysisLog.Color.LIGHT_GREEN
     IsColor.GREEN -> AnalysisLog.Color.GREEN
-    IsColor.DARK_GREEN -> AnalysisLog.Color.DARK_GREEN
+    IsColor.MEDIUM_GREEN -> AnalysisLog.Color.MEDIUM_GREEN
+    IsColor.BRIGHT_GREEN -> AnalysisLog.Color.BRIGHT_GREEN
+    IsColor.VIBRANT_GREEN -> AnalysisLog.Color.VIBRANT_GREEN
+    IsColor.FRESH_GREEN -> AnalysisLog.Color.FRESH_GREEN
+    IsColor.BRILLIANT_GREEN -> AnalysisLog.Color.BRILLIANT_GREEN
     IsColor.NONE -> null
 }
 

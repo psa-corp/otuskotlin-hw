@@ -97,10 +97,9 @@ fun IsAnalysis.toTransport(): Analysis? = if (this.isEmpty()) null else Analysis
     compositionId = compositionId.takeIf { it != IsCompositionId.NONE }?.asString(),
     createDate = createDate.atOffset(ZoneOffset.UTC),
     description = description.takeIf { it.isNotBlank() },
-    rating = rating.takeIf { it > 0 }?.toDouble(), // Предполагаем rating > 0
+    rating = rating,
     color = color.toTransport(),
-    problematicComponent = problematicComponents.map { it.toTransport() },
-    safeComponent = safeComponents.map { it.toTransport() }
+    components = components.map { it.toTransport() }
 )
 
 fun IsComposition.toTransport(): Composition? = if (this.id == IsCompositionId.NONE) null else Composition(
@@ -118,9 +117,7 @@ fun IsCompositionContext.toTransport(): CompositionContext? = if (this.id == IsC
 )
 
 fun IsComponent.toTransport(): Component = Component(
-    id = id.asString(),
     name = name.takeIf { it.isNotBlank() },
-    createDate = createDate.atOffset(ZoneOffset.UTC),
     scientificName = scientificName.takeIf { it.isNotBlank() },
     description = description.takeIf { it.isNotBlank() },
     sources = sources.takeIf { it.isNotBlank() },
@@ -131,14 +128,26 @@ fun IsComponent.toTransport(): Component = Component(
 // --- Enum Mappers ---
 
 fun IsColor.toTransport(): Color? = when (this) {
+    IsColor.VERY_DARK_RED -> Color.VERY_DARK_RED
     IsColor.DARK_RED -> Color.DARK_RED
+    IsColor.DEEP_RED -> Color.DEEP_RED
     IsColor.RED -> Color.RED
+    IsColor.LIGHT_RED -> Color.LIGHT_RED
+    IsColor.RED_ORANGE -> Color.RED_ORANGE
     IsColor.ORANGE -> Color.ORANGE
+    IsColor.LIGHT_ORANGE -> Color.LIGHT_ORANGE
+    IsColor.DARK_YELLOW -> Color.DARK_YELLOW
     IsColor.YELLOW -> Color.YELLOW
     IsColor.LIGHT_YELLOW -> Color.LIGHT_YELLOW
+    IsColor.YELLOW_GREEN -> Color.YELLOW_GREEN
+    IsColor.PALE_GREEN -> Color.PALE_GREEN
     IsColor.LIGHT_GREEN -> Color.LIGHT_GREEN
     IsColor.GREEN -> Color.GREEN
-    IsColor.DARK_GREEN -> Color.DARK_GREEN
+    IsColor.MEDIUM_GREEN -> Color.MEDIUM_GREEN
+    IsColor.BRIGHT_GREEN -> Color.BRIGHT_GREEN
+    IsColor.VIBRANT_GREEN -> Color.VIBRANT_GREEN
+    IsColor.FRESH_GREEN -> Color.FRESH_GREEN
+    IsColor.BRILLIANT_GREEN -> Color.BRILLIANT_GREEN
     IsColor.NONE -> null
 }
 

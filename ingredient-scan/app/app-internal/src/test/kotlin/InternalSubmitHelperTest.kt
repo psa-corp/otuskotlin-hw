@@ -51,9 +51,7 @@ class InternalSubmitHelperTest {
                 createDate = LocalDateTime.now(),
                 description = "Test analysis",
                 rating = 4.5,
-                color = IsColor.GREEN,
-                problematicComponents = mutableListOf(),
-                safeComponents = mutableListOf()
+                color = IsColor.GREEN
             )
         }
 
@@ -86,9 +84,7 @@ class InternalSubmitHelperTest {
                 createDate = LocalDateTime.now().atOffset(ZoneOffset.UTC),
                 description = "Saved analysis",
                 rating = 3.5,
-                color = InternalColor.YELLOW,
-                problematicComponent = mutableListOf(),
-                safeComponent = mutableListOf()
+                color = InternalColor.YELLOW
             ),
             requestType = "internalAnalysisSave"
         )
@@ -110,9 +106,7 @@ class InternalSubmitHelperTest {
                 createDate = LocalDateTime.now(),
                 description = "Saved analysis",
                 rating = 3.5,
-                color = IsColor.YELLOW,
-                problematicComponents = mutableListOf(),
-                safeComponents = mutableListOf()
+                color = IsColor.YELLOW
             )
         }
 

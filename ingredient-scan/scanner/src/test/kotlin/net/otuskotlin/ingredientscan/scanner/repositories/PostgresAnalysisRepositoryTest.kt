@@ -48,8 +48,7 @@ class PostgresAnalysisRepositoryTest {
         every { sqlSpec.bind("description", analysis.description) } returns sqlSpec
         every { sqlSpec.bind("rating", analysis.rating) } returns sqlSpec
         every { sqlSpec.bind("color", analysis.color.name) } returns sqlSpec
-        every { sqlSpec.bind("problematicJson", any<String>()) } returns sqlSpec
-        every { sqlSpec.bind("safeJson", any<String>()) } returns sqlSpec
+        every { sqlSpec.bind("components", any<String>()) } returns sqlSpec
         every { sqlSpec.fetch() } returns fetchSpec
         coEvery { fetchSpec.rowsUpdated() } returns Mono.just(1)
 
@@ -62,8 +61,7 @@ class PostgresAnalysisRepositoryTest {
         verify(exactly = 1) { sqlSpec.bind("description", analysis.description) }
         verify(exactly = 1) { sqlSpec.bind("rating", analysis.rating) }
         verify(exactly = 1) { sqlSpec.bind("color", analysis.color.name) }
-        verify(exactly = 1) { sqlSpec.bind("problematicJson", any()) }
-        verify(exactly = 1) { sqlSpec.bind("safeJson", any()) }
+        verify(exactly = 1) { sqlSpec.bind("components", any()) }
         coVerify(exactly = 1) { fetchSpec.rowsUpdated() }
     }
 
@@ -175,9 +173,7 @@ class PostgresAnalysisRepositoryTest {
             createDate = FIXED_DATE,
             description = "test",
             rating = 4.5,
-            color = IsColor.GREEN,
-            problematicComponents = mutableListOf(),
-            safeComponents = mutableListOf()
+            color = IsColor.GREEN
         )
     }
 }

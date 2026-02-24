@@ -9,9 +9,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 private val TEST_INTERNAL_COMPONENT = InternalComponent(
-    id = "comp-001",
     name = "Пальмовое масло",
-    createDate = OffsetDateTime.parse("2025-11-28T10:00:00Z"),
     riskLevel = InternalRiskLevel.CRITICAL,
     healthRisks = "Сердечно-сосудистые заболевания, канцероген",
     scientificName = "Elaeis guineensis",
@@ -26,8 +24,7 @@ private val TEST_INTERNAL_ANALYSIS = InternalAnalysis(
     description = "Высокий риск. Продукт содержит критические компоненты.",
     rating = 1.2,
     color = InternalColor.DARK_RED,
-    problematicComponent = listOf(TEST_INTERNAL_COMPONENT),
-    safeComponent = emptyList()
+    components = listOf(TEST_INTERNAL_COMPONENT)
 )
 
 private val TEST_INTERNAL_COMPOSITION = InternalComposition(

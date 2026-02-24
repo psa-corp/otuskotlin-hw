@@ -24,7 +24,7 @@ class InternalApiClient(
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(request)
             .retrieve()
-            .awaitBody() // Suspend-функция, не блокирует поток
+            .awaitBody()
     }
 
     suspend fun internalAnalysisSave(request: InternalAnalysisSaveRequest): InternalAnalysisSaveResponse {

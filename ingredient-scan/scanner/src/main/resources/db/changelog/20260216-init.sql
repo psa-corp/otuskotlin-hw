@@ -14,8 +14,7 @@ CREATE TABLE IF NOT EXISTS analysis (
     description TEXT,
     rating DOUBLE PRECISION,
     color TEXT,
-    problematic_components JSONB,
-    safe_components JSONB
+    components JSONB
     );
 
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_analysis_composition_id ON analysis(composition_id);
