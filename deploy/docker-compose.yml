@@ -289,6 +289,8 @@ services:
       # АДРЕС SCANNER ДЛЯ ВНУТРЕННИХ ВЫЗОВОВ
       - SCANNER_INTERNAL_URL=http://ingredient-scan-scanner:8080/v1
 
+      - SPRING_APP_INTEGRATION_AI_URL=http://ingredient-scan-ai:5000/v1
+
       # (Опционально) если analyzer будет работать с БД – раскомментировать
       # - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ingredient_scan
       # - SPRING_DATASOURCE_USERNAME=ingredient_user
@@ -314,6 +316,41 @@ services:
       start_period: 240s
     restart: unless-stopped
 
+
+  # ========== AI SERVICE ==========
+  ingredient-scan-ai:
+    build:
+      context: ../ingredient-scan-ai      # путь относительно папки deploy/
+      dockerfile: Dockerfile
+    container_name: ingredient-scan-ai
+    pull_policy: build
+    environment:
+      - HF_TOKEN=
+      - TRANSFORMERS_CACHE=/cache/huggingface
+      - HF_HOME=/cache/huggingface
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - huggingface_cache:/cache/huggingface
+    ports:
+      - "5000:5000"                         # для отладки (можно закомментировать в production)
+    depends_on:
+      minio:
+        condition: service_healthy          # AI скачивает фото из MinIO (если использует)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 1200s
+
   # ========== API GATEWAY ==========
   envoy:
     image: envoyproxy/envoy:v1.29.0
@@ -335,6 +372,7 @@ volumes:
   zookeeper_data:
   zookeeper_datalog:
   kafka_data:
+  huggingface_cache:
 
 networks:
   default:

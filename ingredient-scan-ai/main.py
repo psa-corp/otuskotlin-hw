@@ -1,3 +1,4 @@
+import os
 import torch
 import requests
 import json
@@ -14,7 +15,7 @@ from json_repair import repair_json
 
 # "__________ FastAPI __________"
 
-HF_TOKEN = ""
+HF_TOKEN = os.getenv("HF_TOKEN", "")
 app = FastAPI(title="Qwen3 Ingredient Scanner")
 
 bnb_config = BitsAndBytesConfig(
@@ -145,6 +146,11 @@ def rating_to_color(rating: float) -> IsColor:
         IsColor.BRILLIANT_GREEN,
     ]
     return colors[idx]
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 
 @app.post("/v1/ai/analyze", response_model=AiAnalysis)
 async def analyze_safety(composition: str = Body(..., embed=True)):

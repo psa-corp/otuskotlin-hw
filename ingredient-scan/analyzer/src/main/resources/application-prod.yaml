@@ -49,6 +49,9 @@ app:
     internal:
       token: ${INTERNAL_API_TOKEN:default-secret-123}
       url: ${SCANNER_INTERNAL_URL:http://ingredient-scan-scanner:8080/v1}
+    ai:
+      token: ${INTERNAL_API_TOKEN:default-secret-123}
+      url: ${AI_SERVICE_URL:http://ingredient-scan-ai:5000/v1}
   kafka:
     topics:
       bootstrap-servers: ${APP_KAFKA_TOPICS_BOOTSTRAP_SERVERS:${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9093}}

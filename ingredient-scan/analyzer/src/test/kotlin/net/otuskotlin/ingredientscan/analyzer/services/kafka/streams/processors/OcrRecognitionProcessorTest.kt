@@ -41,7 +41,7 @@ class OcrRecognitionProcessorTest {
         val resultContext = commonLightContextDeserialize(jsonOutput)
         assertEquals(contextId, resultContext.id)
         assertTrue(resultContext.lightCommands.contains(IsLightCommand.OCR_RECOGNITION))
-        assertEquals(IsCompositionStub.STUB_COMPOSITION.text, resultContext.scan.text)
+        assertEquals(IsCompositionStub.STUB_COMPOSITION_COLA_DOBRA.text, resultContext.scan.text)
 
         verify(exactly = 1) { lightContextRepository.findById(contextId) }
         verify(exactly = 1) { lightContextRepository.save(any()) }

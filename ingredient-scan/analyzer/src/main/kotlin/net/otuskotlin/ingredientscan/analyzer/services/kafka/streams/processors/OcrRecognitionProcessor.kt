@@ -2,10 +2,10 @@ package net.otuskotlin.ingredientscan.analyzer.services.kafka.streams.processors
 
 import net.otuskotlin.ingredientscan.core.common.external.helpers.fail
 import net.otuskotlin.ingredientscan.core.common.external.models.*
-import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextDeserialize
 import net.otuskotlin.ingredientscan.core.common.mappers.commonLightContextSerialize
 import net.otuskotlin.ingredientscan.core.common.external.models.IsLightContextRepository
+import net.otuskotlin.ingredientscan.core.common.external.stubs.IsCompositionStub.Companion.STUB_COMPOSITION_COLA_DOBRA
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.kafka.support.KafkaHeaders
@@ -72,7 +72,7 @@ open class OcrRecognitionProcessor(
         log.debug("Performing OCR recognition on photos: {}", photoUrls)
 
         // STUB DATA - тестовый текст состава
-        val stubCompositionText = STUB_COMPOSITION.text
+        val stubCompositionText = STUB_COMPOSITION_COLA_DOBRA.text
 
         log.info("OCR STUB: returning test composition text")
         return stubCompositionText

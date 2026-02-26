@@ -77,7 +77,7 @@ class PhotoFlowConfigurerTest {
         val inputJson = commonLightContextSerialize(initialContext)
 
         every { lightContextRepository.findById(contextId) } returns null
-        coEvery { compositionRepository.findByText(IsCompositionStub.STUB_COMPOSITION.text) } returns null
+        coEvery { compositionRepository.findByText(IsCompositionStub.STUB_COMPOSITION_COLA_DOBRA.text) } returns null
         coEvery { compositionRepository.save(any<IsComposition>()) } just Runs
         every { lightContextRepository.save(any()) } returns Unit
 
@@ -94,13 +94,13 @@ class PhotoFlowConfigurerTest {
             IsLightCommand.COMPOSITION_SAVE
         )))
         assertEquals(IsSubCommand.READY, resultContext.subCommand)
-        assertEquals(IsCompositionStub.STUB_COMPOSITION.text, resultContext.scan.text)
+        assertEquals(IsCompositionStub.STUB_COMPOSITION_COLA_DOBRA.text, resultContext.scan.text)
         assertNotNull(resultContext.composition)
         assertEquals(resultContext.scan.text, resultContext.composition.text)
 
         verify(atLeast = 1) { lightContextRepository.findById(contextId) }
         verify(atLeast = 1) { lightContextRepository.save(any()) }
-        coVerify(exactly = 1) { compositionRepository.findByText(IsCompositionStub.STUB_COMPOSITION.text) }
+        coVerify(exactly = 1) { compositionRepository.findByText(IsCompositionStub.STUB_COMPOSITION_COLA_DOBRA.text) }
         coVerify(exactly = 1) { compositionRepository.save(any<IsComposition>()) }
     }
 
@@ -109,7 +109,7 @@ class PhotoFlowConfigurerTest {
         val contextId = IsContextId(UUID.randomUUID().toString())
         val existingComposition = IsComposition(
             id = IsCompositionId("comp-123"),
-            text = IsCompositionStub.STUB_COMPOSITION.text
+            text = IsCompositionStub.STUB_COMPOSITION_COLA_DOBRA.text
         )
         val scan = IsScan(files = mutableListOf("photo.jpg"))
         val initialContext = IsLightContext(
@@ -120,7 +120,7 @@ class PhotoFlowConfigurerTest {
         val inputJson = commonLightContextSerialize(initialContext)
 
         every { lightContextRepository.findById(contextId) } returns null
-        coEvery { compositionRepository.findByText(IsCompositionStub.STUB_COMPOSITION.text) } returns existingComposition
+        coEvery { compositionRepository.findByText(IsCompositionStub.STUB_COMPOSITION_COLA_DOBRA.text) } returns existingComposition
         every { lightContextRepository.save(any()) } returns Unit
 
         inputTopic.pipeInput("key", inputJson)
